@@ -148,7 +148,7 @@ owner or the walker assigned to that owner.
 | `id` | UUID | Yes | Unique identifier |
 | `ownerId` | UUID | Yes | FK to Client who owns this dog |
 | `name` | string | Yes | Dog's name |
-| `breed` | string \| null | No | Breed |
+| `breed` | enum:Breed \| null | No | Breed (use `mixed` when not in the closed list, `unknown` if the owner doesn't know) |
 | `ageYears` | integer \| null | No | Age in whole years |
 | `medication` | string \| null | No | Free-text medication notes |
 | `vetName` | string \| null | No | Vet practice name |
@@ -478,3 +478,35 @@ pending ──── (user confirms) ──── used
 |------|----|---------|
 | `pending` | `used` | POST /v1/auth/password-reset/confirm (valid + unexpired) |
 | `pending` | `expired` | Lazy: any confirm attempt after `expiresAt` |
+
+## Enumerations
+
+<!--
+Closed-set values. Each enum named here must appear in
+contracts/openapi.yaml as components.schemas.<Name> with matching
+values (enforced by ENUM-VALUES-CONSISTENT). Cross-contract
+declarations (asyncapi, datacontract) must also match if present.
+-->
+
+### Breed
+
+A pragmatic closed set covering the breeds the walker workforce
+encounters most often, plus `mixed` and `unknown` as fallbacks so
+the field is always answerable without forcing the owner into a
+free-text workaround. Extending this list is a minor version bump
+on the openapi contract (per NFR-COMPAT-001).
+
+| Value | Notes |
+|---|---|
+| `labrador` | |
+| `poodle` | |
+| `golden-retriever` | |
+| `german-shepherd` | |
+| `bulldog` | English bulldog |
+| `beagle` | |
+| `dachshund` | |
+| `cocker-spaniel` | |
+| `border-collie` | |
+| `staffordshire-bull-terrier` | |
+| `mixed` | Crossbreed or pedigree not represented above |
+| `unknown` | Owner doesn't know |

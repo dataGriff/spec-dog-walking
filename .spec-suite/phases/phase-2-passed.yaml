@@ -1,5 +1,5 @@
 phase: modeling
-signed_off_at: '2026-05-31T13:21:16Z'
+signed_off_at: '2026-05-31T17:58:58Z'
 gate_version: '1.0'
 checks_passed:
 - MODEL-ENTITY-NAME-UNIQUE
@@ -22,7 +22,7 @@ decisions:
     semantic. Independent review surfaced the contradiction.
   affects:
   - docs/specifications/domain-model.md
-  ts: '2026-05-31T13:21:16Z'
+  ts: '2026-05-31T17:58:58Z'
 - id: WALKER-NO-API-SURFACE-EXPLICIT
   summary: Documented that Walker has no dedicated REST API in v1 (single-walker constraint);
     access is via auth/register, GET /v1/rate-card, and embedded walker data on Walk
@@ -33,7 +33,7 @@ decisions:
     Walker''s Business Rules.'
   affects:
   - docs/specifications/domain-model.md
-  ts: '2026-05-31T13:21:16Z'
+  ts: '2026-05-31T17:58:58Z'
 - id: GLOSSARY-INVOICE-INDEFINITE-ISSUED
   summary: Glossary Invoice entry clarified that an invoice can remain `issued` indefinitely
     (it's not guaranteed to move to `paid`).
@@ -42,11 +42,21 @@ decisions:
     \ Minor prose for accuracy."
   affects:
   - docs/specifications/glossary.md
-  ts: '2026-05-31T13:21:16Z'
+  ts: '2026-05-31T17:58:58Z'
+- id: BREED-CLOSED-ENUM
+  summary: Dog.breed is a closed enum (12 values) rather than free-text string.
+  rationale: Breed varies widely but the walker workforce sees a stable top-10 list
+    day-to-day. Closing the set with `mixed` + `unknown` fallbacks gives the API a
+    queryable + reportable column without forcing owners into free-text. Extending
+    the list is a minor-version openapi bump per NFR-COMPAT-001.
+  affects:
+  - docs/specifications/domain-model.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-05-31T17:58:58Z'
 files_signed:
 - path: docs/specifications/domain-model.md
-  sha256: 127d040600dcd971a6b258f784d92ee53528eb5c6f1f591e3e768fd684d78937
-  mtime: '2026-05-31T13:21:16Z'
+  sha256: 99e17b2574ed908138b7215363a0a10992e54e845781ca1c42571250e8a6384b
+  mtime: '2026-05-31T17:58:58Z'
 - path: docs/specifications/glossary.md
   sha256: 58e6eea08a6b4b17181e35846dd23c5e667dc0d8bb37bd3e59a9869ca2c1eeb0
-  mtime: '2026-05-31T13:21:16Z'
+  mtime: '2026-05-31T17:58:58Z'

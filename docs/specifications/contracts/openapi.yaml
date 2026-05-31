@@ -741,6 +741,22 @@ components:
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
 
+    Breed:
+      type: string
+      description: "Closed set of breeds the walker workforce encounters most often, plus `mixed` and `unknown` fallbacks. Extending this list is a minor version bump per NFR-COMPAT-001."
+      enum:
+        - labrador
+        - poodle
+        - golden-retriever
+        - german-shepherd
+        - bulldog
+        - beagle
+        - dachshund
+        - cocker-spaniel
+        - border-collie
+        - staffordshire-bull-terrier
+        - mixed
+        - unknown
     Dog:
       type: object
       required: [id, ownerId, name, createdAt, updatedAt]
@@ -748,7 +764,10 @@ components:
         id: { type: string, format: uuid }
         ownerId: { type: string, format: uuid }
         name: { type: string, minLength: 1 }
-        breed: { type: string, nullable: true }
+        breed:
+          allOf:
+            - $ref: '#/components/schemas/Breed'
+          nullable: true
         ageYears: { type: integer, nullable: true, minimum: 0 }
         medication: { type: string, nullable: true }
         vetName: { type: string, nullable: true }
@@ -762,7 +781,8 @@ components:
       properties:
         ownerId: { type: string, format: uuid, description: "Required when caller is walker; ignored otherwise." }
         name: { type: string, minLength: 1 }
-        breed: { type: string }
+        breed:
+          $ref: '#/components/schemas/Breed'
         ageYears: { type: integer, minimum: 0 }
         medication: { type: string }
         vetName: { type: string }
@@ -772,7 +792,10 @@ components:
       type: object
       properties:
         name: { type: string, minLength: 1 }
-        breed: { type: string, nullable: true }
+        breed:
+          allOf:
+            - $ref: '#/components/schemas/Breed'
+          nullable: true
         ageYears: { type: integer, nullable: true, minimum: 0 }
         medication: { type: string, nullable: true }
         vetName: { type: string, nullable: true }

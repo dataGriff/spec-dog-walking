@@ -1,5 +1,5 @@
 phase: contracts
-signed_off_at: '2026-05-31T13:21:51Z'
+signed_off_at: '2026-05-31T17:59:19Z'
 gate_version: '1.0'
 checks_passed:
 - SPECTRAL-OPENAPI
@@ -7,6 +7,7 @@ checks_passed:
 - DATACONTRACT-LINT
 - ENTITY-IN-OPENAPI-SCHEMA
 - FIELD-MATCH-DOMAIN-OPENAPI
+- ENUM-VALUES-CONSISTENT
 - WRITE-OP-HAS-ASYNCAPI-CHANNEL
 - EVENT-IN-DATACONTRACT
 - AUTH-MATRIX-OPENAPI-MATCH
@@ -22,14 +23,24 @@ decisions:
     minimum was wrong. Added a description to make the relationship explicit.'
   affects:
   - docs/specifications/contracts/openapi.yaml
-  ts: '2026-05-31T13:21:51Z'
+  ts: '2026-05-31T17:59:19Z'
+- id: OPENAPI-BREED-SCHEMA
+  summary: Added Breed schema component; Dog.breed (and DogCreateRequest / DogPatchRequest
+    variants) reference it via $ref. Adds enum constraint enforced by ENUM-VALUES-CONSISTENT.
+  rationale: Removes the free-text string in favour of a constrained closed set so
+    client code generators (and impl-side validation) refuse unknown values at the
+    API boundary. AsyncAPI + Datacontract don't carry breed in event payloads (DogAdded
+    ships only dogId/ownerId/name) so the enum stays openapi-only for now.
+  affects:
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-05-31T17:59:19Z'
 files_signed:
 - path: docs/specifications/contracts/openapi.yaml
-  sha256: 9bb13d5d0f3ec620226bfc4bd7949cab03e07ee5b3d21a8abe7cd1ea7489b74c
-  mtime: '2026-05-31T13:21:51Z'
+  sha256: 29ac3684b3f7ec98fe81bbad976c5ef82e959748b389a87ee65230fe71907f35
+  mtime: '2026-05-31T17:59:19Z'
 - path: docs/specifications/contracts/asyncapi.yaml
   sha256: 4e22e68bd3bb35e93b0aca68b615ee126ac41f2daab5d9a1d17fb467da0c955c
-  mtime: '2026-05-31T13:21:51Z'
+  mtime: '2026-05-31T17:59:19Z'
 - path: docs/specifications/contracts/datacontract.yaml
   sha256: 74875df9fc06e70fc02aad5911340bb8630f9e67141dd69c5b734f4e65ef2601
-  mtime: '2026-05-31T13:21:51Z'
+  mtime: '2026-05-31T17:59:19Z'
