@@ -76,7 +76,7 @@ after each walk.
    instance. Coordinating shifts across multiple walkers, walker-to-
    walker handoffs, and franchise-level reporting are out of scope.
 2. **Live GPS tracking of walks in progress.** The domain captures
-   walk-completion updates (timestamp, summary, optional photos), not
+   walk updates posted during or after the walk (notes and optional photos), not
    a moving dot on a map. Real-time location belongs in a different
    product.
 3. **Payment processing.** The domain handles invoices and records
@@ -171,6 +171,22 @@ free-text quirks/notes,
 - Returns 403 with `FORBIDDEN` if the requester is neither the owner nor
   the walker assigned to the owner
 - A `DogUpdated` event is published
+
+#### US-020: View a single dog
+
+**As a** dog owner or the solo dog walker who manages this owner,
+**I want to** view the full details of a single dog (medication, vet,
+notes, owner),
+**So that** I can confirm the dog's current state — mid-walk when
+Alison needs to check medication, or pre-booking when Clancy wants
+to verify she's updated her dog's details since last week.
+
+**Acceptance Criteria:**
+- GET /v1/dogs/{dogId} returns the full dog record
+- Returns 404 with `RESOURCE_NOT_FOUND` if the id does not exist
+- Returns 403 with `FORBIDDEN` if the requester is neither the owner
+  nor the walker assigned to the owner (same ownership rule as
+  US-006)
 
 ### Bookings
 

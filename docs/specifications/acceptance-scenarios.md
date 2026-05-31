@@ -211,6 +211,39 @@ And the response body code equals "FORBIDDEN"
 
 ---
 
+## US-020: View a single dog
+
+### Scenario US-020-A: Owner views their own dog
+
+```gherkin
+Given an owner is logged in
+And a dog "D1" exists owned by me
+When I GET /v1/dogs/D1
+Then the response status is 200
+And the response body dog.id equals "D1"
+And the response body dog.ownerId equals my client id
+```
+
+### Scenario US-020-B: Cross-owner view rejected
+
+```gherkin
+Given an owner is logged in
+And a dog "D2" exists owned by a different owner
+When I GET /v1/dogs/D2
+Then the response status is 403
+And the response body code equals "FORBIDDEN"
+```
+
+### Scenario US-020-C: Unknown dog id rejected
+
+```gherkin
+When I GET /v1/dogs/00000000-0000-0000-0000-000000000000
+Then the response status is 404
+And the response body code equals "RESOURCE_NOT_FOUND"
+```
+
+---
+
 ## US-007: Schedule a walk
 
 ### Scenario US-007-A: Owner requests a walk

@@ -74,7 +74,9 @@ RateCard.
 ### Invoice
 
 A bill for a Client covering completed walks in a date range. Status
-moves `issued → paid`. Immutable after issue.
+starts at `issued` and may move to `paid` (via mark-paid); an invoice
+can remain `issued` indefinitely if never paid. Immutable after
+issue except for the mark-paid transition.
 
 ### InvoiceLineItem
 

@@ -951,6 +951,6 @@ components:
         walkId: { type: string, format: uuid }
         walkType: { type: string }
         durationMinutes: { type: integer, minimum: 1 }
-        priceCents: { type: integer, minimum: 0 }
+        priceCents: { type: integer, minimum: 1, description: "Always strictly positive — copied from a RateCardEntry which enforces the same constraint." }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }

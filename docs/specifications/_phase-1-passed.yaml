@@ -1,5 +1,5 @@
 phase: discovery
-signed_off_at: '2026-05-31T10:45:55Z'
+signed_off_at: '2026-05-31T13:20:52Z'
 gate_version: '1.0'
 checks_passed:
 - PRD-PROBLEM-USER-PAIN
@@ -14,42 +14,36 @@ warnings_responded: []
 rubric_findings:
 - id: RUBRIC-PROBLEM-USER-PAIN
   verdict: pass
-  detail: Problem Statement opens with concrete user pain (5 disconnected tools, paper-folder
-    lookup) before naming the single-place solution in paragraph 2.
+  detail: no change to Problem Statement.
   response: resolved
   reason: agent verdict accepted
-  ts: '2026-05-31T10:45:55Z'
+  ts: '2026-05-31T13:20:52Z'
 - id: RUBRIC-METRICS-MEASURABLE
   verdict: pass
-  detail: Both metrics name a baseline, a target, a measurement method, and a window.
+  detail: no change to Success Metrics.
   response: resolved
   reason: agent verdict accepted
-  ts: '2026-05-31T10:45:55Z'
+  ts: '2026-05-31T13:20:52Z'
 decisions:
-- id: PRD-PERSONA-COUNT-TWO
-  summary: Captured two personas (Solo Dog Walker, Dog Owner) rather than walker-only.
-  rationale: Clancy is a real user with her own goals (book, cancel, see schedule,
-    pay); collapsing her out would hide half the domain motivation.
+- id: US-020-VIEW-DOG-ADDED-POST-REVIEW
+  summary: Added US-020 'View a single dog' to formally justify GET /v1/dogs/{dogId}
+    which already existed in the contract.
+  rationale: Independent review found the operation had no user story behind it. The
+    endpoint is genuinely needed (mid-walk medication lookup, pre-booking detail check)
+    and was implicitly assumed; making it explicit closes the coverage gap.
   affects:
   - docs/specifications/prd.md
-  ts: '2026-05-31T10:45:55Z'
-- id: PRD-PERSONA-NAME-FROM-PERSONA-VIEW
-  summary: Dog Owner persona name reads from her own perspective, not Alison's ('Client').
-  rationale: Both personas use this app; each should describe themselves the way they
-    would, not the way the other party labels them.
+  ts: '2026-05-31T13:20:52Z'
+- id: PRD-NONGOAL-PROSE-CORRECTION
+  summary: "Non-Goals \xA72 rephrased from 'walk-completion updates' to 'walk updates\
+    \ posted during or after the walk' to match the actual update semantics."
+  rationale: Updates can be posted while status=scheduled (live, during) or status=completed
+    (post-hoc) per the modeling phase decision WALK-UPDATE-IN-SCHEDULED-AND-COMPLETED.
+    The original 'completion' framing was inaccurate.
   affects:
   - docs/specifications/prd.md
-  ts: '2026-05-31T10:45:55Z'
-- id: US-019-TIP-AS-OPTIONAL-PAID-FIELD
-  summary: Modelled tipping as an optional `tipCents` integer on the mark-paid request
-    rather than a separate `tip-invoice` endpoint.
-  rationale: Tip is recorded at the same moment as the invoice payment; separate endpoint
-    would split a single business event into two and complicate the InvoicePaid event
-    payload.
-  affects:
-  - docs/specifications/prd.md
-  ts: '2026-05-31T10:45:55Z'
+  ts: '2026-05-31T13:20:52Z'
 files_signed:
 - path: docs/specifications/prd.md
-  sha256: 1d143be4b554be82318a05741f479c3fdc2e01baca9e166029303504b449d28a
-  mtime: '2026-05-31T10:45:55Z'
+  sha256: e687df16ecdd5bba4c35ae0bd0bef7a4671666637aba318088c7cb207a0c5431
+  mtime: '2026-05-31T13:20:52Z'

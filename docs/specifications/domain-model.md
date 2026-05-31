@@ -56,6 +56,13 @@ domain instance, linked 1:1 to the User with role=`walker`.
 - Exactly one Walker per domain instance (enforced at registration —
   a second `role=walker` registration is rejected).
 - `userId` is immutable once set.
+- **No dedicated Walker API surface in v1.** The single-walker
+  constraint means `GET /v1/walkers` / `GET /v1/walkers/{walkerId}`
+  would always return the same one record; `POST /v1/walkers` is
+  covered by walker self-registration via `POST /v1/auth/register`.
+  Walker data reaches owners indirectly through `GET /v1/rate-card`
+  and the assigned walker on Walk responses. Multi-walker support
+  would introduce these endpoints.
 
 ---
 
@@ -333,8 +340,12 @@ One line on an Invoice, one per completed Walk in the billing period.
 **Business Rules:**
 - A walk can appear on at most one issued invoice (uniqueness on
   `walkId`).
-- Pricing is snapshotted at issue — later rate-card edits do not
-  alter historical line items.
+- `priceCents` is captured from the rate-card entry that was in force
+  at the Walk's `scheduled` transition (matching the attribute
+  description above). The InvoiceLineItem row is created when the
+  invoice is generated, but the *value* it carries is the
+  scheduled-time price, not the issue-time price. Later rate-card
+  edits do not alter historical line items.
 
 ---
 

@@ -1,5 +1,5 @@
 phase: nfrs
-signed_off_at: '2026-05-31T10:47:18Z'
+signed_off_at: '2026-05-31T13:21:32Z'
 gate_version: '1.0'
 checks_passed:
 - NFR-THRESHOLD-MEASURABLE
@@ -7,64 +7,29 @@ checks_passed:
 warnings_responded:
 - id: NFR-THRESHOLD-MEASURABLE
   response: n-a
-  reason: NFR-OBS-001/002/003 are behavioural logging guarantees (what gets recorded),
-    not threshold-bearing. NFR-COMPAT-001/002 are backward-compat policies. All are
-    deliberately non-numeric.
-  ts: '2026-05-31T10:47:18Z'
+  reason: Same behavioural-NFR n-a as prior sign-offs (NFR-OBS-001/002/003 and NFR-COMPAT-001/002
+    are policies, not numeric thresholds). No NFR changes in this review pass.
+  ts: '2026-05-31T13:21:32Z'
 rubric_findings:
 - id: RUBRIC-NFR-REALISTIC
   verdict: pass
-  detail: Performance and availability thresholds are scaled for a realistic single-walker
-    workload (5 rps steady, 50 clients / 100 dogs / 1000 walks / 100 invoices). Retention
-    windows tied to UK/EU/US accounting conventions.
+  detail: no NFR file change.
   response: resolved
   reason: agent verdict accepted
-  ts: '2026-05-31T10:47:18Z'
+  ts: '2026-05-31T13:21:32Z'
 decisions:
-- id: AVAIL-TARGET-99-5
-  summary: Set NFR-AVAIL-001 API uptime to 99.5% (not 99.9%).
-  rationale: "Realistic single-walker SaaS target \u2014 99.9% costs meaningfully\
-    \ more without proportional value at this scale. 99.5% is ~220 minutes/month of\
-    \ unavailability, acceptable for a single-walker tool."
-  affects:
-  - docs/specifications/nfr.md
-  ts: '2026-05-31T10:47:18Z'
-- id: INVOICE-RETENTION-84-MONTHS
-  summary: NFR-DATA-002 sets invoice retention to 84 months (7 years).
-  rationale: Conventional accounting record-keeping period for small businesses in
-    UK / EU / US contexts. Shorter retention risks compliance issues; longer adds
-    storage cost without business value.
-  affects:
-  - docs/specifications/nfr.md
-  ts: '2026-05-31T10:47:18Z'
-- id: PHOTO-CAP-10GB-PER-WALKER
-  summary: NFR-DATA-003 caps total stored photo bytes at 10 GB per walker.
-  rationale: Single-walker scale rarely needs more (~5,000 photos at 2MB avg). Cap
-    protects storage budget; 9 GB triggers observability so the user can curate before
-    hitting the hard cap.
-  affects:
-  - docs/specifications/nfr.md
-  ts: '2026-05-31T10:47:18Z'
-- id: LOAD-PROFILE-5RPS-STEADY-STATE
-  summary: All performance NFRs (PERF-001/002/003) reference a 5 rps steady-state
-    load profile.
-  rationale: "Single-walker workload (one walker, ~20 clients, ~30 walks/day) wouldn't\
-    \ realistically exceed 5 rps. Setting thresholds against a realistic profile keeps\
-    \ them honest \u2014 calibrating against 100 rps would make latency budgets meaningless."
-  affects:
-  - docs/specifications/nfr.md
-  ts: '2026-05-31T10:47:18Z'
-- id: TIPPING-NFR-DEFERRED
-  summary: No new NFR added for tipping; inherits NFR-PERF-002 write-latency budget.
-  rationale: Tipping is a single integer added to an existing request; it doesn't
-    change the operation's compute or storage profile.
+- id: US-020-SCENARIOS-ADDED
+  summary: Added US-020-A/B/C acceptance scenarios for the new view-dog story (owner
+    views own, cross-owner forbidden, unknown id 404).
+  rationale: Mirrors the auth-matrix ownership rule and the standard NOT_FOUND pattern.
+    Each scenario follows the existing GWT convention.
   affects:
   - docs/specifications/acceptance-scenarios.md
-  ts: '2026-05-31T10:47:18Z'
+  ts: '2026-05-31T13:21:32Z'
 files_signed:
 - path: docs/specifications/nfr.md
   sha256: 5f855de6f43e4f3ee05c5bcd014588a16a01179a4279fb667f5437ce3763d5ae
-  mtime: '2026-05-31T10:47:18Z'
+  mtime: '2026-05-31T13:21:32Z'
 - path: docs/specifications/acceptance-scenarios.md
-  sha256: d1eafa61834c3688d26013eafda2786dcdd9112fd652273c0768bfa40cb360c9
-  mtime: '2026-05-31T10:47:18Z'
+  sha256: 7af55b38a97f6280168bd94a3e644ce12bbdd5c9ac524ae9c8e8c58bdcf27a7d
+  mtime: '2026-05-31T13:21:32Z'
