@@ -1,0 +1,5 @@
+suite_version: 1.0.0-alpha
+gate_version: '1.0'
+domain_name: DogWalking
+bootstrapped_at: '2026-05-31T12:24:42Z'
+bootstrapped_by: scripts/bootstrap.py (skills/domain-bootstrap)

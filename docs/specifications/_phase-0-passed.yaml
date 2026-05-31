@@ -1,0 +1,14 @@
+phase: bootstrap
+signed_off_at: '2026-05-31T12:24:42Z'
+gate_version: '1.0'
+checks_passed:
+- BOOTSTRAP-FILES-EXIST
+- BOOTSTRAP-FILES-PARSE
+- BOOTSTRAP-PROGRESS-INITIALIZED
+- BOOTSTRAP-MANIFEST-PRESENT
+warnings_responded: []
+rubric_findings: []
+files_signed:
+- path: docs/specifications/_bootstrap.yaml
+  sha256: aaa7fb1d6f0d2fca4481880d7fcf39c26511c53cc3624a31b9b3bed2c1ae30fc
+  mtime: '2026-05-31T12:24:42Z'

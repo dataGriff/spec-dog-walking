@@ -1,0 +1,57 @@
+site_name: DogWalking Domain Docs
+site_url: https://example.com/dogwalking
+docs_dir: docs
+repo_url: https://example.com/dogwalking
+repo_name: dogwalking
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.top
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Specifications:
+    - Product Requirements: specifications/prd.md
+    - Domain Model: specifications/domain-model.md
+    - Glossary: specifications/glossary.md
+    - Auth Matrix: specifications/auth-matrix.md
+    - Error Catalogue: specifications/error-catalogue.md
+    - Sequence Diagrams: specifications/sequence-diagrams.md
+    - Non-Functional Requirements: specifications/nfr.md
+    - Acceptance Scenarios: specifications/acceptance-scenarios.md
+
+# Suite-internal state files under docs/ that should not appear in the
+# rendered site.
+exclude_docs: |
+  specifications/_ambiguities.md
+  specifications/_bootstrap.yaml
+  specifications/_progress.yaml
+  specifications/_template_manifest.yaml
+  specifications/_phase-*-passed.yaml
+  specifications/_template/
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight
+  - tables
+  - toc:
+      permalink: true
+
+extra_javascript:
+  - https://unpkg.com/mermaid@11/dist/mermaid.min.js

@@ -1,0 +1,43 @@
+phase: flows
+signed_off_at: '2026-05-31T10:46:56Z'
+gate_version: '1.0'
+checks_passed:
+- FLOW-DIAGRAM-HAS-TITLE-PARTICIPANTS
+- FLOW-PARTICIPANT-IS-ROLE-OR-SYSTEM
+- STORY-HAS-FLOW
+- LIFECYCLE-IN-FLOWS
+warnings_responded: []
+rubric_findings: []
+decisions:
+- id: ONE-FLOW-PER-STORY-GROUP
+  summary: Drew one flow per user-story group (Authentication, Dogs, Bookings, Walks,
+    Invoicing, Pricing) plus dedicated flows for the lifecycle/special paths (decline,
+    owner-vs-walker walk creation, token lifecycle).
+  rationale: Stories in the same group share participants and arrows; one diagram
+    per group is more readable than ~18 tiny diagrams. The exceptions are the failure
+    paths and the token-lifecycle variants, which warrant their own readable flows.
+  affects:
+  - docs/specifications/sequence-diagrams.md
+  ts: '2026-05-31T10:46:56Z'
+- id: TOKEN-LIFECYCLE-FLOWS-ADDED-LATE
+  summary: Invite and PasswordResetToken state lifecycles got their own flows (Flow
+    3a, 3b) only after the audit re-fired LIFECYCLE-IN-FLOWS at error severity.
+  rationale: At the flows phase the warning was n-a'd (token states are internal).
+    Audit re-runs cross-references at error and doesn't read warnings_responded, so
+    the n-a was lost. Added the small token flows to satisfy audit; the underlying
+    audit/n-a-engagement design gap is logged for follow-up.
+  affects:
+  - docs/specifications/sequence-diagrams.md
+  ts: '2026-05-31T10:46:56Z'
+- id: TIPPING-IN-EXISTING-INVOICING-FLOW
+  summary: US-019 tipping is added to Flow 10 (renamed to 'Invoicing & Tipping') rather
+    than as a separate Flow 11.
+  rationale: Tipping is part of the same business event as mark-paid; a separate flow
+    would split a single sequence into two for no readability gain.
+  affects:
+  - docs/specifications/sequence-diagrams.md
+  ts: '2026-05-31T10:46:56Z'
+files_signed:
+- path: docs/specifications/sequence-diagrams.md
+  sha256: 4d57e665305133b7701297927642327ae8078177f5facb62e4087bea2e40cf0e
+  mtime: '2026-05-31T10:46:56Z'

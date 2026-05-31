@@ -1,0 +1,13 @@
+#!/bin/sh
+# Wrap in `mise exec` so the hook works in non-mise-activated shells
+# (default git GUI clients, Claude Code, etc.). Without this wrap, the
+# hook fails on missing datacontract / spectral / mkdocs even though
+# mise has them installed.
+if git diff --cached --name-only | grep -q 'docs/specifications/contracts/'; then
+  echo "Spec contracts staged — running task lint..."
+  if command -v mise >/dev/null 2>&1; then
+    mise exec -- task lint
+  else
+    task lint
+  fi
+fi

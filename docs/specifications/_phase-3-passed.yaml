@@ -1,0 +1,54 @@
+phase: access-control
+signed_off_at: '2026-05-31T10:46:34Z'
+gate_version: '1.0'
+checks_passed:
+- AUTH-ROLE-HAS-DESCRIPTION
+- AUTH-MATRIX-COMPLETE
+- ERROR-CATALOGUE-COMPLETE
+- ERROR-CODE-IN-CATALOGUE
+- AUTH-ROLE-TRACES-TO-PERSONA
+- AUTH-MATRIX-OPENAPI-MATCH
+warnings_responded: []
+rubric_findings: []
+decisions:
+- id: OWNERSHIP-VIA-FK-TRAVERSAL
+  summary: Ownership rule traverses Client.invitedByWalkerId (and similar) rather
+    than embedding walkerId on every owned resource.
+  rationale: "Single source of truth \u2014 if a Client ever moves walkers (out of\
+    \ scope for v1 but possible later) the change is one row, not N."
+  affects:
+  - docs/specifications/auth-matrix.md
+  ts: '2026-05-31T10:46:34Z'
+- id: FORBIDDEN-FOR-BOTH-ROLE-AND-OWNERSHIP
+  summary: FORBIDDEN (403) returned for both wrong-role and not-the-owner failures;
+    the response does not distinguish.
+  rationale: "Defence in depth \u2014 distinguishing leaks resource existence to a\
+    \ caller with the wrong role. Same approach as the Items reference fixture."
+  affects:
+  - docs/specifications/auth-matrix.md
+  - docs/specifications/error-catalogue.md
+  ts: '2026-05-31T10:46:34Z'
+- id: INVITE-AND-RESET-PUBLIC-WITH-TOKEN-AUTH
+  summary: "POST /v1/invites/{token}/accept and POST /v1/auth/password-reset/confirm\
+    \ are public (no BearerAuth) \u2014 the token in the URL IS the auth."
+  rationale: Bearer auth on these endpoints would defeat their purpose (unauthenticated
+    users follow email links). The token's single-use + TTL semantics handle authorization.
+  affects:
+  - docs/specifications/auth-matrix.md
+  ts: '2026-05-31T10:46:34Z'
+- id: AC-REQUIRES-PHASE-2-MODELING
+  summary: Access Control prerequisite includes modeling (Phase 2), not just discovery.
+  rationale: Ownership rules reference real entity field names (e.g. Client.invitedByWalkerId).
+    Discovery alone doesn't define entities, so the AUTH-OWNERSHIP-RULE-FIELD-EXISTS
+    check (planned for audit) would have nothing to validate against. SUITE-DESIGN
+    didn't mandate this; chosen during build.
+  affects:
+  - skills/domain-access-control/gate.yaml
+  ts: '2026-05-31T10:46:34Z'
+files_signed:
+- path: docs/specifications/auth-matrix.md
+  sha256: a2f67dfc385c558003f11ccf5d6b4b40351317f8435a9cdc04171399bf24025f
+  mtime: '2026-05-31T10:46:34Z'
+- path: docs/specifications/error-catalogue.md
+  sha256: 3bcb2c597896069d136e6a54b92bbf8417c89f5f88ddc1dab1f9ca9b728601b6
+  mtime: '2026-05-31T10:46:34Z'

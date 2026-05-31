@@ -1,0 +1,956 @@
+openapi: 3.0.3
+info:
+  title: Dog Walking API
+  description: |
+    REST contract for the **Dog Walking** domain — a single-walker
+    business that manages clients, dogs, walks, updates, rate cards,
+    and invoices. See `prd.md` for the domain narrative,
+    `domain-model.md` for entity definitions, and `auth-matrix.md`
+    for the operation × role permission matrix.
+  version: 1.0.0
+  contact:
+    name: Dog Walking Domain Spec Set
+    email: noreply@example.com
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: Auth
+    description: Authentication — register, login, password reset, invite acceptance
+  - name: Clients
+    description: Walker-managed list of clients (invited via email)
+  - name: Dogs
+    description: Owner-and-walker editable dog records
+  - name: Walks
+    description: Walk lifecycle — request, schedule, complete, cancel
+  - name: WalkUpdates
+    description: Notes and photos posted against walks
+  - name: Invoices
+    description: Walker-generated invoices for completed walks
+  - name: RateCard
+    description: Walker's per-(walkType,duration) pricing table
+
+security:
+  - BearerAuth: []
+
+paths:
+  # ── Auth ───────────────────────────────────────────────────────
+  /v1/auth/register:
+    post:
+      tags: [Auth]
+      operationId: registerWalker
+      summary: Walker self-registers
+      description: Walker self-registers.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201':
+          description: Registration succeeded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '409':
+          description: Email or walker conflict
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /v1/auth/login:
+    post:
+      tags: [Auth]
+      operationId: login
+      summary: Log in
+      description: Log in.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Login succeeded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/auth/password-reset/request:
+    post:
+      tags: [Auth]
+      operationId: requestPasswordReset
+      summary: Request a password reset email
+      description: Request a password reset email.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PasswordResetRequest' }
+      responses:
+        '204': { description: Always returned (enumeration defense) }
+  /v1/auth/password-reset/confirm:
+    post:
+      tags: [Auth]
+      operationId: confirmPasswordReset
+      summary: Confirm a password reset with a token
+      description: Confirm a password reset with a token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PasswordResetConfirm' }
+      responses:
+        '200': { description: Password updated; refresh tokens revoked }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '410': { $ref: '#/components/responses/Gone' }
+  /v1/invites/{token}/accept:
+    post:
+      tags: [Auth]
+      operationId: acceptInvite
+      summary: Accept a client invite and set password
+      description: Accept a client invite and set password.
+      security: []
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InviteAcceptRequest' }
+      responses:
+        '200':
+          description: Invite accepted; tokens returned
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '410': { $ref: '#/components/responses/Gone' }
+
+  # ── Clients ───────────────────────────────────────────────────
+  /v1/clients:
+    post:
+      tags: [Clients]
+      operationId: addClient
+      summary: Walker invites a new client
+      description: Walker invites a new client.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClientCreateRequest' }
+      responses:
+        '201':
+          description: Client created; invite queued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientCreateResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    get:
+      tags: [Clients]
+      operationId: listClients
+      summary: Walker lists their clients
+      description: Walker lists their clients.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated list of clients
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientList' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ── Dogs ──────────────────────────────────────────────────────
+  /v1/dogs:
+    post:
+      tags: [Dogs]
+      operationId: addDog
+      summary: Add dog
+      description: Add dog.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DogCreateRequest' }
+      responses:
+        '201':
+          description: Dog created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dog' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    get:
+      tags: [Dogs]
+      operationId: listDogs
+      summary: List dogs
+      description: List dogs.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated list of dogs
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DogList' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/dogs/{dogId}:
+    parameters:
+      - { name: dogId, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [Dogs]
+      operationId: viewDog
+      summary: View dog
+      description: View dog.
+      responses:
+        '200':
+          description: Dog detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dog' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Dogs]
+      operationId: editDog
+      summary: Edit dog
+      description: Edit dog.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DogPatchRequest' }
+      responses:
+        '200':
+          description: Dog updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dog' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Walks ─────────────────────────────────────────────────────
+  /v1/walks:
+    post:
+      tags: [Walks]
+      operationId: scheduleWalk
+      summary: Schedule walk
+      description: Schedule walk.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WalkCreateRequest' }
+      responses:
+        '201':
+          description: Walk created (requested if owner, scheduled if walker)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Walk' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    get:
+      tags: [Walks]
+      operationId: listWalks
+      summary: List walks
+      description: List walks.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - { name: status, in: query, schema: { type: string, enum: [requested, scheduled, declined, cancelled, completed] } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+      responses:
+        '200':
+          description: Paginated list of walks
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WalkList' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/walks/{walkId}/decision:
+    parameters:
+      - { name: walkId, in: path, required: true, schema: { type: string, format: uuid } }
+    patch:
+      tags: [Walks]
+      operationId: decideWalk
+      summary: Decide walk
+      description: Decide walk.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WalkDecisionRequest' }
+      responses:
+        '200':
+          description: Decision recorded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Walk' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /v1/walks/{walkId}/cancel:
+    parameters:
+      - { name: walkId, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Walks]
+      operationId: cancelWalk
+      summary: Cancel walk
+      description: Cancel walk.
+      responses:
+        '200':
+          description: Walk cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Walk' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /v1/walks/{walkId}/complete:
+    parameters:
+      - { name: walkId, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Walks]
+      operationId: completeWalk
+      summary: Complete walk
+      description: Complete walk.
+      responses:
+        '200':
+          description: Walk completed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Walk' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  # ── WalkUpdates ───────────────────────────────────────────────
+  /v1/walks/{walkId}/updates:
+    parameters:
+      - { name: walkId, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [WalkUpdates]
+      operationId: postWalkUpdate
+      summary: Post walk update
+      description: Post walk update.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: '#/components/schemas/WalkUpdateCreateRequest' }
+      responses:
+        '201':
+          description: Update posted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WalkUpdate' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    get:
+      tags: [WalkUpdates]
+      operationId: listWalkUpdates
+      summary: List walk updates
+      description: List walk updates.
+      responses:
+        '200':
+          description: Walk updates in posted-at order
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/WalkUpdate' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /v1/walk-updates/{updateId}/photos/{photoId}:
+    parameters:
+      - { name: updateId, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: photoId, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [WalkUpdates]
+      operationId: getWalkUpdatePhoto
+      summary: Get walk update photo
+      description: Get walk update photo.
+      responses:
+        '200':
+          description: Photo bytes
+          content:
+            image/jpeg: { schema: { type: string, format: binary } }
+            image/png: { schema: { type: string, format: binary } }
+            image/heic: { schema: { type: string, format: binary } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Invoices ──────────────────────────────────────────────────
+  /v1/invoices:
+    post:
+      tags: [Invoices]
+      operationId: generateInvoice
+      summary: Generate invoice
+      description: Generate invoice.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvoiceCreateRequest' }
+      responses:
+        '201':
+          description: Invoice created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    get:
+      tags: [Invoices]
+      operationId: listInvoices
+      summary: List invoices
+      description: List invoices.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - { name: status, in: query, schema: { type: string, enum: [issued, paid] } }
+      responses:
+        '200':
+          description: Paginated list of invoices
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InvoiceList' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/invoices/{invoiceId}/mark-paid:
+    parameters:
+      - { name: invoiceId, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Invoices]
+      operationId: markInvoicePaid
+      summary: Mark invoice paid
+      description: Mark invoice paid.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvoiceMarkPaidRequest' }
+      responses:
+        '200':
+          description: Invoice marked paid
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  # ── Rate card ─────────────────────────────────────────────────
+  /v1/rate-card:
+    put:
+      tags: [RateCard]
+      operationId: setRateCard
+      summary: Set rate card
+      description: Set rate card.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RateCardPutRequest' }
+      responses:
+        '200':
+          description: Rate card updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RateCard' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    get:
+      tags: [RateCard]
+      operationId: viewRateCard
+      summary: View rate card
+      description: View rate card.
+      responses:
+        '200':
+          description: Walker's rate card
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RateCard' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSize:
+      name: pageSize
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid bearer token
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Caller lacks the required role or ownership
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Resource does not exist
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Resource is in a state that disallows the operation
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Gone:
+      description: Token has expired or been used
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: Request body or query failed validation
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ValidationError' }
+
+  schemas:
+    # ── Error envelopes ────────────────────────────────────────
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - AUTHENTICATION_REQUIRED
+            - TOKEN_EXPIRED
+            - INVALID_CREDENTIALS
+            - FORBIDDEN
+            - RESOURCE_NOT_FOUND
+            - EMAIL_ALREADY_REGISTERED
+            - WALKER_ALREADY_EXISTS
+            - WALK_NOT_PENDING
+            - WALK_NOT_CANCELLABLE
+            - WALK_NOT_SCHEDULED
+            - WALK_UPDATE_NOT_ALLOWED
+            - INVOICE_NOT_ISSUED
+            - INVITE_EXPIRED
+            - INVITE_ALREADY_USED
+            - RESET_TOKEN_EXPIRED
+            - RESET_TOKEN_ALREADY_USED
+            - INVALID_WALK_TYPE
+            - INVALID_PHOTO
+            - NO_BILLABLE_WALKS
+        message:
+          type: string
+    ValidationError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [VALIDATION_ERROR]
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              issue: { type: string }
+
+    Pagination:
+      type: object
+      required: [page, pageSize, total]
+      properties:
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer }
+
+    # ── Auth ───────────────────────────────────────────────────
+    RegisterRequest:
+      type: object
+      required: [email, password, displayName]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        displayName: { type: string }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+    PasswordResetRequest:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string, format: email }
+    PasswordResetConfirm:
+      type: object
+      required: [token, newPassword]
+      properties:
+        token: { type: string }
+        newPassword: { type: string, minLength: 8 }
+    InviteAcceptRequest:
+      type: object
+      required: [password]
+      properties:
+        password: { type: string, minLength: 8 }
+    AuthResponse:
+      type: object
+      required: [accessToken, refreshToken, user]
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        user: { $ref: '#/components/schemas/UserSummary' }
+
+    # ── Entities ───────────────────────────────────────────────
+    User:
+      type: object
+      required: [id, email, role, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        passwordHash: { type: string, description: "Never returned in API responses; included here for schema completeness." }
+        role: { type: string, enum: [walker, owner] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    UserSummary:
+      type: object
+      required: [id, email, role]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        role: { type: string, enum: [walker, owner] }
+
+    Walker:
+      type: object
+      required: [id, userId, displayName, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        displayName: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    Client:
+      type: object
+      required: [id, userId, invitedByWalkerId, displayName, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        invitedByWalkerId: { type: string, format: uuid }
+        displayName: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ClientCreateRequest:
+      type: object
+      required: [name, email]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+    ClientCreateResponse:
+      type: object
+      required: [clientId, inviteId]
+      properties:
+        clientId: { type: string, format: uuid }
+        inviteId: { type: string, format: uuid }
+    ClientList:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Client' }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+
+    Invite:
+      type: object
+      required: [id, walkerId, email, token, status, expiresAt, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        walkerId: { type: string, format: uuid }
+        email: { type: string, format: email }
+        token: { type: string }
+        status: { type: string, enum: [pending, accepted, expired] }
+        expiresAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    PasswordResetToken:
+      type: object
+      required: [id, userId, token, status, expiresAt, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        token: { type: string }
+        status: { type: string, enum: [pending, used, expired] }
+        expiresAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    Dog:
+      type: object
+      required: [id, ownerId, name, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        ownerId: { type: string, format: uuid }
+        name: { type: string, minLength: 1 }
+        breed: { type: string, nullable: true }
+        ageYears: { type: integer, nullable: true, minimum: 0 }
+        medication: { type: string, nullable: true }
+        vetName: { type: string, nullable: true }
+        vetPhone: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    DogCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        ownerId: { type: string, format: uuid, description: "Required when caller is walker; ignored otherwise." }
+        name: { type: string, minLength: 1 }
+        breed: { type: string }
+        ageYears: { type: integer, minimum: 0 }
+        medication: { type: string }
+        vetName: { type: string }
+        vetPhone: { type: string }
+        notes: { type: string }
+    DogPatchRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        breed: { type: string, nullable: true }
+        ageYears: { type: integer, nullable: true, minimum: 0 }
+        medication: { type: string, nullable: true }
+        vetName: { type: string, nullable: true }
+        vetPhone: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+    DogList:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Dog' }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+
+    Walk:
+      type: object
+      required: [id, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        dogId: { type: string, format: uuid }
+        walkerId: { type: string, format: uuid }
+        walkType: { type: string }
+        durationMinutes: { type: integer, minimum: 1 }
+        startAt: { type: string, format: date-time }
+        requesterRole: { type: string, enum: [walker, owner] }
+        notes: { type: string, nullable: true }
+        status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
+        declinedReason: { type: string, nullable: true }
+        cancelledByRole: { type: string, nullable: true, enum: [walker, owner] }
+        completedAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    WalkCreateRequest:
+      type: object
+      required: [dogId, walkType, durationMinutes, startAt]
+      properties:
+        dogId: { type: string, format: uuid }
+        walkType: { type: string }
+        durationMinutes: { type: integer, minimum: 1 }
+        startAt: { type: string, format: date-time }
+        notes: { type: string }
+    WalkDecisionRequest:
+      type: object
+      required: [decision]
+      properties:
+        decision: { type: string, enum: [scheduled, declined] }
+        reason: { type: string }
+    WalkList:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Walk' }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+
+    WalkUpdate:
+      type: object
+      required: [id, walkId, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        walkId: { type: string, format: uuid }
+        notes: { type: string, nullable: true }
+        photos:
+          type: array
+          items: { $ref: '#/components/schemas/Photo' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    WalkUpdateCreateRequest:
+      type: object
+      properties:
+        notes: { type: string }
+        photo:
+          type: array
+          items: { type: string, format: binary }
+          maxItems: 5
+
+    Photo:
+      type: object
+      required: [id, walkUpdateId, contentType, sizeBytes, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        walkUpdateId: { type: string, format: uuid }
+        contentType: { type: string, enum: [image/jpeg, image/png, image/heic] }
+        sizeBytes: { type: integer, minimum: 0 }
+        capturedAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    RateCard:
+      type: object
+      required: [id, walkerId, currency, entries, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        walkerId: { type: string, format: uuid }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        entries:
+          type: array
+          items: { $ref: '#/components/schemas/RateCardEntry' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    RateCardEntry:
+      type: object
+      required: [id, rateCardId, walkType, durationMinutes, priceCents, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        rateCardId: { type: string, format: uuid }
+        walkType: { type: string }
+        durationMinutes: { type: integer, minimum: 1 }
+        priceCents: { type: integer, minimum: 1 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    RateCardPutRequest:
+      type: object
+      required: [entries]
+      properties:
+        entries:
+          type: array
+          items:
+            type: object
+            required: [walkType, durationMinutes, priceCents, currency]
+            properties:
+              walkType: { type: string }
+              durationMinutes: { type: integer, minimum: 1 }
+              priceCents: { type: integer, minimum: 1 }
+              currency: { type: string, minLength: 3, maxLength: 3 }
+
+    Invoice:
+      type: object
+      required: [id, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, tipCents, lineItems, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        walkerId: { type: string, format: uuid }
+        clientId: { type: string, format: uuid }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        totalCents: { type: integer, minimum: 0 }
+        tipCents: { type: integer, minimum: 0, default: 0 }
+        status: { type: string, enum: [issued, paid] }
+        paidAt: { type: string, format: date-time, nullable: true }
+        paidVia: { type: string, nullable: true }
+        lineItems:
+          type: array
+          items: { $ref: '#/components/schemas/InvoiceLineItem' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    InvoiceCreateRequest:
+      type: object
+      required: [clientId, periodStart, periodEnd]
+      properties:
+        clientId: { type: string, format: uuid }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+    InvoiceMarkPaidRequest:
+      type: object
+      required: [paidAt, paidVia]
+      properties:
+        paidAt: { type: string, format: date-time }
+        paidVia: { type: string }
+        tipCents: { type: integer, minimum: 0, default: 0 }
+    InvoiceList:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Invoice' }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+    InvoiceLineItem:
+      type: object
+      required: [id, invoiceId, walkId, walkType, durationMinutes, priceCents, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        invoiceId: { type: string, format: uuid }
+        walkId: { type: string, format: uuid }
+        walkType: { type: string }
+        durationMinutes: { type: integer, minimum: 1 }
+        priceCents: { type: integer, minimum: 0 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }

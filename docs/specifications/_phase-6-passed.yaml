@@ -1,0 +1,88 @@
+phase: contracts
+signed_off_at: '2026-05-31T10:47:40Z'
+gate_version: '1.0'
+checks_passed:
+- SPECTRAL-OPENAPI
+- SPECTRAL-ASYNCAPI
+- DATACONTRACT-LINT
+- ENTITY-IN-OPENAPI-SCHEMA
+- FIELD-MATCH-DOMAIN-OPENAPI
+- WRITE-OP-HAS-ASYNCAPI-CHANNEL
+- EVENT-IN-DATACONTRACT
+- AUTH-MATRIX-OPENAPI-MATCH
+- ERROR-CODE-IN-CATALOGUE
+warnings_responded: []
+rubric_findings: []
+decisions:
+- id: OPENAPI-PAGINATION-CAP-50
+  summary: List endpoints cap pageSize at 50 (enforced via OpenAPI PageSize.maximum).
+  rationale: Single-walker workload doesn't justify larger pages; lower cap protects
+    mobile bandwidth for owners. Items reference fixture used 100; halved here for
+    the mobile-heavy use case.
+  affects:
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-05-31T10:47:40Z'
+- id: PHOTO-MULTIPART-UPLOAD-SIGNED-RETRIEVAL
+  summary: Photos uploaded via multipart/form-data on POST /v1/walks/{id}/updates;
+    retrieved via auth-protected GET /v1/walk-updates/{id}/photos/{photoId}.
+  rationale: URL-only would require Alison to host photos somewhere publicly accessible.
+    The domain owning storage (multipart in, signed-URL out) is the only model that
+    gives Clancy auth-checked access without hosting overhead. Caps at 5/update, 10
+    MB/photo enforce sensible limits.
+  affects:
+  - docs/specifications/contracts/openapi.yaml
+  - docs/specifications/nfr.md
+  ts: '2026-05-31T10:47:40Z'
+- id: PRICECENTS-INT-MINOR-UNITS
+  summary: Money fields (priceCents, totalCents, tipCents) are integer minor units,
+    not decimal.
+  rationale: Avoids floating-point precision issues for currency. Lock the implementation
+    choice at contract level so every downstream impl agrees.
+  affects:
+  - docs/specifications/contracts/openapi.yaml
+  - docs/specifications/contracts/asyncapi.yaml
+  - docs/specifications/contracts/datacontract.yaml
+  ts: '2026-05-31T10:47:40Z'
+- id: ENUM-CLOSURE-POLICY-VIA-NFR-COMPAT-001
+  summary: 'All enums are closed: NFR-COMPAT-001 forbids removing values within a
+    major version.'
+  rationale: Closed enums let consumers exhaustively pattern-match; open enums require
+    defensive defaults. The NFR pins the policy; this contract emits closed enums
+    by default.
+  affects:
+  - docs/specifications/contracts/openapi.yaml
+  - docs/specifications/nfr.md
+  ts: '2026-05-31T10:47:40Z'
+- id: TIPCENTS-DEFAULT-IN-OPENAPI
+  summary: tipCents on InvoiceMarkPaidRequest defaults to 0 via OpenAPI `default`
+    (not just nullable).
+  rationale: Server fills the field unconditionally; downstream consumers don't need
+    to special-case omitted vs zero.
+  affects:
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-05-31T10:47:40Z'
+- id: TIPCENTS-REQUIRED-IN-INVOICE-SCHEMA
+  summary: tipCents is in Invoice's `required` list (not optional in the response).
+  rationale: "Every Invoice \u2014 issued or paid \u2014 has a tip value (0 or positive).\
+    \ Required-in-response lets clients render the field unconditionally."
+  affects:
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-05-31T10:47:40Z'
+- id: TIPCENTS-REQUIRED-IN-INVOICEPAID-EVENT
+  summary: tipCents added to InvoicePaidEnvelope.data as a required field.
+  rationale: Event consumers (reporting, analytics) need to capture tip alongside
+    totalCents; making it required (zero-default) avoids per-consumer null handling.
+  affects:
+  - docs/specifications/contracts/asyncapi.yaml
+  - docs/specifications/contracts/datacontract.yaml
+  ts: '2026-05-31T10:47:40Z'
+files_signed:
+- path: docs/specifications/contracts/openapi.yaml
+  sha256: aa58ee4eb2601482931d396b31345a35b080053033ff39eb0210797559a2a11e
+  mtime: '2026-05-31T10:47:40Z'
+- path: docs/specifications/contracts/asyncapi.yaml
+  sha256: 4e22e68bd3bb35e93b0aca68b615ee126ac41f2daab5d9a1d17fb467da0c955c
+  mtime: '2026-05-31T10:47:40Z'
+- path: docs/specifications/contracts/datacontract.yaml
+  sha256: 74875df9fc06e70fc02aad5911340bb8630f9e67141dd69c5b734f4e65ef2601
+  mtime: '2026-05-31T10:47:40Z'

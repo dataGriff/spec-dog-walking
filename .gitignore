@@ -1,0 +1,18 @@
+# MkDocs build output
+site/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Demo state (tokens and IDs from task demo:* runs)
+.demo-state
+.demo-state.tmp

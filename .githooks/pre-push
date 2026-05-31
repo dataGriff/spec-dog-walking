@@ -1,0 +1,54 @@
+#!/bin/sh
+# Tier 2 pre-push hook for a domain spec repo.
+# Per SUITE-DESIGN.md §9 Tier 2 (medium, runs less often, target <15 s).
+#
+# What it does:
+#   - Runs Spectral on the OpenAPI and AsyncAPI contracts
+#   - Runs datacontract-cli on the data contract
+#   - Runs cross-file consistency checks across all spec files
+#   - Rejects the push if any hard gate check fails
+#
+# What it does NOT do:
+#   - Run the full audit (Phase 7) — that lives in CI
+#   - Regenerate the domain overview HTML
+#
+# Override with `git push --no-verify` if you're certain. The next full
+# audit on PR will catch any resulting inconsistency.
+set -e
+
+start_time=$(date +%s)
+
+# Wrap in `mise exec` so the hook works in non-mise-activated shells
+# (default git GUI clients, Claude Code, etc.).
+if command -v mise >/dev/null 2>&1; then
+  run() { mise exec -- "$@"; }
+else
+  run() { "$@"; }
+fi
+
+if ! run command -v task >/dev/null 2>&1; then
+  echo "pre-push: 'task' not on PATH. Install via mise (see .mise.toml) or skip with --no-verify." >&2
+  exit 1
+fi
+
+echo "pre-push: linting contracts..."
+run task lint:openapi
+run task lint:asyncapi
+run task lint:datacontract
+
+# Cross-file consistency. Implemented by the suite-installed
+# `task audit:cross-file` target (authored by the audit skill in
+# domain-spec-suite M2.3). The hook is forward-compatible: if the
+# target does not yet exist (e.g. on a fresh bootstrap before the
+# suite has run), the hook treats this as a skip rather than a
+# failure and prints a clear message.
+if run task --list-all 2>/dev/null | grep -qE '^\* audit:cross-file:'; then
+  echo "pre-push: cross-file consistency..."
+  run task audit:cross-file
+else
+  echo "pre-push: skipping cross-file checks — 'audit:cross-file' task not present yet."
+fi
+
+end_time=$(date +%s)
+elapsed=$((end_time - start_time))
+echo "pre-push: OK (${elapsed}s)"

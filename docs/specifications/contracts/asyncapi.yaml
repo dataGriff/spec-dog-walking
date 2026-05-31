@@ -1,0 +1,377 @@
+asyncapi: 2.6.0
+info:
+  title: Dog Walking Domain Events
+  version: 1.0.0
+  description: |
+    Domain event contract for the **Dog Walking** domain. Events are
+    emitted on every business-meaningful change: clients invited and
+    registered, dogs added and updated, walks moving through their
+    lifecycle, walk updates posted, rate cards updated, invoices
+    issued and paid.
+
+    All events conform to the [CloudEvents 1.0](https://cloudevents.io/)
+    specification. The transport binding for development is declared
+    in the `servers` section below; productionised deployments may
+    choose any binding compatible with the channel definitions.
+  contact:
+    name: Dog Walking Domain Spec Set
+    url: https://example.com/dogwalking
+    email: noreply@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  development:
+    url: amqp://localhost:5672
+    protocol: amqp
+    description: Local AMQP broker (development binding)
+
+defaultContentType: application/json
+
+tags:
+  - name: Clients
+    description: Clients domain events.
+  - name: Dogs
+    description: Dogs domain events.
+  - name: Walks
+    description: Walks domain events.
+  - name: WalkUpdates
+    description: WalkUpdates domain events.
+  - name: RateCard
+    description: RateCard domain events.
+  - name: Invoices
+    description: Invoices domain events.
+
+channels:
+  dogwalking.client.invited:
+    description: Published whenever the walker invites a new client.
+    publish:
+      operationId: onClientInvited
+      description: On client invited consumer.
+      message: { $ref: '#/components/messages/ClientInvited' }
+  dogwalking.client.registered:
+    description: Published whenever a client accepts their invite and registers.
+    publish:
+      operationId: onClientRegistered
+      description: On client registered consumer.
+      message: { $ref: '#/components/messages/ClientRegistered' }
+  dogwalking.dog.added:
+    description: Published when a dog record is added.
+    publish:
+      operationId: onDogAdded
+      description: On dog added consumer.
+      message: { $ref: '#/components/messages/DogAdded' }
+  dogwalking.dog.updated:
+    description: Published when a dog record is edited.
+    publish:
+      operationId: onDogUpdated
+      description: On dog updated consumer.
+      message: { $ref: '#/components/messages/DogUpdated' }
+  dogwalking.walk.requested:
+    description: Published when an owner requests a walk.
+    publish:
+      operationId: onWalkRequested
+      description: On walk requested consumer.
+      message: { $ref: '#/components/messages/WalkRequested' }
+  dogwalking.walk.scheduled:
+    description: Published when a walk is scheduled (walker-created or owner-requested-then-accepted).
+    publish:
+      operationId: onWalkScheduled
+      description: On walk scheduled consumer.
+      message: { $ref: '#/components/messages/WalkScheduled' }
+  dogwalking.walk.declined:
+    description: Published when the walker declines a walk request.
+    publish:
+      operationId: onWalkDeclined
+      description: On walk declined consumer.
+      message: { $ref: '#/components/messages/WalkDeclined' }
+  dogwalking.walk.cancelled:
+    description: Published when a walk is cancelled (by either party).
+    publish:
+      operationId: onWalkCancelled
+      description: On walk cancelled consumer.
+      message: { $ref: '#/components/messages/WalkCancelled' }
+  dogwalking.walk.completed:
+    description: Published when the walker marks a walk completed.
+    publish:
+      operationId: onWalkCompleted
+      description: On walk completed consumer.
+      message: { $ref: '#/components/messages/WalkCompleted' }
+  dogwalking.walkupdate.posted:
+    description: Published whenever a WalkUpdate is posted.
+    publish:
+      operationId: onWalkUpdatePosted
+      description: On walk update posted consumer.
+      message: { $ref: '#/components/messages/WalkUpdatePosted' }
+  dogwalking.ratecard.updated:
+    description: Published when the walker replaces their rate card.
+    publish:
+      operationId: onRateCardUpdated
+      description: On rate card updated consumer.
+      message: { $ref: '#/components/messages/RateCardUpdated' }
+  dogwalking.invoice.issued:
+    description: Published when an invoice is generated.
+    publish:
+      operationId: onInvoiceIssued
+      description: On invoice issued consumer.
+      message: { $ref: '#/components/messages/InvoiceIssued' }
+  dogwalking.invoice.paid:
+    description: Published when an issued invoice is marked paid.
+    publish:
+      operationId: onInvoicePaid
+      description: On invoice paid.
+      message: { $ref: '#/components/messages/InvoicePaid' }
+
+components:
+  messages:
+    ClientInvited:
+      name: ClientInvited
+      title: Client invited
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/ClientInvitedEnvelope' }
+    ClientRegistered:
+      name: ClientRegistered
+      title: Client registered
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/ClientRegisteredEnvelope' }
+    DogAdded:
+      name: DogAdded
+      title: Dog added
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/DogAddedEnvelope' }
+    DogUpdated:
+      name: DogUpdated
+      title: Dog updated
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/DogUpdatedEnvelope' }
+    WalkRequested:
+      name: WalkRequested
+      title: Walk requested
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/WalkRequestedEnvelope' }
+    WalkScheduled:
+      name: WalkScheduled
+      title: Walk scheduled
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/WalkScheduledEnvelope' }
+    WalkDeclined:
+      name: WalkDeclined
+      title: Walk declined
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/WalkDeclinedEnvelope' }
+    WalkCancelled:
+      name: WalkCancelled
+      title: Walk cancelled
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/WalkCancelledEnvelope' }
+    WalkCompleted:
+      name: WalkCompleted
+      title: Walk completed
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/WalkCompletedEnvelope' }
+    WalkUpdatePosted:
+      name: WalkUpdatePosted
+      title: Walk update posted
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/WalkUpdatePostedEnvelope' }
+    RateCardUpdated:
+      name: RateCardUpdated
+      title: Rate card updated
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/RateCardUpdatedEnvelope' }
+    InvoiceIssued:
+      name: InvoiceIssued
+      title: Invoice issued
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/InvoiceIssuedEnvelope' }
+    InvoicePaid:
+      name: InvoicePaid
+      title: Invoice paid
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/InvoicePaidEnvelope' }
+
+  schemas:
+    CloudEventsBase:
+      type: object
+      required: [specversion, type, source, id, time, datacontenttype]
+      properties:
+        specversion: { type: string, enum: ['1.0'] }
+        type: { type: string }
+        source: { type: string, format: uri }
+        id: { type: string }
+        time: { type: string, format: date-time }
+        datacontenttype: { type: string, enum: [application/json] }
+
+    ClientInvitedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [clientId, walkerId, email, inviteId]
+              properties:
+                clientId: { type: string, format: uuid }
+                walkerId: { type: string, format: uuid }
+                email: { type: string, format: email }
+                inviteId: { type: string, format: uuid }
+    ClientRegisteredEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [clientId, userId, walkerId]
+              properties:
+                clientId: { type: string, format: uuid }
+                userId: { type: string, format: uuid }
+                walkerId: { type: string, format: uuid }
+    DogAddedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [dogId, ownerId, name]
+              properties:
+                dogId: { type: string, format: uuid }
+                ownerId: { type: string, format: uuid }
+                name: { type: string }
+    DogUpdatedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [dogId, ownerId, updatedFields]
+              properties:
+                dogId: { type: string, format: uuid }
+                ownerId: { type: string, format: uuid }
+                updatedFields:
+                  type: array
+                  items: { type: string }
+    WalkRequestedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt]
+              properties:
+                walkId: { type: string, format: uuid }
+                dogId: { type: string, format: uuid }
+                walkerId: { type: string, format: uuid }
+                walkType: { type: string }
+                durationMinutes: { type: integer }
+                startAt: { type: string, format: date-time }
+    WalkScheduledEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole]
+              properties:
+                walkId: { type: string, format: uuid }
+                dogId: { type: string, format: uuid }
+                walkerId: { type: string, format: uuid }
+                walkType: { type: string }
+                durationMinutes: { type: integer }
+                startAt: { type: string, format: date-time }
+                requesterRole: { type: string, enum: [walker, owner] }
+    WalkDeclinedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [walkId, walkerId, declinedReason]
+              properties:
+                walkId: { type: string, format: uuid }
+                walkerId: { type: string, format: uuid }
+                declinedReason: { type: string }
+    WalkCancelledEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [walkId, cancelledByRole]
+              properties:
+                walkId: { type: string, format: uuid }
+                cancelledByRole: { type: string, enum: [walker, owner] }
+    WalkCompletedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [walkId, walkerId, completedAt]
+              properties:
+                walkId: { type: string, format: uuid }
+                walkerId: { type: string, format: uuid }
+                completedAt: { type: string, format: date-time }
+    WalkUpdatePostedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [updateId, walkId, photoCount]
+              properties:
+                updateId: { type: string, format: uuid }
+                walkId: { type: string, format: uuid }
+                photoCount: { type: integer, minimum: 0 }
+                hasNotes: { type: boolean }
+    RateCardUpdatedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [walkerId, entryCount, currency]
+              properties:
+                walkerId: { type: string, format: uuid }
+                entryCount: { type: integer, minimum: 0 }
+                currency: { type: string, minLength: 3, maxLength: 3 }
+    InvoiceIssuedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [invoiceId, walkerId, clientId, totalCents, currency, periodStart, periodEnd]
+              properties:
+                invoiceId: { type: string, format: uuid }
+                walkerId: { type: string, format: uuid }
+                clientId: { type: string, format: uuid }
+                totalCents: { type: integer, minimum: 0 }
+                currency: { type: string, minLength: 3, maxLength: 3 }
+                periodStart: { type: string, format: date }
+                periodEnd: { type: string, format: date }
+    InvoicePaidEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [invoiceId, walkerId, paidAt, paidVia, tipCents]
+              properties:
+                invoiceId: { type: string, format: uuid }
+                walkerId: { type: string, format: uuid }
+                paidAt: { type: string, format: date-time }
+                paidVia: { type: string }
+                tipCents: { type: integer, minimum: 0 }

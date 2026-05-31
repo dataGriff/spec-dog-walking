@@ -1,0 +1,85 @@
+name: Audit
+
+# Tier 3 of the suite's tiered audit approach (SUITE-DESIGN.md §9).
+# Runs the full Phase 7 conformance audit on every PR and on pushes to
+# main. Blocks merge if the audit fails.
+#
+# Tier 1 (pre-commit) and Tier 2 (pre-push) catch the cheap and medium
+# checks locally. This workflow is the heavy authoritative gate.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Phase 7 conformance audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Task
+        run: sh -c "$(curl -L https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral-cli
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python tooling
+        run: pip install datacontract-cli pyyaml
+
+      - name: Lint contracts
+        run: task lint
+
+      - name: Run full audit
+        # Implemented by the suite-installed `task audit` target (authored
+        # by the audit skill in domain-spec-suite M2.3). Until the suite
+        # has produced this target in a bootstrapped repo, fall back to
+        # `task domain:check` which exercises the contract linting and
+        # the docs generator.
+        run: |
+          if task --list-all 2>/dev/null | grep -qE '^\* audit:'; then
+            task audit
+          else
+            echo "audit: 'task audit' target not present yet — falling back to 'task domain:check'."
+            task domain:check
+          fi
+
+      - name: Regenerate domain overview
+        run: task docs:generate
+
+      - name: Verify generator output is clean
+        # Per SUITE-DESIGN.md §8 Phase 7, "clean" means: exit 0 (already
+        # confirmed by the step above), no placeholder strings in the
+        # rendered HTML, every domain-model entity present in the
+        # overview. The entity-coverage check is implemented inside the
+        # full audit; here we only assert the placeholder-free property.
+        run: |
+          OVERVIEW=docs/specifications/domain-overview.html
+          if [ ! -f "$OVERVIEW" ]; then
+            echo "audit: $OVERVIEW not produced by the generator." >&2
+            exit 1
+          fi
+          if grep -E '\[Resource1\]|\[Domain\]|\{\{' "$OVERVIEW"; then
+            echo "audit: placeholder strings found in $OVERVIEW." >&2
+            exit 1
+          fi
+          echo "audit: domain overview is placeholder-clean."

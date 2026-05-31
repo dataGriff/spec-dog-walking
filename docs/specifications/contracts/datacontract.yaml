@@ -1,0 +1,132 @@
+apiVersion: v3.1.0
+kind: DataContract
+id: urn:datacontract:dogwalking:dogwalking-domain-events:1.0.0
+name: Dog Walking Data Contract
+version: 1.0.0
+status: active
+domain: dogwalking
+
+description:
+  purpose: >
+    Defines the structure and quality expectations for data published
+    by the Dog Walking domain via domain events. This contract is the
+    authoritative historical integration point for downstream
+    consumers (reporting, analytics, downstream sync).
+  usage: >
+    Consume this contract to understand the schema of records emitted
+    on the `dogwalking.*` event channels. Use it as the basis for
+    pipelines, analytics, and reporting on the walker's business.
+  limitations: >
+    Covers the event payload only (data envelope). CloudEvents
+    metadata fields (specversion, type, source, id, time,
+    datacontenttype) are documented in `asyncapi.yaml` and not
+    repeated here.
+
+team:
+  name: Dog Walking Domain Spec Set
+  members:
+    - username: dogwalking-domain
+      name: Dog Walking Domain Spec Set
+      role: owner
+
+servers:
+  - server: development
+    type: custom
+    description: Local AMQP broker (development binding) publishing dogwalking domain events.
+    environment: dev
+    customProperties:
+      - property: protocol
+        value: amqp
+      - property: url
+        value: amqp://localhost:5672
+
+schema:
+  - name: client
+    description: >
+      Client records published via dogwalking.client.invited and
+      dogwalking.client.registered channels. Represents the
+      walker-managed client record at the point of emission.
+    physicalType: topic
+    properties:
+      - { name: clientId, description: Client identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
+      - { name: walkerId, description: Walker who issued the invite., logicalType: string, physicalType: uuid, required: true }
+      - { name: email, description: Client's email at the moment of invite., logicalType: string, required: true }
+      - { name: userId, description: User id associated with the client (set on registered)., logicalType: string, physicalType: uuid, required: false }
+      - { name: inviteId, description: Invite token identifier., logicalType: string, physicalType: uuid, required: false }
+
+  - name: dog
+    description: >
+      Dog records published via dogwalking.dog.added and
+      dogwalking.dog.updated channels.
+    physicalType: topic
+    properties:
+      - { name: dogId, description: Dog identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
+      - { name: ownerId, description: Client (owner) identifier., logicalType: string, physicalType: uuid, required: true }
+      - { name: name, description: Dog's name., logicalType: string, required: true }
+      - { name: updatedFields, description: Set of fields edited (added events omit this)., logicalType: string, required: false }
+
+  - name: walk
+    description: >
+      Walk records published across the full walk lifecycle:
+      dogwalking.walk.requested / scheduled / declined / cancelled /
+      completed.
+    physicalType: topic
+    properties:
+      - { name: walkId, description: Walk identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
+      - { name: dogId, description: Dog being walked., logicalType: string, physicalType: uuid, required: true }
+      - { name: walkerId, description: Walker assigned to the walk., logicalType: string, physicalType: uuid, required: true }
+      - { name: walkType, description: Walk type matching the rate card., logicalType: string, required: false }
+      - { name: durationMinutes, description: Walk duration in minutes., logicalType: integer, required: false }
+      - { name: startAt, description: Scheduled start timestamp., logicalType: timestamp, required: false }
+      - { name: requesterRole, description: Who created the walk (walker / owner)., logicalType: string, required: false }
+      - { name: declinedReason, description: Walker's decline reason (declined events only)., logicalType: string, required: false }
+      - { name: cancelledByRole, description: Who cancelled (cancelled events only)., logicalType: string, required: false }
+      - { name: completedAt, description: Completion timestamp (completed events only)., logicalType: timestamp, required: false }
+
+  - name: walkupdate
+    description: >
+      WalkUpdate records published via the
+      dogwalking.walkupdate.posted channel.
+    physicalType: topic
+    properties:
+      - { name: updateId, description: WalkUpdate identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
+      - { name: walkId, description: Parent walk identifier., logicalType: string, physicalType: uuid, required: true }
+      - { name: photoCount, description: Number of photos attached to the update., logicalType: integer, required: true }
+      - { name: hasNotes, description: Whether the update carried free-text notes., logicalType: boolean, required: false }
+
+  - name: ratecard
+    description: >
+      Rate-card change events published via
+      dogwalking.ratecard.updated channel.
+    physicalType: topic
+    properties:
+      - { name: walkerId, description: Walker whose rate card changed., logicalType: string, physicalType: uuid, required: true, primaryKey: true, primaryKeyPosition: 1 }
+      - { name: entryCount, description: Number of entries on the new rate card., logicalType: integer, required: true }
+      - { name: currency, description: ISO 4217 currency code., logicalType: string, required: true }
+
+  - name: invoice
+    description: >
+      Invoice events published via dogwalking.invoice.issued and
+      dogwalking.invoice.paid channels.
+    physicalType: topic
+    properties:
+      - { name: invoiceId, description: Invoice identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
+      - { name: walkerId, description: Walker issuing the invoice., logicalType: string, physicalType: uuid, required: true }
+      - { name: clientId, description: Client being billed (issued events only)., logicalType: string, physicalType: uuid, required: false }
+      - { name: totalCents, description: Total amount in minor units (issued events only)., logicalType: integer, required: false }
+      - { name: currency, description: ISO 4217 currency code (issued events only)., logicalType: string, required: false }
+      - { name: periodStart, description: Billing period start date (issued events only)., logicalType: date, required: false }
+      - { name: periodEnd, description: Billing period end date (issued events only)., logicalType: date, required: false }
+      - { name: paidAt, description: Payment timestamp (paid events only)., logicalType: timestamp, required: false }
+      - { name: paidVia, description: Payment channel description (paid events only)., logicalType: string, required: false }
+      - { name: tipCents, description: Tip amount in minor units (paid events only; defaults to 0)., logicalType: integer, required: false }
+
+slaProperties:
+  - property: availability
+    value: "99.5"
+    unit: "%"
+    description: Events are delivered at least 99.5% of the time (matches NFR-AVAIL-002).
+  - property: retention
+    value: 30
+    unit: d
+    description: Events are retained for 30 days for replay and historical access.

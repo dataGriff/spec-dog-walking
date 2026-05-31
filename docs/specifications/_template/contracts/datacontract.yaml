@@ -1,0 +1,64 @@
+apiVersion: v3.1.0
+kind: DataContract
+id: urn:datacontract:[domain]:[domain]-domain-events:1.0.0
+name: "[Domain Name] Data Contract"
+version: 1.0.0
+status: draft
+domain: "[domain]"
+
+description:
+  purpose: >
+    TODO: Describe the purpose of this data contract.
+    This contract is the authoritative historical integration point for
+    downstream consumers of the [Domain Name] domain events.
+  usage: >
+    TODO: Describe how consumers should use this contract.
+    Consume this contract to understand the schema of data emitted on the
+    [domain] event channels.
+  limitations: >
+    TODO: Describe any limitations or caveats.
+
+team:
+  name: "[Your Team Name]"
+  members:
+    - username: "[your@email.com]"
+      name: "[Your Name]"
+      role: owner
+
+servers:
+  - server: development
+    type: custom
+    description: "Local broker publishing [domain] domain events."
+    environment: dev
+    customProperties:
+      - property: protocol
+        value: amqp
+      - property: url
+        value: amqp://localhost:5672
+
+schema:
+  - name: "[resource1]"
+    description: >
+      TODO: Describe the dataset — which event channels does it come from
+      and what does each record represent?
+    physicalType: topic
+    properties:
+      - name: id
+        description: Unique identifier for the [resource1].
+        logicalType: string
+        physicalType: uuid
+        required: true
+        unique: true
+        primaryKey: true
+        primaryKeyPosition: 1
+      # TODO: Add further properties matching your domain model and AsyncAPI schema
+
+slaProperties:
+  - property: availability
+    value: "99.9"
+    unit: "%"
+    description: Events are delivered at least 99.9% of the time.
+  - property: retention
+    value: 30
+    unit: d
+    description: Events are retained for 30 days for replay and historical access.

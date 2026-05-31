@@ -1,0 +1,17 @@
+extends: ["spectral:oas"]
+
+rules:
+  # Every operation must have a description (keeps Scalar docs rich)
+  operation-description: error
+
+  # Every tag must have a description
+  tag-description:
+    description: Tags must have a description.
+    given: "$.tags[*]"
+    severity: error
+    then:
+      field: description
+      function: truthy
+
+  # Contact info required (public API)
+  info-contact: error

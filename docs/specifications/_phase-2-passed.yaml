@@ -1,0 +1,73 @@
+phase: modeling
+signed_off_at: '2026-05-31T10:46:16Z'
+gate_version: '1.0'
+checks_passed:
+- MODEL-ENTITY-NAME-UNIQUE
+- ENTITY-IN-GLOSSARY
+- GLOSSARY-COVERS-ATTRIBUTES
+- MODEL-ENTITY-HAS-ID-TIMESTAMPS
+- MODEL-ENTITY-BUSINESS-RULE
+- MODEL-LIFECYCLE-DEFINED
+- MODEL-RELATIONSHIP-BIDIRECTIONAL
+warnings_responded: []
+rubric_findings: []
+decisions:
+- id: USER-WALKER-CLIENT-SPLIT
+  summary: Split authentication User entity from role profiles Walker / Client (1:1
+    each).
+  rationale: Keeps auth tables slim; role-specific fields live on the profile entity
+    without nullable noise.
+  affects:
+  - docs/specifications/domain-model.md
+  ts: '2026-05-31T10:46:16Z'
+- id: WALKER-AS-ENTITY
+  summary: Modelled Walker as an entity even though there's exactly one per domain
+    instance.
+  rationale: Multi-walker may emerge as a future requirement; modelling now as an
+    entity makes that refactor a one-line cardinality change instead of a schema redesign.
+  affects:
+  - docs/specifications/domain-model.md
+  ts: '2026-05-31T10:46:16Z'
+- id: INVOICE-LINEITEM-FK-PLUS-COPY
+  summary: InvoiceLineItem references Walk by FK (walkId) AND copies walkType / durationMinutes
+    / priceCents from it.
+  rationale: Copy snapshots pricing at the moment of agreement so later rate-card
+    edits or walk corrections don't retroactively change billed invoices. FK preserves
+    audit trail to the source Walk.
+  affects:
+  - docs/specifications/domain-model.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-05-31T10:46:16Z'
+- id: WALK-REQUESTER-ROLE-STORED-ON-WALK
+  summary: requesterRole is stored on Walk (not derived from caller context at creation).
+  rationale: The decision history of 'who initiated this walk' is load-bearing for
+    analytics and downstream review; storing it on the row makes it queryable without
+    joining audit logs.
+  affects:
+  - docs/specifications/domain-model.md
+  ts: '2026-05-31T10:46:16Z'
+- id: WALK-UPDATE-IN-SCHEDULED-AND-COMPLETED
+  summary: WalkUpdate entries allowed during status=scheduled (live updates) AND status=completed
+    (post-hoc reflections); rejected in requested / declined / cancelled.
+  rationale: Live + post-hoc cover both common posting patterns. Excluding the three
+    terminal/pre-walk states avoids ambiguous semantics ('what's an update on a declined
+    walk?').
+  affects:
+  - docs/specifications/domain-model.md
+  ts: '2026-05-31T10:46:16Z'
+- id: INVOICE-TIPCENTS-NON-NULLABLE
+  summary: tipCents on Invoice is required, non-nullable, defaults to 0.
+  rationale: Avoids tri-state semantics (no tip vs zero tip vs missing data). Server
+    fills 0 unconditionally; downstream consumers don't need to special-case omitted
+    vs zero.
+  affects:
+  - docs/specifications/domain-model.md
+  - docs/specifications/glossary.md
+  ts: '2026-05-31T10:46:16Z'
+files_signed:
+- path: docs/specifications/domain-model.md
+  sha256: ae67212e745ffbd53cf389c8b9ebbc2751f144c559d8a7af8f36f415ef752b9f
+  mtime: '2026-05-31T10:46:16Z'
+- path: docs/specifications/glossary.md
+  sha256: a915f80f1df93281b2e115c880fdb51e78e2a13162d6496ef821b08f0716d3bd
+  mtime: '2026-05-31T10:46:16Z'

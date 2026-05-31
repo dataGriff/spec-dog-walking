@@ -1,0 +1,14 @@
+extends: ["spectral:asyncapi"]
+
+rules:
+  # Every operation should have a description
+  asyncapi-operation-description: error
+
+  # Every tag must have a description
+  asyncapi-tag-description: error
+
+  # Contact info required
+  asyncapi-info-contact: error
+
+  # Suppress version upgrade nudge — intentionally on 2.6.0
+  asyncapi-latest-version: off

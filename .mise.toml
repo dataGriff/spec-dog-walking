@@ -1,0 +1,9 @@
+[tools]
+node = "20"
+python = "3.11"
+"npm:@stoplight/spectral-cli" = "latest"
+"pipx:datacontract-cli" = "latest"
+"pipx:mkdocs-material" = { version = "latest", pipx_args = "--include-deps" }
+
+[env]
+PIPX_DEFAULT_PYTHON = "python3.11"

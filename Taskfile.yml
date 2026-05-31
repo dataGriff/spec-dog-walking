@@ -1,0 +1,119 @@
+version: '3'
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  lint:openapi:
+    desc: Lint the OpenAPI spec with Spectral
+    cmds:
+      - spectral lint docs/specifications/contracts/openapi.yaml --ruleset .spectral-openapi.yaml
+
+  lint:asyncapi:
+    desc: Lint the AsyncAPI spec with Spectral
+    cmds:
+      - spectral lint docs/specifications/contracts/asyncapi.yaml --ruleset .spectral-asyncapi.yaml
+
+  lint:datacontract:
+    desc: Lint the ODCS data contract with datacontract-cli
+    cmds:
+      - datacontract lint docs/specifications/contracts/datacontract.yaml
+
+  lint:
+    desc: Run all linting (OpenAPI + AsyncAPI + data contract)
+    cmds:
+      - task: lint:openapi
+      - task: lint:asyncapi
+      - task: lint:datacontract
+
+  lint:fix-descriptions:
+    desc: Auto-insert `description:` lines on every operationId in openapi.yaml + asyncapi.yaml that lacks one (idempotent). Use to clear Spectral's operation-description / asyncapi-operation-description / asyncapi-tag-description failures in one pass.
+    cmds:
+      - python3 scripts/lint_fix_descriptions.py
+
+  glossary:skeleton:
+    desc: 'Generate glossary.md skeleton from domain-model.md entities + attributes (placeholders for the agent to fill). Idempotent on template glossary; --force to overwrite a real one. Saves ~90 entries of typing on a non-trivial domain.'
+    cmds:
+      - python3 scripts/glossary_skeleton.py
+
+  docs:generate:
+    desc: Generate the domain overview HTML page from OpenAPI, AsyncAPI, and Data Contract specs
+    cmds:
+      - python3 scripts/generate_domain_overview.py
+
+  docs:serve:
+    desc: Serve the MkDocs site locally
+    cmds:
+      - mkdocs serve
+
+  docs:build:
+    desc: Build the MkDocs site (regenerates domain overview first)
+    cmds:
+      - task: docs:generate
+      - mkdocs build
+
+  docs:deploy:
+    desc: Deploy docs to GitHub Pages (regenerates domain overview first)
+    cmds:
+      - task: docs:generate
+      - mkdocs gh-deploy --force
+
+  domain:init:
+    desc: Copy blank spec templates into docs/specifications/ (safe — does not overwrite unless FORCE=true)
+    vars:
+      FORCE: '{{.FORCE | default "false"}}'
+    cmds:
+      - |
+        TEMPLATE_DIR="docs/specifications/_template"
+        TARGET_DIR="docs/specifications"
+        FORCE="{{.FORCE}}"
+
+        if [ ! -d "$TEMPLATE_DIR" ]; then
+          echo "ERROR: Template directory '$TEMPLATE_DIR' not found."
+          exit 1
+        fi
+
+        echo "Copying spec templates from $TEMPLATE_DIR → $TARGET_DIR"
+
+        copy_file() {
+          local src="$1"
+          local dst="$2"
+          mkdir -p "$(dirname "$dst")"
+          if [ -f "$dst" ] && [ "$FORCE" != "true" ]; then
+            echo "  SKIP (exists): $dst  (use FORCE=true to overwrite)"
+          else
+            cp "$src" "$dst"
+            echo "  COPIED: $dst"
+          fi
+        }
+
+        find "$TEMPLATE_DIR" -type f | while read -r src; do
+          rel="${src#$TEMPLATE_DIR/}"
+          dst="$TARGET_DIR/$rel"
+          copy_file "$src" "$dst"
+        done
+
+        echo ""
+        echo "Done. Edit the files in $TARGET_DIR to describe your domain."
+        echo "Then run: task domain:check"
+
+  setup:
+    desc: Install all tooling and dependencies (run once after cloning — requires mise)
+    cmds:
+      - mise install
+      - python -m pip install pyyaml
+      - task: hooks:install
+
+  hooks:install:
+    desc: Install git hooks from .githooks/ (run once after cloning)
+    cmds:
+      - git config core.hooksPath .githooks
+      - echo "Git hooks installed from .githooks/"
+
+  domain:check:
+    desc: Validate the domain contracts and regenerate domain overview docs
+    cmds:
+      - task: lint
+      - task: docs:generate

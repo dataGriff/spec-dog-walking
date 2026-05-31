@@ -1,0 +1,55 @@
+phase: discovery
+signed_off_at: '2026-05-31T10:45:55Z'
+gate_version: '1.0'
+checks_passed:
+- PRD-PROBLEM-USER-PAIN
+- PRD-PERSONA-EXISTS
+- PRD-NON-GOAL
+- PRD-PERSONA-GOAL
+- PRD-PERSONA-FRUSTRATION
+- PRD-STORY-ACCEPTANCE
+- PRD-STORY-PERSONA-LINK
+- PRD-METRICS-MEASURABLE
+warnings_responded: []
+rubric_findings:
+- id: RUBRIC-PROBLEM-USER-PAIN
+  verdict: pass
+  detail: Problem Statement opens with concrete user pain (5 disconnected tools, paper-folder
+    lookup) before naming the single-place solution in paragraph 2.
+  response: resolved
+  reason: agent verdict accepted
+  ts: '2026-05-31T10:45:55Z'
+- id: RUBRIC-METRICS-MEASURABLE
+  verdict: pass
+  detail: Both metrics name a baseline, a target, a measurement method, and a window.
+  response: resolved
+  reason: agent verdict accepted
+  ts: '2026-05-31T10:45:55Z'
+decisions:
+- id: PRD-PERSONA-COUNT-TWO
+  summary: Captured two personas (Solo Dog Walker, Dog Owner) rather than walker-only.
+  rationale: Clancy is a real user with her own goals (book, cancel, see schedule,
+    pay); collapsing her out would hide half the domain motivation.
+  affects:
+  - docs/specifications/prd.md
+  ts: '2026-05-31T10:45:55Z'
+- id: PRD-PERSONA-NAME-FROM-PERSONA-VIEW
+  summary: Dog Owner persona name reads from her own perspective, not Alison's ('Client').
+  rationale: Both personas use this app; each should describe themselves the way they
+    would, not the way the other party labels them.
+  affects:
+  - docs/specifications/prd.md
+  ts: '2026-05-31T10:45:55Z'
+- id: US-019-TIP-AS-OPTIONAL-PAID-FIELD
+  summary: Modelled tipping as an optional `tipCents` integer on the mark-paid request
+    rather than a separate `tip-invoice` endpoint.
+  rationale: Tip is recorded at the same moment as the invoice payment; separate endpoint
+    would split a single business event into two and complicate the InvoicePaid event
+    payload.
+  affects:
+  - docs/specifications/prd.md
+  ts: '2026-05-31T10:45:55Z'
+files_signed:
+- path: docs/specifications/prd.md
+  sha256: 1d143be4b554be82318a05741f479c3fdc2e01baca9e166029303504b449d28a
+  mtime: '2026-05-31T10:45:55Z'
