@@ -146,3 +146,16 @@ tasks:
         fi
         mise exec -- python3 "{{.SUITE}}/shared/run_phase.py" audit --repo . \
           --exclude NO-TEMPLATE-PLACEHOLDERS,SIGNOFF-SHA256-MATCHES,FORCE-ADVANCES-ALL-ACCEPTED,AMBIGUITIES-NO-AUDIT-REQUIRED,GENERATOR-CLEAN-OUTPUT
+
+  review:
+    desc: 'Run the qualitative independent review on this spec set. Prereq: audit green. Surfaces inconsistencies, coverage gaps, and semantic contradictions the mechanical checks cannot catch. Invokes the suite via DOMAIN_SPEC_SUITE_ROOT or ../domain-spec-suite/ sibling.'
+    vars:
+      SUITE: '{{.DOMAIN_SPEC_SUITE_ROOT | default "../domain-spec-suite"}}'
+    cmds:
+      - |
+        if [ ! -f "{{.SUITE}}/scripts/domain_review.py" ]; then
+          echo "review: suite not found at '{{.SUITE}}'." >&2
+          echo "        set DOMAIN_SPEC_SUITE_ROOT or sibling-clone the suite." >&2
+          exit 1
+        fi
+        mise exec -- python3 "{{.SUITE}}/scripts/domain_review.py" --repo .

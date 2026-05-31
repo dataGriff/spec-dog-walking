@@ -21,6 +21,7 @@ task                # list every available task
 task domain:check   # lint contracts + regenerate the domain overview
 task docs:serve     # browse the docs site locally
 task audit          # full Phase 7 conformance audit (requires the suite)
+task review         # qualitative independent review (catches what audit misses)
 ```
 
 ### Running the audit
@@ -39,6 +40,25 @@ at `git clone https://github.com/dataGriff/domain-spec-suite ../domain-spec-suit
 Future: the suite will be packaged as a `pipx`-installable CLI (`dss
 audit`) so spec repos no longer need a sibling checkout — see the
 suite repo's roadmap.
+
+### Running an independent review
+
+`task review` runs the qualitative review skill against this spec
+set. It catches inconsistencies the mechanical audit can't —
+contradictions between docs, orphan operations, semantic drift in
+prose, decision-log entries that don't match the implementation.
+
+Run it:
+
+- Before a major release
+- After a large update-mode change
+- Periodically as hygiene
+- On demand when something feels off
+
+Output lands at `docs/specifications/_review-<timestamp>.md` (each
+run is a new file; old reviews stay for reference). The review is
+read-only: the user reads findings and decides what to action via
+the normal update-mode flow.
 
 ---
 
