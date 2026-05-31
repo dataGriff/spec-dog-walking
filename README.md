@@ -20,7 +20,25 @@ task setup          # installs pyyaml and wires git hooks
 task                # list every available task
 task domain:check   # lint contracts + regenerate the domain overview
 task docs:serve     # browse the docs site locally
+task audit          # full Phase 7 conformance audit (requires the suite)
 ```
+
+### Running the audit
+
+`task audit` and `task audit:cross-file` invoke the
+[`domain-spec-suite`](https://github.com/dataGriff/domain-spec-suite)
+from your local checkout. Resolution order:
+
+1. `DOMAIN_SPEC_SUITE_ROOT` env var (preferred — works anywhere)
+2. Sibling directory `../domain-spec-suite/` (the convention when both
+   live under the same parent)
+
+If neither resolves, the task fails with a one-line setup hint pointing
+at `git clone https://github.com/dataGriff/domain-spec-suite ../domain-spec-suite`.
+
+Future: the suite will be packaged as a `pipx`-installable CLI (`dss
+audit`) so spec repos no longer need a sibling checkout — see the
+suite repo's roadmap.
 
 ---
 
