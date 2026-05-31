@@ -1,5 +1,5 @@
 phase: nfrs
-signed_off_at: '2026-05-31T13:21:32Z'
+signed_off_at: '2026-05-31T13:47:07Z'
 gate_version: '1.0'
 checks_passed:
 - NFR-THRESHOLD-MEASURABLE
@@ -7,29 +7,30 @@ checks_passed:
 warnings_responded:
 - id: NFR-THRESHOLD-MEASURABLE
   response: n-a
-  reason: Same behavioural-NFR n-a as prior sign-offs (NFR-OBS-001/002/003 and NFR-COMPAT-001/002
-    are policies, not numeric thresholds). No NFR changes in this review pass.
-  ts: '2026-05-31T13:21:32Z'
+  reason: Same behavioural-NFR n-a as prior sign-offs. No NFR file change in this
+    update.
+  ts: '2026-05-31T13:47:07Z'
 rubric_findings:
 - id: RUBRIC-NFR-REALISTIC
   verdict: pass
-  detail: no NFR file change.
+  detail: no NFR file change
   response: resolved
   reason: agent verdict accepted
-  ts: '2026-05-31T13:21:32Z'
+  ts: '2026-05-31T13:47:07Z'
 decisions:
-- id: US-020-SCENARIOS-ADDED
-  summary: Added US-020-A/B/C acceptance scenarios for the new view-dog story (owner
-    views own, cross-owner forbidden, unknown id 404).
-  rationale: Mirrors the auth-matrix ownership rule and the standard NOT_FOUND pattern.
-    Each scenario follows the existing GWT convention.
+- id: US-009-C-CROSS-OWNER-CANCEL-SCENARIO
+  summary: 'Added US-009-C: cross-owner walk cancellation rejected (403 FORBIDDEN).'
+  rationale: Domain-review skill (FIND-001) noticed US-009 enforces the boundary in
+    auth-matrix and acceptance criteria but tested only owner-own and walker-completed
+    paths. Adding the missing cross-owner case closes the ownership-boundary test
+    gap.
   affects:
   - docs/specifications/acceptance-scenarios.md
-  ts: '2026-05-31T13:21:32Z'
+  ts: '2026-05-31T13:47:07Z'
 files_signed:
 - path: docs/specifications/nfr.md
   sha256: 5f855de6f43e4f3ee05c5bcd014588a16a01179a4279fb667f5437ce3763d5ae
-  mtime: '2026-05-31T13:21:32Z'
+  mtime: '2026-05-31T13:47:07Z'
 - path: docs/specifications/acceptance-scenarios.md
-  sha256: 7af55b38a97f6280168bd94a3e644ce12bbdd5c9ac524ae9c8e8c58bdcf27a7d
-  mtime: '2026-05-31T13:21:32Z'
+  sha256: fb440d46309d05dbe73480aab0d2273b5a8e2384b6b84d6f34fd7054704c3097
+  mtime: '2026-05-31T13:47:07Z'

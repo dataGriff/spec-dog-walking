@@ -353,6 +353,16 @@ Then the response status is 409
 And the response body code equals "WALK_NOT_CANCELLABLE"
 ```
 
+### Scenario US-009-C: Cross-owner cancel rejected
+
+```gherkin
+Given an owner is logged in
+And a walk "W2" exists in status "scheduled" for a dog owned by a different owner
+When I POST /v1/walks/W2/cancel
+Then the response status is 403
+And the response body code equals "FORBIDDEN"
+```
+
 ---
 
 ## US-010: List walks

@@ -2,7 +2,7 @@ suite_version: 1.0.0-alpha
 gate_version: '1.0'
 domain_name: DogWalking
 started_at: '2026-05-31T12:24:42Z'
-last_updated: '2026-05-31T13:22:38Z'
+last_updated: '2026-05-31T13:47:07Z'
 phases:
   bootstrap:
     status: passed
@@ -26,7 +26,7 @@ phases:
     gate_version: '1.0'
   nfrs:
     status: passed
-    signed_off_at: '2026-05-31T13:21:32Z'
+    signed_off_at: '2026-05-31T13:47:07Z'
     gate_version: '1.0'
   contracts:
     status: passed
@@ -34,7 +34,7 @@ phases:
     gate_version: '1.0'
   audit:
     status: passed
-    signed_off_at: '2026-05-31T13:22:38Z'
+    signed_off_at: '2026-05-31T13:47:07Z'
     gate_version: '1.0'
 force_advances: []
 session_log:
@@ -56,5 +56,11 @@ session_log:
   event: phase-passed
   phase: contracts
 - timestamp: '2026-05-31T13:22:38Z'
+  event: phase-passed
+  phase: audit
+- timestamp: '2026-05-31T13:47:07Z'
+  event: phase-passed
+  phase: nfrs
+- timestamp: '2026-05-31T13:47:07Z'
   event: phase-passed
   phase: audit
