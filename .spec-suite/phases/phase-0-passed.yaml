@@ -9,6 +9,6 @@ checks_passed:
 warnings_responded: []
 rubric_findings: []
 files_signed:
-- path: docs/specifications/_bootstrap.yaml
+- path: .spec-suite/bootstrap.yaml
   sha256: aaa7fb1d6f0d2fca4481880d7fcf39c26511c53cc3624a31b9b3bed2c1ae30fc
   mtime: '2026-05-31T12:24:42Z'
