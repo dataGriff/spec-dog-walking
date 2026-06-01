@@ -38,10 +38,16 @@ tasks:
     cmds:
       - python3 scripts/glossary_skeleton.py
 
+  docs:render-datacontract:
+    desc: Render the data contract as a standalone HTML reference page via datacontract-cli
+    cmds:
+      - datacontract export html docs/specifications/contracts/datacontract.yaml --output docs/specifications/datacontract-reference.html
+
   docs:generate:
-    desc: Generate the domain overview HTML page from OpenAPI, AsyncAPI, and Data Contract specs
+    desc: Generate the domain overview HTML page and the data contract HTML reference from OpenAPI, AsyncAPI, and Data Contract specs
     cmds:
       - python3 scripts/generate_domain_overview.py
+      - task: docs:render-datacontract
 
   docs:serve:
     desc: Serve the MkDocs site locally

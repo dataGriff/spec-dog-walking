@@ -68,6 +68,22 @@ decisions:
   - docs/specifications/contracts/asyncapi.yaml
   - docs/specifications/contracts/datacontract.yaml
   ts: '2026-06-01T17:59:47Z'
+- id: DATACONTRACT-HTML-EXPORT-CONVENTION
+  summary: Datacontract is published as a standalone HTML reference at docs/specifications/datacontract-reference.html
+    via `datacontract export html`, joining api-reference.html and asyncapi-reference.html
+    as the third peer contract reference on the spec site.
+  rationale: Per suite v1.0.7 the datacontract CLI's HTML exporter is the official
+    rendering path for ODCS contracts. Wired into `task docs:render-datacontract`,
+    invoked by `docs:generate` so the page is regenerated on every docs build and
+    gh-deploy. Rendering is a site-build concern; DATACONTRACT-LINT already proves
+    the YAML is exportable so no Phase 6 check is added. Inline data-contract tables
+    in domain-overview.html were trimmed in favour of a link-out to the new reference.
+  affects:
+  - Taskfile.yml
+  - scripts/generate_domain_overview.py
+  - docs/index.md
+  - .github/workflows/docs.yml
+  ts: '2026-06-01T19:17:00Z'
 files_signed:
 - path: docs/specifications/contracts/openapi.yaml
   sha256: 29ac3684b3f7ec98fe81bbad976c5ef82e959748b389a87ee65230fe71907f35

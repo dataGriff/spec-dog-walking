@@ -23,7 +23,7 @@ All authoritative business requirements live in `docs/specifications/`.
 | [**Domain Overview →**](specifications/domain-overview.html) | Auto-generated: operations, events, entities, ER diagram and data contract in one page |
 | [**Interactive API Reference →**](specifications/api-reference.html) | OpenAPI 3.0.3 contract — live try-it-out |
 | [**AsyncAPI Event Reference →**](specifications/asyncapi-reference.html) | Domain event catalogue — CloudEvents schemas |
-| [Data Contract](specifications/contracts/datacontract.yaml) | ODCS 3.1 data contract — historical event payload schema |
+| [**Data Contract Reference →**](specifications/datacontract-reference.html) | ODCS 3.1 data contract — interactive HTML view of the historic event payload schema |
 
 Raw contract files: [`specifications/contracts/openapi.yaml`](specifications/contracts/openapi.yaml) · [`specifications/contracts/asyncapi.yaml`](specifications/contracts/asyncapi.yaml) · [`specifications/contracts/datacontract.yaml`](specifications/contracts/datacontract.yaml)
 

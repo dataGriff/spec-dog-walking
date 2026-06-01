@@ -1,0 +1,4830 @@
+
+
+<!doctype html>
+<html class="h-full bg-gray-100" lang="en">
+<head>
+  <title>Data Contract</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <script src="https://unpkg.com/@panzoom/panzoom@4.6.0/dist/panzoom.min.js"></script>
+
+  <style>
+    /*
+! tailwindcss v3.4.3 | MIT License | https://tailwindcss.com
+*/
+
+/*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  /* 1 */
+  border-width: 0;
+  /* 2 */
+  border-style: solid;
+  /* 2 */
+  border-color: #e5e7eb;
+  /* 2 */
+}
+
+::before,
+::after {
+  --tw-content: '';
+}
+
+/*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+6. Use the user's configured `sans` font-variation-settings by default.
+7. Disable tap highlights on iOS
+*/
+
+html,
+:host {
+  line-height: 1.5;
+  /* 1 */
+  -webkit-text-size-adjust: 100%;
+  /* 2 */
+  -moz-tab-size: 4;
+  /* 3 */
+  -o-tab-size: 4;
+     tab-size: 4;
+  /* 3 */
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* 4 */
+  font-feature-settings: normal;
+  /* 5 */
+  font-variation-settings: normal;
+  /* 6 */
+  -webkit-tap-highlight-color: transparent;
+  /* 7 */
+}
+
+/*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/
+
+body {
+  margin: 0;
+  /* 1 */
+  line-height: inherit;
+  /* 2 */
+}
+
+/*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/
+
+hr {
+  height: 0;
+  /* 1 */
+  color: inherit;
+  /* 2 */
+  border-top-width: 1px;
+  /* 3 */
+}
+
+/*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/
+
+abbr:where([title]) {
+  -webkit-text-decoration: underline dotted;
+          text-decoration: underline dotted;
+}
+
+/*
+Remove the default font size and weight for headings.
+*/
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/*
+Add the correct font weight in Edge and Safari.
+*/
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+/*
+1. Use the user's configured `mono` font-family by default.
+2. Use the user's configured `mono` font-feature-settings by default.
+3. Use the user's configured `mono` font-variation-settings by default.
+4. Correct the odd `em` font sizing in all browsers.
+*/
+
+code,
+kbd,
+samp,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  /* 1 */
+  font-feature-settings: normal;
+  /* 2 */
+  font-variation-settings: normal;
+  /* 3 */
+  font-size: 1em;
+  /* 4 */
+}
+
+/*
+Add the correct font size in all browsers.
+*/
+
+small {
+  font-size: 80%;
+}
+
+/*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/
+
+table {
+  text-indent: 0;
+  /* 1 */
+  border-color: inherit;
+  /* 2 */
+  border-collapse: collapse;
+  /* 3 */
+}
+
+/*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  /* 1 */
+  font-feature-settings: inherit;
+  /* 1 */
+  font-variation-settings: inherit;
+  /* 1 */
+  font-size: 100%;
+  /* 1 */
+  font-weight: inherit;
+  /* 1 */
+  line-height: inherit;
+  /* 1 */
+  letter-spacing: inherit;
+  /* 1 */
+  color: inherit;
+  /* 1 */
+  margin: 0;
+  /* 2 */
+  padding: 0;
+  /* 3 */
+}
+
+/*
+Remove the inheritance of text transform in Edge and Firefox.
+*/
+
+button,
+select {
+  text-transform: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/
+
+button,
+input:where([type='button']),
+input:where([type='reset']),
+input:where([type='submit']) {
+  -webkit-appearance: button;
+  /* 1 */
+  background-color: transparent;
+  /* 2 */
+  background-image: none;
+  /* 2 */
+}
+
+/*
+Use the modern Firefox focus style for all focusable elements.
+*/
+
+:-moz-focusring {
+  outline: auto;
+}
+
+/*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+/*
+Add the correct vertical alignment in Chrome and Firefox.
+*/
+
+progress {
+  vertical-align: baseline;
+}
+
+/*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/
+
+[type='search'] {
+  -webkit-appearance: textfield;
+  /* 1 */
+  outline-offset: -2px;
+  /* 2 */
+}
+
+/*
+Remove the inner padding in Chrome and Safari on macOS.
+*/
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  /* 1 */
+  font: inherit;
+  /* 2 */
+}
+
+/*
+Add the correct display in Chrome and Safari.
+*/
+
+summary {
+  display: list-item;
+}
+
+/*
+Removes the default spacing and border for appropriate elements.
+*/
+
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+Reset default styling for dialogs.
+*/
+
+dialog {
+  padding: 0;
+}
+
+/*
+Prevent resizing textareas horizontally by default.
+*/
+
+textarea {
+  resize: vertical;
+}
+
+/*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/
+
+input::-moz-placeholder, textarea::-moz-placeholder {
+  opacity: 1;
+  /* 1 */
+  color: #9ca3af;
+  /* 2 */
+}
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1;
+  /* 1 */
+  color: #9ca3af;
+  /* 2 */
+}
+
+/*
+Set the default cursor for buttons.
+*/
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+
+:disabled {
+  cursor: default;
+}
+
+/*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+  /* 1 */
+  vertical-align: middle;
+  /* 2 */
+}
+
+/*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Make elements with the HTML hidden attribute stay hidden by default */
+
+[hidden] {
+  display: none;
+}
+
+*, ::before, ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x: ;
+  --tw-pan-y: ;
+  --tw-pinch-zoom: ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position: ;
+  --tw-gradient-via-position: ;
+  --tw-gradient-to-position: ;
+  --tw-ordinal: ;
+  --tw-slashed-zero: ;
+  --tw-numeric-figure: ;
+  --tw-numeric-spacing: ;
+  --tw-numeric-fraction: ;
+  --tw-ring-inset: ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur: ;
+  --tw-brightness: ;
+  --tw-contrast: ;
+  --tw-grayscale: ;
+  --tw-hue-rotate: ;
+  --tw-invert: ;
+  --tw-saturate: ;
+  --tw-sepia: ;
+  --tw-drop-shadow: ;
+  --tw-backdrop-blur: ;
+  --tw-backdrop-brightness: ;
+  --tw-backdrop-contrast: ;
+  --tw-backdrop-grayscale: ;
+  --tw-backdrop-hue-rotate: ;
+  --tw-backdrop-invert: ;
+  --tw-backdrop-opacity: ;
+  --tw-backdrop-saturate: ;
+  --tw-backdrop-sepia: ;
+  --tw-contain-size: ;
+  --tw-contain-layout: ;
+  --tw-contain-paint: ;
+  --tw-contain-style: ;
+}
+
+::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x: ;
+  --tw-pan-y: ;
+  --tw-pinch-zoom: ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position: ;
+  --tw-gradient-via-position: ;
+  --tw-gradient-to-position: ;
+  --tw-ordinal: ;
+  --tw-slashed-zero: ;
+  --tw-numeric-figure: ;
+  --tw-numeric-spacing: ;
+  --tw-numeric-fraction: ;
+  --tw-ring-inset: ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur: ;
+  --tw-brightness: ;
+  --tw-contrast: ;
+  --tw-grayscale: ;
+  --tw-hue-rotate: ;
+  --tw-invert: ;
+  --tw-saturate: ;
+  --tw-sepia: ;
+  --tw-drop-shadow: ;
+  --tw-backdrop-blur: ;
+  --tw-backdrop-brightness: ;
+  --tw-backdrop-contrast: ;
+  --tw-backdrop-grayscale: ;
+  --tw-backdrop-hue-rotate: ;
+  --tw-backdrop-invert: ;
+  --tw-backdrop-opacity: ;
+  --tw-backdrop-saturate: ;
+  --tw-backdrop-sepia: ;
+  --tw-contain-size: ;
+  --tw-contain-layout: ;
+  --tw-contain-paint: ;
+  --tw-contain-style: ;
+}
+
+.container {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.pointer-events-none {
+  pointer-events: none;
+}
+
+.visible {
+  visibility: visible;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.inset-0 {
+  inset: 0px;
+}
+
+.inset-y-0 {
+  top: 0px;
+  bottom: 0px;
+}
+
+.left-0 {
+  left: 0px;
+}
+
+.right-0 {
+  right: 0px;
+}
+
+.top-0 {
+  top: 0px;
+}
+
+.z-10 {
+  z-index: 10;
+}
+
+.col-span-1 {
+  grid-column: span 1 / span 1;
+}
+
+.-mx-4 {
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+.-my-2 {
+  margin-top: -0.5rem;
+  margin-bottom: -0.5rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.my-2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.-ml-0 {
+  margin-left: -0px;
+}
+
+.-ml-0\.5 {
+  margin-left: -0.125rem;
+}
+
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.ml-3 {
+  margin-left: 0.75rem;
+}
+
+.mr-1 {
+  margin-right: 0.25rem;
+}
+
+.mr-1\.5 {
+  margin-right: 0.375rem;
+}
+
+.mr-6 {
+  margin-right: 1.5rem;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mt-3 {
+  margin-top: 0.75rem;
+}
+
+.mt-5 {
+  margin-top: 1.25rem;
+}
+
+.mt-6 {
+  margin-top: 1.5rem;
+}
+
+.mt-8 {
+  margin-top: 2rem;
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.block {
+  display: block;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.flex {
+  display: flex;
+}
+
+.inline-flex {
+  display: inline-flex;
+}
+
+.table {
+  display: table;
+}
+
+.flow-root {
+  display: flow-root;
+}
+
+.grid {
+  display: grid;
+}
+
+.hidden {
+  display: none;
+}
+
+.h-10 {
+  height: 2.5rem;
+}
+
+.h-16 {
+  height: 4rem;
+}
+
+.h-4 {
+  height: 1rem;
+}
+
+.h-5 {
+  height: 1.25rem;
+}
+
+.h-6 {
+  height: 1.5rem;
+}
+
+.h-8 {
+  height: 2rem;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.min-h-full {
+  min-height: 100%;
+}
+
+.w-1\/12 {
+  width: 8.333333%;
+}
+
+.w-10 {
+  width: 2.5rem;
+}
+
+.w-2 {
+  width: 0.5rem;
+}
+
+.w-2\/12 {
+  width: 16.666667%;
+}
+
+.w-4 {
+  width: 1rem;
+}
+
+.w-5 {
+  width: 1.25rem;
+}
+
+.w-6 {
+  width: 1.5rem;
+}
+
+.w-7\/12 {
+  width: 58.333333%;
+}
+
+.w-8 {
+  width: 2rem;
+}
+
+.w-fit {
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.w-screen {
+  width: 100vw;
+}
+
+.min-w-0 {
+  min-width: 0px;
+}
+
+.min-w-full {
+  min-width: 100%;
+}
+
+.max-w-7xl {
+  max-width: 80rem;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.transform {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-baseline {
+  align-items: baseline;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.gap-x-4 {
+  -moz-column-gap: 1rem;
+       column-gap: 1rem;
+}
+
+.gap-x-6 {
+  -moz-column-gap: 1.5rem;
+       column-gap: 1.5rem;
+}
+
+.gap-y-6 {
+  row-gap: 1.5rem;
+}
+
+.space-x-1 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.25rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.25rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
+.space-x-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.75rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.75rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
+.space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(1rem * var(--tw-space-x-reverse));
+  margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
+.space-x-6 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(1.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(1.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
+.space-x-8 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(2rem * var(--tw-space-x-reverse));
+  margin-left: calc(2rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
+.space-y-1 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
+}
+
+.space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+}
+
+.space-y-6 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
+}
+
+.divide-y > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-y-reverse: 0;
+  border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
+  border-bottom-width: calc(1px * var(--tw-divide-y-reverse));
+}
+
+.divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-opacity: 1;
+  border-color: rgb(243 244 246 / var(--tw-divide-opacity));
+}
+
+.divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-opacity: 1;
+  border-color: rgb(229 231 235 / var(--tw-divide-opacity));
+}
+
+.divide-gray-300 > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-opacity: 1;
+  border-color: rgb(209 213 219 / var(--tw-divide-opacity));
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.rounded-md {
+  border-radius: 0.375rem;
+}
+
+.border-0 {
+  border-width: 0px;
+}
+
+.bg-blue-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 246 255 / var(--tw-bg-opacity));
+}
+
+.bg-gray-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 244 246 / var(--tw-bg-opacity));
+}
+
+.bg-gray-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 250 251 / var(--tw-bg-opacity));
+}
+
+.bg-gray-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(107 114 128 / var(--tw-bg-opacity));
+}
+
+.bg-green-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(240 253 244 / var(--tw-bg-opacity));
+}
+
+.bg-indigo-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(224 231 255 / var(--tw-bg-opacity));
+}
+
+.bg-indigo-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(79 70 229 / var(--tw-bg-opacity));
+}
+
+.bg-purple-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(250 245 255 / var(--tw-bg-opacity));
+}
+
+.bg-red-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 242 242 / var(--tw-bg-opacity));
+}
+
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.bg-yellow-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 252 232 / var(--tw-bg-opacity));
+}
+
+.bg-opacity-75 {
+  --tw-bg-opacity: 0.75;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.px-0 {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.px-2\.5 {
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+}
+
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.py-0 {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.py-0\.5 {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.py-1\.5 {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.py-5 {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+.pb-4 {
+  padding-bottom: 1rem;
+}
+
+.pb-6 {
+  padding-bottom: 1.5rem;
+}
+
+.pb-7 {
+  padding-bottom: 1.75rem;
+}
+
+.pl-10 {
+  padding-left: 2.5rem;
+}
+
+.pl-3 {
+  padding-left: 0.75rem;
+}
+
+.pl-4 {
+  padding-left: 1rem;
+}
+
+.pr-2 {
+  padding-right: 0.5rem;
+}
+
+.pr-3 {
+  padding-right: 0.75rem;
+}
+
+.pr-4 {
+  padding-right: 1rem;
+}
+
+.pt-4 {
+  padding-top: 1rem;
+}
+
+.pt-5 {
+  padding-top: 1.25rem;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.align-middle {
+  vertical-align: middle;
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-normal {
+  font-weight: 400;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.leading-5 {
+  line-height: 1.25rem;
+}
+
+.leading-6 {
+  line-height: 1.5rem;
+}
+
+.leading-7 {
+  line-height: 1.75rem;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+.text-blue-600 {
+  --tw-text-opacity: 1;
+  color: rgb(37 99 235 / var(--tw-text-opacity));
+}
+
+.text-blue-700 {
+  --tw-text-opacity: 1;
+  color: rgb(29 78 216 / var(--tw-text-opacity));
+}
+
+.text-blue-800 {
+  --tw-text-opacity: 1;
+  color: rgb(30 64 175 / var(--tw-text-opacity));
+}
+
+.text-gray-400 {
+  --tw-text-opacity: 1;
+  color: rgb(156 163 175 / var(--tw-text-opacity));
+}
+
+.text-gray-500 {
+  --tw-text-opacity: 1;
+  color: rgb(107 114 128 / var(--tw-text-opacity));
+}
+
+.text-gray-600 {
+  --tw-text-opacity: 1;
+  color: rgb(75 85 99 / var(--tw-text-opacity));
+}
+
+.text-gray-700 {
+  --tw-text-opacity: 1;
+  color: rgb(55 65 81 / var(--tw-text-opacity));
+}
+
+.text-gray-800 {
+  --tw-text-opacity: 1;
+  color: rgb(31 41 55 / var(--tw-text-opacity));
+}
+
+.text-gray-900 {
+  --tw-text-opacity: 1;
+  color: rgb(17 24 39 / var(--tw-text-opacity));
+}
+
+.text-green-600 {
+  --tw-text-opacity: 1;
+  color: rgb(22 163 74 / var(--tw-text-opacity));
+}
+
+.text-green-700 {
+  --tw-text-opacity: 1;
+  color: rgb(21 128 61 / var(--tw-text-opacity));
+}
+
+.text-purple-800 {
+  --tw-text-opacity: 1;
+  color: rgb(107 33 168 / var(--tw-text-opacity));
+}
+
+.text-red-800 {
+  --tw-text-opacity: 1;
+  color: rgb(153 27 27 / var(--tw-text-opacity));
+}
+
+.text-sky-500 {
+  --tw-text-opacity: 1;
+  color: rgb(14 165 233 / var(--tw-text-opacity));
+}
+
+.text-white {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.text-yellow-600 {
+  --tw-text-opacity: 1;
+  color: rgb(202 138 4 / var(--tw-text-opacity));
+}
+
+.text-yellow-800 {
+  --tw-text-opacity: 1;
+  color: rgb(133 77 14 / var(--tw-text-opacity));
+}
+
+.shadow {
+  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow-sm {
+  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow-xl {
+  --tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.ring-1 {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+
+.ring-inset {
+  --tw-ring-inset: inset;
+}
+
+.ring-black {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(0 0 0 / var(--tw-ring-opacity));
+}
+
+.ring-blue-500\/10 {
+  --tw-ring-color: rgb(59 130 246 / 0.1);
+}
+
+.ring-blue-600\/20 {
+  --tw-ring-color: rgb(37 99 235 / 0.2);
+}
+
+.ring-gray-300 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(209 213 219 / var(--tw-ring-opacity));
+}
+
+.ring-gray-500\/10 {
+  --tw-ring-color: rgb(107 114 128 / 0.1);
+}
+
+.ring-gray-600\/20 {
+  --tw-ring-color: rgb(75 85 99 / 0.2);
+}
+
+.ring-gray-900\/5 {
+  --tw-ring-color: rgb(17 24 39 / 0.05);
+}
+
+.ring-green-600\/20 {
+  --tw-ring-color: rgb(22 163 74 / 0.2);
+}
+
+.ring-purple-600\/20 {
+  --tw-ring-color: rgb(147 51 234 / 0.2);
+}
+
+.ring-red-600\/20 {
+  --tw-ring-color: rgb(220 38 38 / 0.2);
+}
+
+.ring-yellow-500\/10 {
+  --tw-ring-color: rgb(234 179 8 / 0.1);
+}
+
+.ring-yellow-600\/20 {
+  --tw-ring-color: rgb(202 138 4 / 0.2);
+}
+
+.ring-opacity-5 {
+  --tw-ring-opacity: 0.05;
+}
+
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-opacity {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.placeholder\:text-gray-400::-moz-placeholder {
+  --tw-text-opacity: 1;
+  color: rgb(156 163 175 / var(--tw-text-opacity));
+}
+
+.placeholder\:text-gray-400::placeholder {
+  --tw-text-opacity: 1;
+  color: rgb(156 163 175 / var(--tw-text-opacity));
+}
+
+.hover\:bg-gray-50:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 250 251 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-indigo-500:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(99 102 241 / var(--tw-bg-opacity));
+}
+
+.hover\:text-gray-500:hover {
+  --tw-text-opacity: 1;
+  color: rgb(107 114 128 / var(--tw-text-opacity));
+}
+
+.hover\:text-gray-700:hover {
+  --tw-text-opacity: 1;
+  color: rgb(55 65 81 / var(--tw-text-opacity));
+}
+
+.hover\:text-sky-700:hover {
+  --tw-text-opacity: 1;
+  color: rgb(3 105 161 / var(--tw-text-opacity));
+}
+
+.focus\:ring-2:focus {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+
+.focus\:ring-inset:focus {
+  --tw-ring-inset: inset;
+}
+
+.focus\:ring-indigo-600:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(79 70 229 / var(--tw-ring-opacity));
+}
+
+.focus-visible\:outline:focus-visible {
+  outline-style: solid;
+}
+
+.focus-visible\:outline-2:focus-visible {
+  outline-width: 2px;
+}
+
+.focus-visible\:outline-offset-2:focus-visible {
+  outline-offset: 2px;
+}
+
+.focus-visible\:outline-indigo-600:focus-visible {
+  outline-color: #4f46e5;
+}
+
+@media (min-width: 640px) {
+  .sm\:col-span-1 {
+    grid-column: span 1 / span 1;
+  }
+
+  .sm\:col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+
+  .sm\:-mx-6 {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+  }
+
+  .sm\:my-8 {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .sm\:ml-6 {
+    margin-left: 1.5rem;
+  }
+
+  .sm\:mt-0 {
+    margin-top: 0px;
+  }
+
+  .sm\:mt-5 {
+    margin-top: 1.25rem;
+  }
+
+  .sm\:mt-6 {
+    margin-top: 1.5rem;
+  }
+
+  .sm\:flex {
+    display: flex;
+  }
+
+  .sm\:w-4\/5 {
+    width: 80%;
+  }
+
+  .sm\:w-72 {
+    width: 18rem;
+  }
+
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sm\:flex-row {
+    flex-direction: row;
+  }
+
+  .sm\:flex-col {
+    flex-direction: column;
+  }
+
+  .sm\:flex-wrap {
+    flex-wrap: wrap;
+  }
+
+  .sm\:items-center {
+    align-items: center;
+  }
+
+  .sm\:space-x-4 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 0;
+    margin-right: calc(1rem * var(--tw-space-x-reverse));
+    margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
+  }
+
+  .sm\:space-x-6 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 0;
+    margin-right: calc(1.5rem * var(--tw-space-x-reverse));
+    margin-left: calc(1.5rem * calc(1 - var(--tw-space-x-reverse)));
+  }
+
+  .sm\:truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sm\:rounded-lg {
+    border-radius: 0.5rem;
+  }
+
+  .sm\:p-0 {
+    padding: 0px;
+  }
+
+  .sm\:p-6 {
+    padding: 1.5rem;
+  }
+
+  .sm\:px-0 {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
+  .sm\:px-6 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .sm\:pl-6 {
+    padding-left: 1.5rem;
+  }
+
+  .sm\:text-3xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+
+  .sm\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .sm\:leading-6 {
+    line-height: 1.5rem;
+  }
+
+  .sm\:tracking-tight {
+    letter-spacing: -0.025em;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:order-1 {
+    order: 1;
+  }
+
+  .md\:order-2 {
+    order: 2;
+  }
+
+  .md\:mt-0 {
+    margin-top: 0px;
+  }
+
+  .md\:flex {
+    display: flex;
+  }
+
+  .md\:items-center {
+    align-items: center;
+  }
+
+  .md\:justify-between {
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:-mx-8 {
+    margin-left: -2rem;
+    margin-right: -2rem;
+  }
+
+  .lg\:ml-4 {
+    margin-left: 1rem;
+  }
+
+  .lg\:mt-0 {
+    margin-top: 0px;
+  }
+
+  .lg\:flex {
+    display: flex;
+  }
+
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lg\:items-center {
+    align-items: center;
+  }
+
+  .lg\:justify-between {
+    justify-content: space-between;
+  }
+
+  .lg\:px-8 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+  </style>
+</head>
+<body class="h-full">
+<div class="min-h-full flex flex-col">
+
+  <nav class="bg-white shadow-sm">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 justify-between">
+        <div class="flex">
+          <div class="flex flex-shrink-0 items-center mr-6">
+            <a class="text-xl text-gray-900 font-semibold" href="/">
+              Data Contracts
+            </a>
+          </div>
+        </div>
+        <div class="hidden sm:ml-6 sm:flex sm:items-center">
+          <a href="https://datacontract.com" class="text-sky-500 hover:text-gray-700 text-sm font-semibold" target="_blank">datacontract.com</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <main class="pb-7">
+
+    <div class="pt-5 mx-auto max-w-7xl sm:px-6 lg:px-8">
+      <div>
+        <div class="md:flex md:items-center md:justify-between px-4 sm:px-0">
+          <div class="min-w-0 flex-1">
+            <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+              Data Contract</h2>
+            <div class="mt-1 flex flex-col sm:mt-1 sm:flex-row sm:flex-wrap sm:space-x-6">
+              urn:datacontract:dogwalking:dogwalking-domain-events:1.0.0
+            </div>
+            <div class="mt-1 flex flex-col sm:mt-1 sm:flex-row sm:flex-wrap sm:space-x-4">
+              <span
+                class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 ">
+                <span>Open Data Contract Standard v3.1.0</span>
+              </span>
+
+              
+            </div>
+          </div>
+          <div class="mt-5 flex lg:mt-0 lg:ml-4 gap-3 items-center">
+            <button
+              type="button"
+              onclick="document.getElementById('dialog-datacontract-yaml').showModal()"
+              class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+              <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-600" viewBox="-0.5 -0.5 24 24">
+                <path d="m4.3125 8.145833333333334 9.104166666666668 0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path><path d="m4.3125 11.020833333333334 9.104166666666668 0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path><path d="m4.3125 5.270833333333334 6.708333333333334 0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path><path d="m4.3125 13.895833333333334 7.1875 0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path><path d="m4.3125 16.770833333333336 3.8333333333333335 0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path><path d="M8.145833333333334 22.520833333333336h-6.708333333333334a0.9583333333333334 0.9583333333333334 0 0 1 -0.9583333333333334 -0.9583333333333334v-20.125a0.9583333333333334 0.9583333333333334 0 0 1 0.9583333333333334 -0.9583333333333334h12.739125a0.9583333333333334 0.9583333333333334 0 0 1 0.6775416666666667 0.28079166666666666L18.406708333333334 4.3125a0.9583333333333334 0.9583333333333334 0 0 1 0.28079166666666666 0.6775416666666667V8.145833333333334" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path><path d="m15.045833333333333 21.370833333333334 -4.025 1.15 1.15 -4.025 6.879875 -6.879875a2.032625 2.032625 0 0 1 2.875 2.875Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path><path d="m18.188208333333332 12.478458333333334 2.875 2.875" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path><path d="m12.170833333333333 18.495833333333334 2.875 2.875" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path>
+              </svg>
+              Show YAML
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="space-y-6 mt-6">
+          <section id="information">
+            <div class="px-4 sm:px-0">
+              <h1 class="text-base font-semibold leading-6 text-gray-900">Fundamentals</h1>
+              <p class="text-sm text-gray-500">Basic information about the data contract</p>
+            </div>
+
+            <div class="mt-2 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
+              <div class="px-6 py-4 space-y-4">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+
+                  
+                <div>
+                  <dt class="text-sm font-medium text-gray-900">Name</dt>
+                  <dd class="mt-1 text-sm text-gray-700">Dog Walking Data Contract</dd>
+                </div>
+                
+
+                
+                <div>
+                  <dt class="text-sm font-medium text-gray-900">Version</dt>
+                  <dd class="mt-1 text-sm text-gray-700">1.0.0</dd>
+                </div>
+                
+
+                  
+                  <div>
+                    <dt class="text-sm font-medium text-gray-900">Status</dt>
+                    <dd class="mt-1 text-sm text-gray-700">active</dd>
+                  </div>
+                  
+
+                  
+
+                  
+
+                
+                
+                <div>
+                  <dt class="text-sm font-medium text-gray-900">Purpose</dt>
+                  <dd class="mt-1 text-sm text-gray-700">Defines the structure and quality expectations for data published by the Dog Walking domain via domain events. This contract is the authoritative historical integration point for downstream consumers (reporting, analytics, downstream sync). Per SUITE-DESIGN §4.5 every record carries the full state of its affected entity at the moment of the event — the contract is the audit-grade historic record.
+</dd>
+                </div>
+                
+
+                
+                <div>
+                  <dt class="text-sm font-medium text-gray-900">Usage</dt>
+                  <dd class="mt-1 text-sm text-gray-700">Consume this contract to understand the schema of records emitted on the `dogwalking.*` event channels. Use it as the basis for pipelines, analytics, and reporting on the walker's business.
+</dd>
+                </div>
+                
+
+                
+                <div>
+                  <dt class="text-sm font-medium text-gray-900">Limitations</dt>
+                  <dd class="mt-1 text-sm text-gray-700">Covers the event payload only (data envelope). CloudEvents metadata fields (specversion, type, source, id, time, datacontenttype) are documented in `asyncapi.yaml` and not repeated here. Aggregate-child collections (RateCard entries, Invoice line items) are intentionally NOT in the payloads at v1 — aggregate-child coverage is v1.0.7 follow-up work (see BUILD-PLAN §6.11).
+</dd>
+                </div>
+                
+                
+
+                
+                </dl>
+              </div>
+            </div>
+          </section>
+
+          <section id="diagram" class="mt-6">
+            <div class="px-4 sm:px-0">
+              <h1 class="text-base font-semibold leading-6 text-gray-900">Entity Relationship
+                Diagram</h1>
+              <p class="text-sm text-gray-500">Visual representation of data model relationships</p>
+            </div>
+            <div class="mt-3">
+              <div class="overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
+                <div class="diagram-container p-4 w-full" id="diagram-container">
+                  <pre class="mermaid">
+                    erDiagram
+	"**invite**" {
+	inviteId🔑🔒 string
+	walkerId string
+	email string
+	status string
+	expiresAt timestamp
+	createdAt timestamp
+	updatedAt timestamp
+}
+	"**client**" {
+	clientId🔑🔒 string
+	userId string
+	invitedByWalkerId string
+	displayName string
+	createdAt timestamp
+	updatedAt timestamp
+}
+	"**dog**" {
+	dogId🔑🔒 string
+	ownerId string
+	name string
+	breed string
+	ageYears integer
+	medication string
+	vetName string
+	vetPhone string
+	notes string
+	createdAt timestamp
+	updatedAt timestamp
+}
+	"**walk**" {
+	walkId🔑🔒 string
+	dogId string
+	walkerId string
+	walkType string
+	durationMinutes integer
+	startAt timestamp
+	requesterRole string
+	notes string
+	status string
+	declinedReason string
+	cancelledByRole string
+	completedAt timestamp
+	createdAt timestamp
+	updatedAt timestamp
+}
+	"**walkupdate**" {
+	walkUpdateId🔑🔒 string
+	walkId string
+	notes string
+	createdAt timestamp
+	updatedAt timestamp
+}
+	"**ratecard**" {
+	rateCardId🔑🔒 string
+	walkerId string
+	currency string
+	createdAt timestamp
+	updatedAt timestamp
+}
+	"**invoice**" {
+	invoiceId🔑🔒 string
+	walkerId string
+	clientId string
+	periodStart date
+	periodEnd date
+	currency string
+	totalCents integer
+	status string
+	paidAt timestamp
+	paidVia string
+	tipCents integer
+	createdAt timestamp
+	updatedAt timestamp
+}
+
+
+                  </pre>
+                </div>
+              </div>
+            </div>
+            <script type="module">
+              import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+
+              mermaid.initialize({
+                startOnLoad: false,
+                theme: 'neutral'
+              });
+              await mermaid.run({
+                querySelector: '.mermaid',
+                postRenderCallback: (id) => {
+                  const container = document.getElementById("diagram-container");
+                  const svgElement = container.querySelector("svg");
+
+                  if (svgElement) {
+                    // Initialize Panzoom
+                    const panzoomInstance = Panzoom(svgElement, {
+                      maxScale: 5,
+                      minScale: 0.5,
+                      step: 0.1,
+                    });
+
+                    // Mouse wheel zoom
+                    container.addEventListener("wheel", (event) => {
+                      event.preventDefault();
+                      panzoomInstance.zoomWithWheel(event);
+                    });
+                  }
+                }
+              });
+            </script>
+          </section>
+
+          <section id="schema">
+            <div class="flex justify-between">
+              <div class="px-4 sm:px-0">
+                <h1 class="text-base font-semibold leading-6 text-gray-900">
+                  Schema
+                </h1>
+                <p class="text-sm text-gray-500">The data schema and structure</p>
+              </div>
+            </div>
+
+            
+
+            <div class="mt-3 flow-root">
+              <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                  <div
+                    class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+
+                    <table class="min-w-full divide-y divide-gray-300">
+                      <thead class="bg-gray-50">
+                      <tr>
+                        <th scope="colgroup" colspan="5"
+                            class="py-2 pl-4 pr-3 text-left font-semibold text-gray-900 sm:pl-6">
+                          
+                          <span class="font-semibold" id="invite">invite</span>
+                          
+                          
+                          <span
+                            class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">topic</span>
+                          <div class="text-sm font-medium text-gray-500">Invite records published via the dogwalking.invite.created channel. Represents the invite issued by the walker for a prospective client. The opaque `token` field is intentionally excluded (marked `[secret]` in the domain model).
+
+                          </div>
+                          
+                        </th>
+                      </tr>
+                      <tr>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Property
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Business Name
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Required
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Description
+                        </th>
+                      </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200 bg-white">
+                      
+  <tr>
+    
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      inviteId</div>
+      
+      <span
+        class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Primary Key</span>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Invite identifier.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      walkerId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walker who issued the invite.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      email</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Prospective client's email.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      status</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Invite status at emission (pending / accepted / expired).
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      expiresAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Timestamp at which the invite auto-transitions to expired.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      createdAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">When the invite was queued.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      updatedAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Last update timestamp.
+    </td>
+  </tr>
+    
+    
+  
+<!-- Mark the end of the contained fields -->
+<tr style="--tw-divide-y-reverse: 2"></tr>
+
+                      </tbody>
+                      
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+
+            <div class="mt-3 flow-root">
+              <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                  <div
+                    class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+
+                    <table class="min-w-full divide-y divide-gray-300">
+                      <thead class="bg-gray-50">
+                      <tr>
+                        <th scope="colgroup" colspan="5"
+                            class="py-2 pl-4 pr-3 text-left font-semibold text-gray-900 sm:pl-6">
+                          
+                          <span class="font-semibold" id="client">client</span>
+                          
+                          
+                          <span
+                            class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">topic</span>
+                          <div class="text-sm font-medium text-gray-500">Client records published via the dogwalking.client.registered channel. Represents the walker-managed client record at the point of registration.
+
+                          </div>
+                          
+                        </th>
+                      </tr>
+                      <tr>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Property
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Business Name
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Required
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Description
+                        </th>
+                      </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200 bg-white">
+                      
+  <tr>
+    
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      clientId</div>
+      
+      <span
+        class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Primary Key</span>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Client identifier.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      userId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">User identifier (role=owner) backing the client.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      invitedByWalkerId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walker who issued the invite that created this client.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      displayName</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Name the walker uses to refer to this client.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      createdAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">When the Client record was created.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      updatedAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Last update timestamp.
+    </td>
+  </tr>
+    
+    
+  
+<!-- Mark the end of the contained fields -->
+<tr style="--tw-divide-y-reverse: 2"></tr>
+
+                      </tbody>
+                      
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+
+            <div class="mt-3 flow-root">
+              <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                  <div
+                    class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+
+                    <table class="min-w-full divide-y divide-gray-300">
+                      <thead class="bg-gray-50">
+                      <tr>
+                        <th scope="colgroup" colspan="5"
+                            class="py-2 pl-4 pr-3 text-left font-semibold text-gray-900 sm:pl-6">
+                          
+                          <span class="font-semibold" id="dog">dog</span>
+                          
+                          
+                          <span
+                            class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">topic</span>
+                          <div class="text-sm font-medium text-gray-500">Dog records published via dogwalking.dog.added and dogwalking.dog.updated channels. Each event carries the full Dog state at the moment of emission.
+
+                          </div>
+                          
+                        </th>
+                      </tr>
+                      <tr>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Property
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Business Name
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Required
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Description
+                        </th>
+                      </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200 bg-white">
+                      
+  <tr>
+    
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      dogId</div>
+      
+      <span
+        class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Primary Key</span>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Dog identifier.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      ownerId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Client (owner) identifier.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      name</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Dog's name.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      breed</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Closed-set breed (see Breed enum in openapi/asyncapi). Null when unknown.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      ageYears</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">integer</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Age in whole years.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      medication</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Free-text medication notes.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      vetName</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Vet practice name.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      vetPhone</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Vet contact number.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      notes</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Free-text quirks / handling notes.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      createdAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Creation timestamp.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      updatedAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Last update timestamp.
+    </td>
+  </tr>
+    
+    
+  
+<!-- Mark the end of the contained fields -->
+<tr style="--tw-divide-y-reverse: 2"></tr>
+
+                      </tbody>
+                      
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+
+            <div class="mt-3 flow-root">
+              <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                  <div
+                    class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+
+                    <table class="min-w-full divide-y divide-gray-300">
+                      <thead class="bg-gray-50">
+                      <tr>
+                        <th scope="colgroup" colspan="5"
+                            class="py-2 pl-4 pr-3 text-left font-semibold text-gray-900 sm:pl-6">
+                          
+                          <span class="font-semibold" id="walk">walk</span>
+                          
+                          
+                          <span
+                            class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">topic</span>
+                          <div class="text-sm font-medium text-gray-500">Walk records published across the full walk lifecycle: dogwalking.walk.requested / scheduled / declined / cancelled / completed. Every event carries the full Walk state at the moment of emission; the `status` field distinguishes which lifecycle event was published.
+
+                          </div>
+                          
+                        </th>
+                      </tr>
+                      <tr>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Property
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Business Name
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Required
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Description
+                        </th>
+                      </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200 bg-white">
+                      
+  <tr>
+    
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      walkId</div>
+      
+      <span
+        class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Primary Key</span>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walk identifier.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      dogId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Dog being walked.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      walkerId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walker assigned to the walk.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      walkType</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walk type matching the rate card.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      durationMinutes</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">integer</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walk duration in minutes.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      startAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Scheduled start timestamp.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      requesterRole</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Who created the walk (walker / owner).
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      notes</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Free-text booking notes.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      status</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walk status at emission (requested / scheduled / declined / cancelled / completed).
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      declinedReason</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walker's decline reason (when status=declined).
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      cancelledByRole</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Who cancelled the walk (when status=cancelled).
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      completedAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Completion timestamp (when status=completed).
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      createdAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">When the walk was first recorded.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      updatedAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Last update timestamp.
+    </td>
+  </tr>
+    
+    
+  
+<!-- Mark the end of the contained fields -->
+<tr style="--tw-divide-y-reverse: 2"></tr>
+
+                      </tbody>
+                      
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+
+            <div class="mt-3 flow-root">
+              <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                  <div
+                    class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+
+                    <table class="min-w-full divide-y divide-gray-300">
+                      <thead class="bg-gray-50">
+                      <tr>
+                        <th scope="colgroup" colspan="5"
+                            class="py-2 pl-4 pr-3 text-left font-semibold text-gray-900 sm:pl-6">
+                          
+                          <span class="font-semibold" id="walkupdate">walkupdate</span>
+                          
+                          
+                          <span
+                            class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">topic</span>
+                          <div class="text-sm font-medium text-gray-500">WalkUpdate records published via the dogwalking.walkupdate.posted channel.
+
+                          </div>
+                          
+                        </th>
+                      </tr>
+                      <tr>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Property
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Business Name
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Required
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Description
+                        </th>
+                      </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200 bg-white">
+                      
+  <tr>
+    
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      walkUpdateId</div>
+      
+      <span
+        class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Primary Key</span>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">WalkUpdate identifier.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      walkId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Parent walk identifier.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      notes</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Free-text note attached to the update.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      createdAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">When the update was posted.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      updatedAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Last update timestamp.
+    </td>
+  </tr>
+    
+    
+  
+<!-- Mark the end of the contained fields -->
+<tr style="--tw-divide-y-reverse: 2"></tr>
+
+                      </tbody>
+                      
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+
+            <div class="mt-3 flow-root">
+              <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                  <div
+                    class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+
+                    <table class="min-w-full divide-y divide-gray-300">
+                      <thead class="bg-gray-50">
+                      <tr>
+                        <th scope="colgroup" colspan="5"
+                            class="py-2 pl-4 pr-3 text-left font-semibold text-gray-900 sm:pl-6">
+                          
+                          <span class="font-semibold" id="ratecard">ratecard</span>
+                          
+                          
+                          <span
+                            class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">topic</span>
+                          <div class="text-sm font-medium text-gray-500">RateCard root records published via the dogwalking.ratecard.updated channel. Carries the rate-card root only; the contained collection of RateCardEntry rows is v1.0.7 follow-up work (BUILD-PLAN §6.11).
+
+                          </div>
+                          
+                        </th>
+                      </tr>
+                      <tr>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Property
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Business Name
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Required
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Description
+                        </th>
+                      </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200 bg-white">
+                      
+  <tr>
+    
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      rateCardId</div>
+      
+      <span
+        class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Primary Key</span>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">RateCard identifier.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      walkerId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walker whose rate card changed.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      currency</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">ISO 4217 currency code.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      createdAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Creation timestamp.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      updatedAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Last update timestamp.
+    </td>
+  </tr>
+    
+    
+  
+<!-- Mark the end of the contained fields -->
+<tr style="--tw-divide-y-reverse: 2"></tr>
+
+                      </tbody>
+                      
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+
+            <div class="mt-3 flow-root">
+              <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                  <div
+                    class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+
+                    <table class="min-w-full divide-y divide-gray-300">
+                      <thead class="bg-gray-50">
+                      <tr>
+                        <th scope="colgroup" colspan="5"
+                            class="py-2 pl-4 pr-3 text-left font-semibold text-gray-900 sm:pl-6">
+                          
+                          <span class="font-semibold" id="invoice">invoice</span>
+                          
+                          
+                          <span
+                            class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">topic</span>
+                          <div class="text-sm font-medium text-gray-500">Invoice root records published via dogwalking.invoice.issued and dogwalking.invoice.paid channels. Carries the invoice root only; the contained collection of InvoiceLineItem rows is v1.0.7 follow-up work.
+
+                          </div>
+                          
+                        </th>
+                      </tr>
+                      <tr>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Property
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Business Name
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Required
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Description
+                        </th>
+                      </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200 bg-white">
+                      
+  <tr>
+    
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      invoiceId</div>
+      
+      <span
+        class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Primary Key</span>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Invoice identifier.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      walkerId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walker issuing the invoice.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      clientId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Client being billed.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      periodStart</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">date</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Billing period start date.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      periodEnd</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">date</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Billing period end date.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      currency</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">ISO 4217 currency code copied from the RateCard at issue.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      totalCents</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">integer</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Total amount in minor units (sum of line-item priceCents).
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      status</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Invoice status at emission (issued / paid).
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      paidAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Payment timestamp (when status=paid).
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      paidVia</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Payment channel description (when status=paid).
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      tipCents</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">integer</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Tip amount in minor units (defaults to 0 at issue).
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      createdAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Issue timestamp.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      updatedAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Last update timestamp.
+    </td>
+  </tr>
+    
+    
+  
+<!-- Mark the end of the contained fields -->
+<tr style="--tw-divide-y-reverse: 2"></tr>
+
+                      </tbody>
+                      
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          </section>
+
+          
+
+          
+
+
+          
+          <section id="team">
+            <div class="px-4 sm:px-0">
+              <h1 class="text-base font-semibold leading-6 text-gray-900">Team</h1>
+              <p class="text-sm text-gray-500">Team members and their roles</p>
+            </div>
+
+            <div
+              class="mt-2 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
+              
+              
+              
+              
+              <div class="px-6 py-4 border-b border-gray-200">
+                
+                <div class="text-sm font-medium text-gray-900">Dog Walking Domain Spec Set</div>
+                
+                
+              </div>
+              
+              
+              
+              <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Username
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date In
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date Out
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Comment
+                  </th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">dogwalking-domain
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">owner
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-
+                  </td>
+                </tr>
+                
+                </tbody>
+              </table>
+            </div>
+          </section>
+          
+
+          
+
+
+          
+          <section id="sla">
+            <div class="px-4 sm:px-0">
+              <h1 class="text-base font-semibold leading-6 text-gray-900">Service Level Agreements</h1>
+              <p class="text-sm text-gray-500">SLA properties and commitments</p>
+            </div>
+
+            <div class="mt-2 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
+              <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Element</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                  
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">availability</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">99.5</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">%</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
+                  </tr>
+                  
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">retention</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">d</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
+                  </tr>
+                  
+                </tbody>
+              </table>
+            </div>
+          </section>
+          
+
+
+          
+          <section id="servers">
+            <div class="px-4 sm:px-0">
+              <h1 class="text-base font-semibold leading-6 text-gray-900" id="servers">Servers</h1>
+              <p class="text-sm text-gray-500">Infrastructure servers of the data contract</p>
+            </div>
+
+            <ul role="list"
+                class="mt-2 divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
+              
+              <li class="relative flex gap-x-6 px-4 py-5 sm:px-6">
+  <div class="flex items-center gap-x-4">
+    <div class="sm:flex sm:flex-col">
+      <div class="flex flex-col">
+        <dt class="text-sm font-medium text-gray-500">Server</dt>
+        <dd class="mt-1 text-sm text-gray-900">development</dd>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="flex items-center gap-x-4">
+    <div class="sm:flex sm:flex-col">
+      <div class="flex flex-col">
+        <dt class="text-sm font-medium text-gray-500">Environment</dt>
+        <dd class="mt-1 text-sm text-gray-900">dev</dd>
+      </div>
+    </div>
+  </div>
+  
+
+  
+  <div class="flex items-center gap-x-4">
+    <div class="sm:flex sm:flex-col">
+      <div class="flex flex-col">
+        <dt class="text-sm font-medium text-gray-500">Type</dt>
+        <dd class="mt-1 text-sm text-gray-900">custom</dd>
+      </div>
+    </div>
+  </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="flex items-center gap-x-4">
+    <div class="sm:flex sm:flex-col">
+      <div class="flex flex-col">
+        <dt class="text-sm font-medium text-gray-500">Description</dt>
+        <dd class="mt-1 text-sm text-gray-900">Local AMQP broker (development binding) publishing dogwalking domain events.</dd>
+      </div>
+    </div>
+  </div>
+  
+
+  
+
+</li>
+              
+            </ul>
+
+          </section>
+          
+
+
+          
+
+        </div>
+      </div>
+
+      <div class="mt-6 text-sm text-gray-400">
+        Created at 01 Jun 2026 18:17:45 UTC with <a href="https://cli.datacontract.com" class="text-gray-400 hover:text-gray-500">Data Contract CLI</a> v0.12.1
+      </div>
+
+    </div>
+  </main>
+
+  <dialog  id="dialog-datacontract-yaml" class="relative z-10" aria-labelledby="modal-title" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="relative transform rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-4/5 sm:p-6">
+          <div class="absolute right-0 top-0 pr-4 pt-4">
+            <button type="button" onclick="document.getElementById('dialog-datacontract-yaml').close()" class="rounded-md bg-white text-gray-400 hover:text-gray-500">
+              <span class="sr-only">Close</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div>
+            <div class="mt-3 mb-3 text-center sm:mt-5">
+
+              <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Data Contract YAML</h3>
+            </div>
+            <pre class="overflow-x-auto text-sm bg-gray-50 p-4"><code>version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:datacontract:dogwalking:dogwalking-domain-events:1.0.0
+name: Dog Walking Data Contract
+status: active
+servers:
+- server: development
+  type: custom
+  description: Local AMQP broker (development binding) publishing dogwalking domain
+    events.
+  environment: dev
+  customProperties:
+  - property: protocol
+    value: amqp
+  - property: url
+    value: amqp://localhost:5672
+description:
+  usage: 'Consume this contract to understand the schema of records emitted on the
+    `dogwalking.*` event channels. Use it as the basis for pipelines, analytics, and
+    reporting on the walker''s business.
+
+    '
+  purpose: 'Defines the structure and quality expectations for data published by the
+    Dog Walking domain via domain events. This contract is the authoritative historical
+    integration point for downstream consumers (reporting, analytics, downstream sync).
+    Per SUITE-DESIGN §4.5 every record carries the full state of its affected entity
+    at the moment of the event — the contract is the audit-grade historic record.
+
+    '
+  limitations: 'Covers the event payload only (data envelope). CloudEvents metadata
+    fields (specversion, type, source, id, time, datacontenttype) are documented in
+    `asyncapi.yaml` and not repeated here. Aggregate-child collections (RateCard entries,
+    Invoice line items) are intentionally NOT in the payloads at v1 — aggregate-child
+    coverage is v1.0.7 follow-up work (see BUILD-PLAN §6.11).
+
+    '
+domain: dogwalking
+schema:
+- name: invite
+  physicalType: topic
+  description: 'Invite records published via the dogwalking.invite.created channel.
+    Represents the invite issued by the walker for a prospective client. The opaque
+    `token` field is intentionally excluded (marked `[secret]` in the domain model).
+
+    '
+  properties:
+  - name: inviteId
+    physicalType: uuid
+    description: Invite identifier.
+    primaryKey: true
+    primaryKeyPosition: 1
+    logicalType: string
+    required: true
+    unique: true
+  - name: walkerId
+    physicalType: uuid
+    description: Walker who issued the invite.
+    logicalType: string
+    required: true
+  - name: email
+    description: Prospective client's email.
+    logicalType: string
+    required: true
+  - name: status
+    description: Invite status at emission (pending / accepted / expired).
+    logicalType: string
+    required: true
+  - name: expiresAt
+    description: Timestamp at which the invite auto-transitions to expired.
+    logicalType: timestamp
+    required: true
+  - name: createdAt
+    description: When the invite was queued.
+    logicalType: timestamp
+    required: true
+  - name: updatedAt
+    description: Last update timestamp.
+    logicalType: timestamp
+    required: true
+- name: client
+  physicalType: topic
+  description: 'Client records published via the dogwalking.client.registered channel.
+    Represents the walker-managed client record at the point of registration.
+
+    '
+  properties:
+  - name: clientId
+    physicalType: uuid
+    description: Client identifier.
+    primaryKey: true
+    primaryKeyPosition: 1
+    logicalType: string
+    required: true
+    unique: true
+  - name: userId
+    physicalType: uuid
+    description: User identifier (role=owner) backing the client.
+    logicalType: string
+    required: true
+  - name: invitedByWalkerId
+    physicalType: uuid
+    description: Walker who issued the invite that created this client.
+    logicalType: string
+    required: true
+  - name: displayName
+    description: Name the walker uses to refer to this client.
+    logicalType: string
+    required: true
+  - name: createdAt
+    description: When the Client record was created.
+    logicalType: timestamp
+    required: true
+  - name: updatedAt
+    description: Last update timestamp.
+    logicalType: timestamp
+    required: true
+- name: dog
+  physicalType: topic
+  description: 'Dog records published via dogwalking.dog.added and dogwalking.dog.updated
+    channels. Each event carries the full Dog state at the moment of emission.
+
+    '
+  properties:
+  - name: dogId
+    physicalType: uuid
+    description: Dog identifier.
+    primaryKey: true
+    primaryKeyPosition: 1
+    logicalType: string
+    required: true
+    unique: true
+  - name: ownerId
+    physicalType: uuid
+    description: Client (owner) identifier.
+    logicalType: string
+    required: true
+  - name: name
+    description: Dog's name.
+    logicalType: string
+    required: true
+  - name: breed
+    description: Closed-set breed (see Breed enum in openapi/asyncapi). Null when
+      unknown.
+    logicalType: string
+    required: false
+  - name: ageYears
+    description: Age in whole years.
+    logicalType: integer
+    required: false
+  - name: medication
+    description: Free-text medication notes.
+    logicalType: string
+    required: false
+  - name: vetName
+    description: Vet practice name.
+    logicalType: string
+    required: false
+  - name: vetPhone
+    description: Vet contact number.
+    logicalType: string
+    required: false
+  - name: notes
+    description: Free-text quirks / handling notes.
+    logicalType: string
+    required: false
+  - name: createdAt
+    description: Creation timestamp.
+    logicalType: timestamp
+    required: true
+  - name: updatedAt
+    description: Last update timestamp.
+    logicalType: timestamp
+    required: true
+- name: walk
+  physicalType: topic
+  description: 'Walk records published across the full walk lifecycle: dogwalking.walk.requested
+    / scheduled / declined / cancelled / completed. Every event carries the full Walk
+    state at the moment of emission; the `status` field distinguishes which lifecycle
+    event was published.
+
+    '
+  properties:
+  - name: walkId
+    physicalType: uuid
+    description: Walk identifier.
+    primaryKey: true
+    primaryKeyPosition: 1
+    logicalType: string
+    required: true
+    unique: true
+  - name: dogId
+    physicalType: uuid
+    description: Dog being walked.
+    logicalType: string
+    required: true
+  - name: walkerId
+    physicalType: uuid
+    description: Walker assigned to the walk.
+    logicalType: string
+    required: true
+  - name: walkType
+    description: Walk type matching the rate card.
+    logicalType: string
+    required: true
+  - name: durationMinutes
+    description: Walk duration in minutes.
+    logicalType: integer
+    required: true
+  - name: startAt
+    description: Scheduled start timestamp.
+    logicalType: timestamp
+    required: true
+  - name: requesterRole
+    description: Who created the walk (walker / owner).
+    logicalType: string
+    required: true
+  - name: notes
+    description: Free-text booking notes.
+    logicalType: string
+    required: false
+  - name: status
+    description: Walk status at emission (requested / scheduled / declined / cancelled
+      / completed).
+    logicalType: string
+    required: true
+  - name: declinedReason
+    description: Walker's decline reason (when status=declined).
+    logicalType: string
+    required: false
+  - name: cancelledByRole
+    description: Who cancelled the walk (when status=cancelled).
+    logicalType: string
+    required: false
+  - name: completedAt
+    description: Completion timestamp (when status=completed).
+    logicalType: timestamp
+    required: false
+  - name: createdAt
+    description: When the walk was first recorded.
+    logicalType: timestamp
+    required: true
+  - name: updatedAt
+    description: Last update timestamp.
+    logicalType: timestamp
+    required: true
+- name: walkupdate
+  physicalType: topic
+  description: 'WalkUpdate records published via the dogwalking.walkupdate.posted
+    channel.
+
+    '
+  properties:
+  - name: walkUpdateId
+    physicalType: uuid
+    description: WalkUpdate identifier.
+    primaryKey: true
+    primaryKeyPosition: 1
+    logicalType: string
+    required: true
+    unique: true
+  - name: walkId
+    physicalType: uuid
+    description: Parent walk identifier.
+    logicalType: string
+    required: true
+  - name: notes
+    description: Free-text note attached to the update.
+    logicalType: string
+    required: false
+  - name: createdAt
+    description: When the update was posted.
+    logicalType: timestamp
+    required: true
+  - name: updatedAt
+    description: Last update timestamp.
+    logicalType: timestamp
+    required: true
+- name: ratecard
+  physicalType: topic
+  description: 'RateCard root records published via the dogwalking.ratecard.updated
+    channel. Carries the rate-card root only; the contained collection of RateCardEntry
+    rows is v1.0.7 follow-up work (BUILD-PLAN §6.11).
+
+    '
+  properties:
+  - name: rateCardId
+    physicalType: uuid
+    description: RateCard identifier.
+    primaryKey: true
+    primaryKeyPosition: 1
+    logicalType: string
+    required: true
+    unique: true
+  - name: walkerId
+    physicalType: uuid
+    description: Walker whose rate card changed.
+    logicalType: string
+    required: true
+  - name: currency
+    description: ISO 4217 currency code.
+    logicalType: string
+    required: true
+  - name: createdAt
+    description: Creation timestamp.
+    logicalType: timestamp
+    required: true
+  - name: updatedAt
+    description: Last update timestamp.
+    logicalType: timestamp
+    required: true
+- name: invoice
+  physicalType: topic
+  description: 'Invoice root records published via dogwalking.invoice.issued and dogwalking.invoice.paid
+    channels. Carries the invoice root only; the contained collection of InvoiceLineItem
+    rows is v1.0.7 follow-up work.
+
+    '
+  properties:
+  - name: invoiceId
+    physicalType: uuid
+    description: Invoice identifier.
+    primaryKey: true
+    primaryKeyPosition: 1
+    logicalType: string
+    required: true
+    unique: true
+  - name: walkerId
+    physicalType: uuid
+    description: Walker issuing the invoice.
+    logicalType: string
+    required: true
+  - name: clientId
+    physicalType: uuid
+    description: Client being billed.
+    logicalType: string
+    required: true
+  - name: periodStart
+    description: Billing period start date.
+    logicalType: date
+    required: true
+  - name: periodEnd
+    description: Billing period end date.
+    logicalType: date
+    required: true
+  - name: currency
+    description: ISO 4217 currency code copied from the RateCard at issue.
+    logicalType: string
+    required: true
+  - name: totalCents
+    description: Total amount in minor units (sum of line-item priceCents).
+    logicalType: integer
+    required: true
+  - name: status
+    description: Invoice status at emission (issued / paid).
+    logicalType: string
+    required: true
+  - name: paidAt
+    description: Payment timestamp (when status=paid).
+    logicalType: timestamp
+    required: false
+  - name: paidVia
+    description: Payment channel description (when status=paid).
+    logicalType: string
+    required: false
+  - name: tipCents
+    description: Tip amount in minor units (defaults to 0 at issue).
+    logicalType: integer
+    required: true
+  - name: createdAt
+    description: Issue timestamp.
+    logicalType: timestamp
+    required: true
+  - name: updatedAt
+    description: Last update timestamp.
+    logicalType: timestamp
+    required: true
+team:
+  name: Dog Walking Domain Spec Set
+  members:
+  - username: dogwalking-domain
+    name: Dog Walking Domain Spec Set
+    role: owner
+slaProperties:
+- property: availability
+  value: '99.5'
+  unit: '%'
+  description: Events are delivered at least 99.5% of the time (matches NFR-AVAIL-002).
+- property: retention
+  value: 30
+  unit: d
+  description: Events are retained for 30 days for replay and historical access.
+</code></pre>
+          </div>
+          <div class="mt-5 sm:mt-6">
+            <button type="button" onclick="document.getElementById('dialog-datacontract-yaml').close()"
+                    class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+
+  <footer class="bg-white mt-auto text-sm text-gray-400">
+    <div class="mx-auto max-w-7xl py-5 px-6 md:flex md:items-center md:justify-between lg:px-8">
+      <div class="flex justify-center space-x-6 md:order-2">
+        <div>
+          <a href="https://cli.datacontract.com" class="text-gray-400 hover:text-gray-500 px-2">Data Contract CLI</a>
+
+          <a href="https://datacontract.com" class="text-gray-400 hover:text-gray-500 px-2">Data Contract Specification</a>
+        </div>
+
+
+      </div>
+      <div class="mt-8 md:order-1 md:mt-0">
+        <p class="text-center leading-5 text-gray-400">
+          Supported by <a href="https://datacontract-manager.com"
+                          class="text-gray-400 hover:text-gray-500">Data Contract Manager</a>
+        </p>
+      </div>
+    </div>
+
+  </footer>
+
+</div>
+
+</body>
+</html>

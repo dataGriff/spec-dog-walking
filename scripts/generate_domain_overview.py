@@ -393,38 +393,11 @@ def build_entities_section(openapi):
 
 
 def build_data_contract_section(datacontract):
-    tables = datacontract.get("schema", [])
     name = datacontract.get("name", "Data Contract")
     version = datacontract.get("version", "")
     desc_obj = datacontract.get("description", {})
     purpose = desc_obj.get("purpose", "") if isinstance(desc_obj, dict) else str(desc_obj)
-
-    blocks = []
-    for tbl in tables:
-        tbl_name = tbl.get("name", "")
-        tbl_desc = tbl.get("description", "")
-        props = tbl.get("properties", [])
-        rows = ""
-        for p in props:
-            pk = " 🔑" if p.get("primaryKey") else ""
-            req = "✓" if p.get("required") else ""
-            rows += (
-                f"<tr>"
-                f"<td><code>{h(p.get('name',''))}</code>{h(pk)}</td>"
-                f"<td>{h(p.get('logicalType',''))}</td>"
-                f"<td>{h(p.get('physicalType',''))}</td>"
-                f"<td>{h(req)}</td>"
-                f"<td>{h(p.get('description',''))}</td>"
-                f"</tr>"
-            )
-        blocks.append(f"""
-<h3><code>{h(tbl_name)}</code></h3>
-<p>{h(tbl_desc.strip())}</p>
-<table>
-  <thead><tr><th>Field</th><th>Logical Type</th><th>Physical Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody>{rows}</tbody>
-</table>
-""")
+    record_count = len(datacontract.get("schema", []))
 
     return f"""
 <section id="data-contract" class="card">
@@ -434,7 +407,12 @@ def build_data_contract_section(datacontract):
     <span class="domain-version badge">v{h(version)}</span>
   </div>
   <p>{h(purpose.strip())}</p>
-  {"".join(blocks)}
+  <p>
+    The full data contract ({record_count} record{'s' if record_count != 1 else ''})
+    is rendered as a standalone interactive reference at
+    <a href="datacontract-reference.html"><code>datacontract-reference.html</code></a>
+    — generated via <code>datacontract export html</code>.
+  </p>
 </section>
 """
 
