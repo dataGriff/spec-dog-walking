@@ -25,7 +25,7 @@ which profile entity (Walker or Client) is attached.
 |-----------|------|----------|-------------|
 | `id` | UUID | Yes | Unique identifier |
 | `email` | string (email) | Yes | Login email (unique across all users) |
-| `passwordHash` | string | Yes | Adaptive password-hash output. Never returned in API responses. |
+| `passwordHash` | string | Yes | [secret] Adaptive password-hash output. Never returned in API responses, never published to events. |
 | `role` | enum | Yes | `walker` or `owner`. Set at registration; immutable. |
 | `createdAt` | ISO 8601 | Yes | Registration timestamp |
 | `updatedAt` | ISO 8601 | Yes | Last update timestamp (refresh-token rotation, etc.) |
@@ -97,7 +97,7 @@ invite carries the prospective client's email and a 1-day TTL.
 | `id` | UUID | Yes | Unique identifier |
 | `walkerId` | UUID | Yes | FK to Walker issuing the invite |
 | `email` | string (email) | Yes | Prospective client's email |
-| `token` | string (opaque) | Yes | URL-safe single-use token |
+| `token` | string (opaque) | Yes | [secret] URL-safe single-use token. Never published to events. |
 | `status` | enum | Yes | `pending` / `accepted` / `expired` |
 | `expiresAt` | ISO 8601 | Yes | Timestamp at which the invite auto-transitions to `expired` |
 | `createdAt` | ISO 8601 | Yes | When the invite was queued |
@@ -123,7 +123,7 @@ with a 1-hour TTL.
 |-----------|------|----------|-------------|
 | `id` | UUID | Yes | Unique identifier |
 | `userId` | UUID | Yes | FK to User the reset targets |
-| `token` | string (opaque) | Yes | URL-safe single-use token |
+| `token` | string (opaque) | Yes | [secret] URL-safe single-use token. Never published to events. |
 | `status` | enum | Yes | `pending` / `used` / `expired` |
 | `expiresAt` | ISO 8601 | Yes | Timestamp at which the token auto-transitions to `expired` |
 | `createdAt` | ISO 8601 | Yes | When the reset was requested |
@@ -407,7 +407,7 @@ Walk                ──── billed-by ───  InvoiceLineItem
 
 | Event | Trigger | Channel |
 |-------|---------|---------|
-| `ClientInvited` | POST /v1/clients → 201 | `dogwalking.client.invited` |
+| `InviteCreated` | POST /v1/clients → 201 | `dogwalking.invite.created` |
 | `ClientRegistered` | POST /v1/invites/{token}/accept → 200 | `dogwalking.client.registered` |
 | `DogAdded` | POST /v1/dogs → 201 | `dogwalking.dog.added` |
 | `DogUpdated` | PATCH /v1/dogs/{dogId} → 200 | `dogwalking.dog.updated` |

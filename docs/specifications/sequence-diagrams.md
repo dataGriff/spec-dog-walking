@@ -39,7 +39,7 @@ sequenceDiagram
     participant owner
 
     walker->>API: POST /v1/clients<br/>{ name, email }
-    API->>EventBus: publish dogwalking.client.invited
+    API->>EventBus: publish dogwalking.invite.created
     API-->>walker: 201 { clientId, inviteId }
     Note over API: Invite email queued with 1-day TTL
 

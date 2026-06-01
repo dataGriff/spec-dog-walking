@@ -1,5 +1,5 @@
 phase: nfrs
-signed_off_at: '2026-05-31T13:47:07Z'
+signed_off_at: '2026-06-01T17:59:24Z'
 gate_version: '1.0'
 checks_passed:
 - NFR-THRESHOLD-MEASURABLE
@@ -9,14 +9,14 @@ warnings_responded:
   response: n-a
   reason: Same behavioural-NFR n-a as prior sign-offs. No NFR file change in this
     update.
-  ts: '2026-05-31T13:47:07Z'
+  ts: '2026-06-01T17:59:24Z'
 rubric_findings:
 - id: RUBRIC-NFR-REALISTIC
   verdict: pass
   detail: no NFR file change
   response: resolved
   reason: agent verdict accepted
-  ts: '2026-05-31T13:47:07Z'
+  ts: '2026-06-01T17:59:24Z'
 decisions:
 - id: US-009-C-CROSS-OWNER-CANCEL-SCENARIO
   summary: 'Added US-009-C: cross-owner walk cancellation rejected (403 FORBIDDEN).'
@@ -26,11 +26,19 @@ decisions:
     gap.
   affects:
   - docs/specifications/acceptance-scenarios.md
-  ts: '2026-05-31T13:47:07Z'
+  ts: '2026-06-01T17:59:24Z'
+- id: ACCEPTANCE-SCENARIO-INVITE-CREATED-RENAME
+  summary: Updated US-001-A scenario to publish `dogwalking.invite.created` (was `dogwalking.client.invited`)
+    per the modeling-phase channel rename.
+  rationale: Channel renamed in suite v1.0.6 cleanup; scenarios must reference the
+    new channel name to be testable.
+  affects:
+  - docs/specifications/acceptance-scenarios.md
+  ts: '2026-06-01T17:59:24Z'
 files_signed:
 - path: docs/specifications/nfr.md
   sha256: 5f855de6f43e4f3ee05c5bcd014588a16a01179a4279fb667f5437ce3763d5ae
-  mtime: '2026-05-31T13:47:07Z'
+  mtime: '2026-06-01T17:59:24Z'
 - path: docs/specifications/acceptance-scenarios.md
-  sha256: fb440d46309d05dbe73480aab0d2273b5a8e2384b6b84d6f34fd7054704c3097
-  mtime: '2026-05-31T13:47:07Z'
+  sha256: 637ef16e51aafb1d07a22d061eca3ae6bef167efe12acc25ec09117b00568eef
+  mtime: '2026-06-01T17:59:24Z'

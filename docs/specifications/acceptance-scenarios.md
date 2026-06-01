@@ -21,7 +21,7 @@ When I POST /v1/clients with
   | email | clancy@example.com |
 Then the response status is 201
 And the response body contains a clientId and an inviteId
-And an event with type "dogwalking.client.invited" is published
+And an event with type "dogwalking.invite.created" is published
 ```
 
 ### Scenario US-001-B: Duplicate email rejected

@@ -4,10 +4,17 @@ info:
   version: 1.0.0
   description: |
     Domain event contract for the **Dog Walking** domain. Events are
-    emitted on every business-meaningful change: clients invited and
-    registered, dogs added and updated, walks moving through their
-    lifecycle, walk updates posted, rate cards updated, invoices
+    emitted on every business-meaningful change: invites created,
+    clients registered, dogs added and updated, walks moving through
+    their lifecycle, walk updates posted, rate cards updated, invoices
     issued and paid.
+
+    Per SUITE-DESIGN §4.5, every event payload carries the **full
+    domain state** of its affected entity at the moment of the event
+    (minus [secret]-marked fields). The data contract records that
+    state. Together they form the audit-grade historic record —
+    downstream consumers can reconstruct what happened from the event
+    stream alone, without re-querying the live API.
 
     All events conform to the [CloudEvents 1.0](https://cloudevents.io/)
     specification. The transport binding for development is declared
@@ -30,28 +37,30 @@ servers:
 defaultContentType: application/json
 
 tags:
+  - name: Invites
+    description: Invite-lifecycle events.
   - name: Clients
-    description: Clients domain events.
+    description: Client-lifecycle events.
   - name: Dogs
-    description: Dogs domain events.
+    description: Dog-lifecycle events.
   - name: Walks
-    description: Walks domain events.
+    description: Walk-lifecycle events.
   - name: WalkUpdates
-    description: WalkUpdates domain events.
+    description: WalkUpdate-lifecycle events.
   - name: RateCard
-    description: RateCard domain events.
+    description: RateCard-lifecycle events.
   - name: Invoices
-    description: Invoices domain events.
+    description: Invoice-lifecycle events.
 
 channels:
-  dogwalking.client.invited:
-    description: Published whenever the walker invites a new client.
+  dogwalking.invite.created:
+    description: Published whenever the walker creates an invite for a prospective client.
     publish:
-      operationId: onClientInvited
-      description: On client invited consumer.
-      message: { $ref: '#/components/messages/ClientInvited' }
+      operationId: onInviteCreated
+      description: On invite created consumer.
+      message: { $ref: '#/components/messages/InviteCreated' }
   dogwalking.client.registered:
-    description: Published whenever a client accepts their invite and registers.
+    description: Published whenever a prospective client accepts their invite and the Client record is created.
     publish:
       operationId: onClientRegistered
       description: On client registered consumer.
@@ -125,11 +134,11 @@ channels:
 
 components:
   messages:
-    ClientInvited:
-      name: ClientInvited
-      title: Client invited
+    InviteCreated:
+      name: InviteCreated
+      title: Invite created
       contentType: application/json
-      payload: { $ref: '#/components/schemas/ClientInvitedEnvelope' }
+      payload: { $ref: '#/components/schemas/InviteCreatedEnvelope' }
     ClientRegistered:
       name: ClientRegistered
       title: Client registered
@@ -203,19 +212,39 @@ components:
         time: { type: string, format: date-time }
         datacontenttype: { type: string, enum: [application/json] }
 
-    ClientInvitedEnvelope:
+    Breed:
+      type: string
+      description: "Closed set of breeds. Mirrors the OpenAPI Breed schema; enforced consistent by ENUM-VALUES-CONSISTENT."
+      enum:
+        - labrador
+        - poodle
+        - golden-retriever
+        - german-shepherd
+        - bulldog
+        - beagle
+        - dachshund
+        - cocker-spaniel
+        - border-collie
+        - staffordshire-bull-terrier
+        - mixed
+        - unknown
+
+    InviteCreatedEnvelope:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
           properties:
             data:
               type: object
-              required: [clientId, walkerId, email, inviteId]
+              required: [inviteId, walkerId, email, status, expiresAt, createdAt, updatedAt]
               properties:
-                clientId: { type: string, format: uuid }
+                inviteId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
                 email: { type: string, format: email }
-                inviteId: { type: string, format: uuid }
+                status: { type: string, enum: [pending, accepted, expired] }
+                expiresAt: { type: string, format: date-time }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
     ClientRegisteredEnvelope:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
@@ -223,11 +252,14 @@ components:
           properties:
             data:
               type: object
-              required: [clientId, userId, walkerId]
+              required: [clientId, userId, invitedByWalkerId, displayName, createdAt, updatedAt]
               properties:
                 clientId: { type: string, format: uuid }
                 userId: { type: string, format: uuid }
-                walkerId: { type: string, format: uuid }
+                invitedByWalkerId: { type: string, format: uuid }
+                displayName: { type: string }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
     DogAddedEnvelope:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
@@ -235,11 +267,22 @@ components:
           properties:
             data:
               type: object
-              required: [dogId, ownerId, name]
+              required: [dogId, ownerId, name, createdAt, updatedAt]
               properties:
                 dogId: { type: string, format: uuid }
                 ownerId: { type: string, format: uuid }
                 name: { type: string }
+                breed:
+                  allOf:
+                    - $ref: '#/components/schemas/Breed'
+                  nullable: true
+                ageYears: { type: integer, nullable: true, minimum: 0 }
+                medication: { type: string, nullable: true }
+                vetName: { type: string, nullable: true }
+                vetPhone: { type: string, nullable: true }
+                notes: { type: string, nullable: true }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
     DogUpdatedEnvelope:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
@@ -247,13 +290,22 @@ components:
           properties:
             data:
               type: object
-              required: [dogId, ownerId, updatedFields]
+              required: [dogId, ownerId, name, createdAt, updatedAt]
               properties:
                 dogId: { type: string, format: uuid }
                 ownerId: { type: string, format: uuid }
-                updatedFields:
-                  type: array
-                  items: { type: string }
+                name: { type: string }
+                breed:
+                  allOf:
+                    - $ref: '#/components/schemas/Breed'
+                  nullable: true
+                ageYears: { type: integer, nullable: true, minimum: 0 }
+                medication: { type: string, nullable: true }
+                vetName: { type: string, nullable: true }
+                vetPhone: { type: string, nullable: true }
+                notes: { type: string, nullable: true }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
     WalkRequestedEnvelope:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
@@ -261,22 +313,7 @@ components:
           properties:
             data:
               type: object
-              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt]
-              properties:
-                walkId: { type: string, format: uuid }
-                dogId: { type: string, format: uuid }
-                walkerId: { type: string, format: uuid }
-                walkType: { type: string }
-                durationMinutes: { type: integer }
-                startAt: { type: string, format: date-time }
-    WalkScheduledEnvelope:
-      allOf:
-        - $ref: '#/components/schemas/CloudEventsBase'
-        - type: object
-          properties:
-            data:
-              type: object
-              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole]
+              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, status, createdAt, updatedAt]
               properties:
                 walkId: { type: string, format: uuid }
                 dogId: { type: string, format: uuid }
@@ -285,6 +322,36 @@ components:
                 durationMinutes: { type: integer }
                 startAt: { type: string, format: date-time }
                 requesterRole: { type: string, enum: [walker, owner] }
+                notes: { type: string, nullable: true }
+                status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
+                declinedReason: { type: string, nullable: true }
+                cancelledByRole: { type: string, nullable: true, enum: [walker, owner] }
+                completedAt: { type: string, format: date-time, nullable: true }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
+    WalkScheduledEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, status, createdAt, updatedAt]
+              properties:
+                walkId: { type: string, format: uuid }
+                dogId: { type: string, format: uuid }
+                walkerId: { type: string, format: uuid }
+                walkType: { type: string }
+                durationMinutes: { type: integer }
+                startAt: { type: string, format: date-time }
+                requesterRole: { type: string, enum: [walker, owner] }
+                notes: { type: string, nullable: true }
+                status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
+                declinedReason: { type: string, nullable: true }
+                cancelledByRole: { type: string, nullable: true, enum: [walker, owner] }
+                completedAt: { type: string, format: date-time, nullable: true }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
     WalkDeclinedEnvelope:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
@@ -292,11 +359,22 @@ components:
           properties:
             data:
               type: object
-              required: [walkId, walkerId, declinedReason]
+              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, status, declinedReason, createdAt, updatedAt]
               properties:
                 walkId: { type: string, format: uuid }
+                dogId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
+                walkType: { type: string }
+                durationMinutes: { type: integer }
+                startAt: { type: string, format: date-time }
+                requesterRole: { type: string, enum: [walker, owner] }
+                notes: { type: string, nullable: true }
+                status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
                 declinedReason: { type: string }
+                cancelledByRole: { type: string, nullable: true, enum: [walker, owner] }
+                completedAt: { type: string, format: date-time, nullable: true }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
     WalkCancelledEnvelope:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
@@ -304,10 +382,22 @@ components:
           properties:
             data:
               type: object
-              required: [walkId, cancelledByRole]
+              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, status, cancelledByRole, createdAt, updatedAt]
               properties:
                 walkId: { type: string, format: uuid }
+                dogId: { type: string, format: uuid }
+                walkerId: { type: string, format: uuid }
+                walkType: { type: string }
+                durationMinutes: { type: integer }
+                startAt: { type: string, format: date-time }
+                requesterRole: { type: string, enum: [walker, owner] }
+                notes: { type: string, nullable: true }
+                status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
+                declinedReason: { type: string, nullable: true }
                 cancelledByRole: { type: string, enum: [walker, owner] }
+                completedAt: { type: string, format: date-time, nullable: true }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
     WalkCompletedEnvelope:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
@@ -315,11 +405,22 @@ components:
           properties:
             data:
               type: object
-              required: [walkId, walkerId, completedAt]
+              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, status, completedAt, createdAt, updatedAt]
               properties:
                 walkId: { type: string, format: uuid }
+                dogId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
+                walkType: { type: string }
+                durationMinutes: { type: integer }
+                startAt: { type: string, format: date-time }
+                requesterRole: { type: string, enum: [walker, owner] }
+                notes: { type: string, nullable: true }
+                status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
+                declinedReason: { type: string, nullable: true }
+                cancelledByRole: { type: string, nullable: true, enum: [walker, owner] }
                 completedAt: { type: string, format: date-time }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
     WalkUpdatePostedEnvelope:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
@@ -327,40 +428,59 @@ components:
           properties:
             data:
               type: object
-              required: [updateId, walkId, photoCount]
+              required: [walkUpdateId, walkId, createdAt, updatedAt]
               properties:
-                updateId: { type: string, format: uuid }
+                walkUpdateId: { type: string, format: uuid }
                 walkId: { type: string, format: uuid }
-                photoCount: { type: integer, minimum: 0 }
-                hasNotes: { type: boolean }
+                notes: { type: string, nullable: true }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
     RateCardUpdatedEnvelope:
+      description: |
+        Carries the RateCard root state. The contained collection of
+        RateCardEntry rows is intentionally NOT in this payload at
+        v1 — aggregate-child coverage is v1.0.7 follow-up work (see
+        BUILD-PLAN §6.11). Consumers needing entries must re-query
+        the API for the current rate card.
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
           properties:
             data:
               type: object
-              required: [walkerId, entryCount, currency]
+              required: [rateCardId, walkerId, currency, createdAt, updatedAt]
               properties:
+                rateCardId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
-                entryCount: { type: integer, minimum: 0 }
                 currency: { type: string, minLength: 3, maxLength: 3 }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
     InvoiceIssuedEnvelope:
+      description: |
+        Carries the Invoice root state. The contained collection of
+        InvoiceLineItem rows is intentionally NOT in this payload at
+        v1 — aggregate-child coverage is v1.0.7 follow-up work.
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
           properties:
             data:
               type: object
-              required: [invoiceId, walkerId, clientId, totalCents, currency, periodStart, periodEnd]
+              required: [invoiceId, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, tipCents, createdAt, updatedAt]
               properties:
                 invoiceId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
                 clientId: { type: string, format: uuid }
-                totalCents: { type: integer, minimum: 0 }
-                currency: { type: string, minLength: 3, maxLength: 3 }
                 periodStart: { type: string, format: date }
                 periodEnd: { type: string, format: date }
+                currency: { type: string, minLength: 3, maxLength: 3 }
+                totalCents: { type: integer, minimum: 0 }
+                status: { type: string, enum: [issued, paid] }
+                paidAt: { type: string, format: date-time, nullable: true }
+                paidVia: { type: string, nullable: true }
+                tipCents: { type: integer, minimum: 0, default: 0 }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
     InvoicePaidEnvelope:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
@@ -368,10 +488,18 @@ components:
           properties:
             data:
               type: object
-              required: [invoiceId, walkerId, paidAt, paidVia, tipCents]
+              required: [invoiceId, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, paidAt, paidVia, tipCents, createdAt, updatedAt]
               properties:
                 invoiceId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
+                clientId: { type: string, format: uuid }
+                periodStart: { type: string, format: date }
+                periodEnd: { type: string, format: date }
+                currency: { type: string, minLength: 3, maxLength: 3 }
+                totalCents: { type: integer, minimum: 0 }
+                status: { type: string, enum: [issued, paid] }
                 paidAt: { type: string, format: date-time }
                 paidVia: { type: string }
                 tipCents: { type: integer, minimum: 0 }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }

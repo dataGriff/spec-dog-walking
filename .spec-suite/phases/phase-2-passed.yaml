@@ -1,5 +1,5 @@
 phase: modeling
-signed_off_at: '2026-05-31T17:58:58Z'
+signed_off_at: '2026-06-01T17:58:57Z'
 gate_version: '1.0'
 checks_passed:
 - MODEL-ENTITY-NAME-UNIQUE
@@ -22,7 +22,7 @@ decisions:
     semantic. Independent review surfaced the contradiction.
   affects:
   - docs/specifications/domain-model.md
-  ts: '2026-05-31T17:58:58Z'
+  ts: '2026-06-01T17:58:57Z'
 - id: WALKER-NO-API-SURFACE-EXPLICIT
   summary: Documented that Walker has no dedicated REST API in v1 (single-walker constraint);
     access is via auth/register, GET /v1/rate-card, and embedded walker data on Walk
@@ -33,7 +33,7 @@ decisions:
     Walker''s Business Rules.'
   affects:
   - docs/specifications/domain-model.md
-  ts: '2026-05-31T17:58:58Z'
+  ts: '2026-06-01T17:58:57Z'
 - id: GLOSSARY-INVOICE-INDEFINITE-ISSUED
   summary: Glossary Invoice entry clarified that an invoice can remain `issued` indefinitely
     (it's not guaranteed to move to `paid`).
@@ -42,7 +42,7 @@ decisions:
     \ Minor prose for accuracy."
   affects:
   - docs/specifications/glossary.md
-  ts: '2026-05-31T17:58:58Z'
+  ts: '2026-06-01T17:58:57Z'
 - id: BREED-CLOSED-ENUM
   summary: Dog.breed is a closed enum (12 values) rather than free-text string.
   rationale: Breed varies widely but the walker workforce sees a stable top-10 list
@@ -52,11 +52,37 @@ decisions:
   affects:
   - docs/specifications/domain-model.md
   - docs/specifications/contracts/openapi.yaml
-  ts: '2026-05-31T17:58:58Z'
+  ts: '2026-06-01T17:58:57Z'
+- id: SECRET-MARKER-ON-TOKENS-AND-PASSWORDHASH
+  summary: "Marked User.passwordHash, Invite.token, PasswordResetToken.token as `[secret]`\
+    \ in the model \u2014 never published to events or the data contract."
+  rationale: "Per SUITE-DESIGN \xA74.5 the `[secret]` marker excludes a field from\
+    \ the must-appear-in-events set enforced by EVENT-PAYLOAD-COVERS-ENTITY-STATE.\
+    \ All three are security-sensitive: password hash gives offline cracking surface;\
+    \ opaque tokens grant one-shot privilege escalation. They stay in the model +\
+    \ OpenAPI request/response shapes where the API boundary needs them, but the historic\
+    \ event record does not."
+  affects:
+  - docs/specifications/domain-model.md
+  ts: '2026-06-01T17:58:57Z'
+- id: INVITE-CREATED-EVENT-RENAMED
+  summary: Renamed `ClientInvited` event (channel `dogwalking.client.invited`) to
+    `InviteCreated` (channel `dogwalking.invite.created`).
+  rationale: "The event fires when an Invite is created, not when a Client is created\
+    \ (Client doesn't exist until invite acceptance). The old name forced the EVENT-PAYLOAD-COVERS-ENTITY-STATE\
+    \ check to require Client fields in the payload \u2014 but no Client record exists\
+    \ at that point. Renaming aligns the channel to the entity actually created."
+  affects:
+  - docs/specifications/domain-model.md
+  - docs/specifications/sequence-diagrams.md
+  - docs/specifications/acceptance-scenarios.md
+  - docs/specifications/contracts/asyncapi.yaml
+  - docs/specifications/contracts/datacontract.yaml
+  ts: '2026-06-01T17:58:57Z'
 files_signed:
 - path: docs/specifications/domain-model.md
-  sha256: 99e17b2574ed908138b7215363a0a10992e54e845781ca1c42571250e8a6384b
-  mtime: '2026-05-31T17:58:58Z'
+  sha256: 0f7d59097a462d247a4550bd738c39b9f60f654417452b8f1c50015e7bfe2495
+  mtime: '2026-06-01T17:58:57Z'
 - path: docs/specifications/glossary.md
   sha256: 58e6eea08a6b4b17181e35846dd23c5e667dc0d8bb37bd3e59a9869ca2c1eeb0
-  mtime: '2026-05-31T17:58:58Z'
+  mtime: '2026-06-01T17:58:57Z'

@@ -1,5 +1,5 @@
 phase: contracts
-signed_off_at: '2026-05-31T17:59:19Z'
+signed_off_at: '2026-06-01T17:59:47Z'
 gate_version: '1.0'
 checks_passed:
 - SPECTRAL-OPENAPI
@@ -10,6 +10,7 @@ checks_passed:
 - ENUM-VALUES-CONSISTENT
 - WRITE-OP-HAS-ASYNCAPI-CHANNEL
 - EVENT-IN-DATACONTRACT
+- EVENT-PAYLOAD-COVERS-ENTITY-STATE
 - AUTH-MATRIX-OPENAPI-MATCH
 - ERROR-CODE-IN-CATALOGUE
 warnings_responded: []
@@ -23,24 +24,57 @@ decisions:
     minimum was wrong. Added a description to make the relationship explicit.'
   affects:
   - docs/specifications/contracts/openapi.yaml
-  ts: '2026-05-31T17:59:19Z'
+  ts: '2026-06-01T17:59:47Z'
 - id: OPENAPI-BREED-SCHEMA
   summary: Added Breed schema component; Dog.breed (and DogCreateRequest / DogPatchRequest
     variants) reference it via $ref. Adds enum constraint enforced by ENUM-VALUES-CONSISTENT.
   rationale: Removes the free-text string in favour of a constrained closed set so
     client code generators (and impl-side validation) refuse unknown values at the
-    API boundary. AsyncAPI + Datacontract don't carry breed in event payloads (DogAdded
-    ships only dogId/ownerId/name) so the enum stays openapi-only for now.
+    API boundary.
   affects:
   - docs/specifications/contracts/openapi.yaml
-  ts: '2026-05-31T17:59:19Z'
+  ts: '2026-06-01T17:59:47Z'
+- id: EVENTS-CARRY-FULL-ENTITY-STATE
+  summary: Fattened every asyncapi event payload + matching datacontract record to
+    carry the full state of its affected entity at the moment of the event (minus
+    [secret]-marked fields).
+  rationale: "Per SUITE-DESIGN \xA74.5 the data contract must be the audit-grade historic\
+    \ record \u2014 downstream consumers (analytics, audit log, time-travel reconstruction)\
+    \ need to recover what happened from the event stream alone. Previously DogAdded\
+    \ carried `{dogId, ownerId, name}` and DogUpdated carried field *names* without\
+    \ values; consumers had to re-query the API for any other field. Now every entity\
+    \ event carries its complete state. Single-entity coverage; aggregate-child collections\
+    \ (RateCard entries, Invoice line items) deferred to v1.0.7."
+  affects:
+  - docs/specifications/contracts/asyncapi.yaml
+  - docs/specifications/contracts/datacontract.yaml
+  ts: '2026-06-01T17:59:47Z'
+- id: ASYNCAPI-BREED-SCHEMA-MIRROR
+  summary: 'Added Breed schema to asyncapi.yaml mirroring the openapi declaration
+    so DogAdded/DogUpdated payloads can `$ref` it instead of inlining `type: string`.'
+  rationale: "Without the schema reference, payload validation would accept any string\
+    \ for breed \u2014 defeating the enum. ENUM-VALUES-CONSISTENT now verifies all\
+    \ three contracts agree on Breed values."
+  affects:
+  - docs/specifications/contracts/asyncapi.yaml
+  ts: '2026-06-01T17:59:47Z'
+- id: WALKUPDATE-ID-RENAMED-FROM-UPDATEID
+  summary: "Renamed asyncapi + datacontract field `updateId` \u2192 `walkUpdateId`\
+    \ to match the `<entity>Id` convention recognized by EVENT-PAYLOAD-COVERS-ENTITY-STATE."
+  rationale: The check accepts model `id` mapping to payload `<entity>Id`. For `WalkUpdate.id`
+    that's `walkUpdateId`. The previous `updateId` shorthand was ambiguous and caught
+    by the new check.
+  affects:
+  - docs/specifications/contracts/asyncapi.yaml
+  - docs/specifications/contracts/datacontract.yaml
+  ts: '2026-06-01T17:59:47Z'
 files_signed:
 - path: docs/specifications/contracts/openapi.yaml
   sha256: 29ac3684b3f7ec98fe81bbad976c5ef82e959748b389a87ee65230fe71907f35
-  mtime: '2026-05-31T17:59:19Z'
+  mtime: '2026-06-01T17:59:47Z'
 - path: docs/specifications/contracts/asyncapi.yaml
-  sha256: 4e22e68bd3bb35e93b0aca68b615ee126ac41f2daab5d9a1d17fb467da0c955c
-  mtime: '2026-05-31T17:59:19Z'
+  sha256: ced81fe939f2b38835ab0f486d6c9d8f70c6e6feca1f915af6bd884321ce64fc
+  mtime: '2026-06-01T17:59:47Z'
 - path: docs/specifications/contracts/datacontract.yaml
-  sha256: 74875df9fc06e70fc02aad5911340bb8630f9e67141dd69c5b734f4e65ef2601
-  mtime: '2026-05-31T17:59:19Z'
+  sha256: 5c9ab88a5b7bd0cce606a1042b34506acf850d622307813cce7b75446a72cb82
+  mtime: '2026-06-01T17:59:47Z'

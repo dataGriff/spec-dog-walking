@@ -1,5 +1,5 @@
 phase: flows
-signed_off_at: '2026-05-31T10:46:56Z'
+signed_off_at: '2026-06-01T17:59:12Z'
 gate_version: '1.0'
 checks_passed:
 - FLOW-DIAGRAM-HAS-TITLE-PARTICIPANTS
@@ -18,7 +18,7 @@ decisions:
     paths and the token-lifecycle variants, which warrant their own readable flows.
   affects:
   - docs/specifications/sequence-diagrams.md
-  ts: '2026-05-31T10:46:56Z'
+  ts: '2026-06-01T17:59:12Z'
 - id: TOKEN-LIFECYCLE-FLOWS-ADDED-LATE
   summary: Invite and PasswordResetToken state lifecycles got their own flows (Flow
     3a, 3b) only after the audit re-fired LIFECYCLE-IN-FLOWS at error severity.
@@ -28,7 +28,7 @@ decisions:
     audit/n-a-engagement design gap is logged for follow-up.
   affects:
   - docs/specifications/sequence-diagrams.md
-  ts: '2026-05-31T10:46:56Z'
+  ts: '2026-06-01T17:59:12Z'
 - id: TIPPING-IN-EXISTING-INVOICING-FLOW
   summary: US-019 tipping is added to Flow 10 (renamed to 'Invoicing & Tipping') rather
     than as a separate Flow 11.
@@ -36,8 +36,16 @@ decisions:
     would split a single sequence into two for no readability gain.
   affects:
   - docs/specifications/sequence-diagrams.md
-  ts: '2026-05-31T10:46:56Z'
+  ts: '2026-06-01T17:59:12Z'
+- id: INVITE-CREATED-CHANNEL-RENAME
+  summary: "Updated sequence diagram step to publish `dogwalking.invite.created` (was\
+    \ `dogwalking.client.invited`) \u2014 see modeling-phase decision INVITE-CREATED-EVENT-RENAMED."
+  rationale: Channel renamed in suite v1.0.6 cleanup to align with the actually-created
+    entity (Invite, not Client).
+  affects:
+  - docs/specifications/sequence-diagrams.md
+  ts: '2026-06-01T17:59:12Z'
 files_signed:
 - path: docs/specifications/sequence-diagrams.md
-  sha256: 4d57e665305133b7701297927642327ae8078177f5facb62e4087bea2e40cf0e
-  mtime: '2026-05-31T10:46:56Z'
+  sha256: 53b01c570131ff3ee9fd7fbf6052ea46d2ae7e1d58a7c9f619957a921edd5397
+  mtime: '2026-06-01T17:59:12Z'
