@@ -38,6 +38,21 @@ tasks:
     cmds:
       - python3 scripts/glossary_skeleton.py
 
+  openapi:skeleton:
+    desc: 'Generate contracts/openapi.yaml skeleton from auth-matrix.md + domain-model.md + error-catalogue.md. Wires Idempotency-Key on every POST. Idempotent on template; --force to overwrite a real one.'
+    cmds:
+      - python3 scripts/openapi_skeleton.py {{.CLI_ARGS}}
+
+  asyncapi:skeleton:
+    desc: 'Generate contracts/asyncapi.yaml skeleton from domain-model.md events + entities + aggregates. Idempotent on template; --force to overwrite a real one.'
+    cmds:
+      - python3 scripts/asyncapi_skeleton.py {{.CLI_ARGS}}
+
+  datacontract:skeleton:
+    desc: 'Generate contracts/datacontract.yaml skeleton from asyncapi.yaml + nfr.md. Run AFTER asyncapi:skeleton. Idempotent on template; --force to overwrite a real one.'
+    cmds:
+      - python3 scripts/datacontract_skeleton.py {{.CLI_ARGS}}
+
   docs:render-datacontract:
     desc: Render the data contract as a standalone HTML reference page via datacontract-cli
     cmds:
