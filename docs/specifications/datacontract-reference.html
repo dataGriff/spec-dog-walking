@@ -1873,7 +1873,7 @@ video {
                 
                 <div>
                   <dt class="text-sm font-medium text-gray-900">Limitations</dt>
-                  <dd class="mt-1 text-sm text-gray-700">Covers the event payload only (data envelope). CloudEvents metadata fields (specversion, type, source, id, time, datacontenttype) are documented in `asyncapi.yaml` and not repeated here. Aggregate-child collections (RateCard entries, Invoice line items) are intentionally NOT in the payloads at v1 — aggregate-child coverage is v1.0.7 follow-up work (see BUILD-PLAN §6.11).
+                  <dd class="mt-1 text-sm text-gray-700">Covers the event payload only (data envelope). CloudEvents metadata fields (specversion, type, source, id, time, datacontenttype) are documented in `asyncapi.yaml` and not repeated here.
 </dd>
                 </div>
                 
@@ -1955,6 +1955,7 @@ video {
 	currency string
 	createdAt timestamp
 	updatedAt timestamp
+	entries array
 }
 	"**invoice**" {
 	invoiceId🔑🔒 string
@@ -1970,6 +1971,7 @@ video {
 	tipCents integer
 	createdAt timestamp
 	updatedAt timestamp
+	lineItems array
 }
 
 
@@ -3548,7 +3550,7 @@ video {
                           
                           <span
                             class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">topic</span>
-                          <div class="text-sm font-medium text-gray-500">RateCard root records published via the dogwalking.ratecard.updated channel. Carries the rate-card root only; the contained collection of RateCardEntry rows is v1.0.7 follow-up work (BUILD-PLAN §6.11).
+                          <div class="text-sm font-medium text-gray-500">RateCard root records published via the dogwalking.ratecard.updated channel. Carries the rate-card root plus its contained RateCardEntry rows (per `## Aggregates` in domain-model.md).
 
                           </div>
                           
@@ -3723,6 +3725,313 @@ video {
     
     
   
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      entries</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">array</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Rate-card entries on this rate card at the moment of the event.
+    </td>
+  </tr>
+    
+    
+    
+  <tr>
+    
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      items</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">object</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">-
+    </td>
+  </tr>
+    
+    
+  <tr>
+    
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      id</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">RateCardEntry identifier.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      rateCardId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">FK to parent RateCard.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      walkType</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walk type for this entry (e.g. solo
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      durationMinutes</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">integer</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Duration of the walk in minutes.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      priceCents</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">integer</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Price for this entry in the rate card's currency
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      createdAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Entry creation timestamp.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      updatedAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Entry last update timestamp.
+    </td>
+  </tr>
+    
+    
+  
+<!-- Mark the end of the contained fields -->
+<tr style="--tw-divide-y-reverse: 2"></tr>
+
+    
+    
+  
+<!-- Mark the end of the contained fields -->
+<tr style="--tw-divide-y-reverse: 2"></tr>
+
+    
+  
 <!-- Mark the end of the contained fields -->
 <tr style="--tw-divide-y-reverse: 2"></tr>
 
@@ -3752,7 +4061,7 @@ video {
                           
                           <span
                             class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">topic</span>
-                          <div class="text-sm font-medium text-gray-500">Invoice root records published via dogwalking.invoice.issued and dogwalking.invoice.paid channels. Carries the invoice root only; the contained collection of InvoiceLineItem rows is v1.0.7 follow-up work.
+                          <div class="text-sm font-medium text-gray-500">Invoice root records published via dogwalking.invoice.issued and dogwalking.invoice.paid channels. Carries the invoice root plus its contained InvoiceLineItem rows (per `## Aggregates` in domain-model.md).
 
                           </div>
                           
@@ -4145,6 +4454,348 @@ video {
     
     
   
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      
+      lineItems</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">array</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Invoice line items billing each completed walk in the period.
+    </td>
+  </tr>
+    
+    
+    
+  <tr>
+    
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      items</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">object</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-gray-400">No</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">-
+    </td>
+  </tr>
+    
+    
+  <tr>
+    
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      id</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">InvoiceLineItem identifier.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      invoiceId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">FK to parent Invoice.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      walkId</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">uuid</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">FK to the completed Walk this line bills.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      walkType</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">string</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Walk type copied from the Walk at issue.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      durationMinutes</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">integer</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Duration of the walk in minutes.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      priceCents</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">integer</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Price in the invoice currency
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      createdAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Line item creation timestamp.
+    </td>
+  </tr>
+    
+    
+  
+    <td class="px-4 py-4 whitespace-nowrap">
+      
+      <div class="text-sm font-medium text-gray-900">
+      
+      &nbsp;
+      
+      &nbsp;
+      
+      
+      ↳
+      
+      updatedAt</div>
+      
+      
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">-
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap">
+      <div class="text-sm text-gray-900">timestamp</div>
+      
+    </td>
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+      
+      <span class="text-green-600">Yes</span>
+      
+    </td>
+    <td class="px-4 py-4 text-sm text-gray-500">Line item last update timestamp.
+    </td>
+  </tr>
+    
+    
+  
+<!-- Mark the end of the contained fields -->
+<tr style="--tw-divide-y-reverse: 2"></tr>
+
+    
+    
+  
+<!-- Mark the end of the contained fields -->
+<tr style="--tw-divide-y-reverse: 2"></tr>
+
+    
+  
 <!-- Mark the end of the contained fields -->
 <tr style="--tw-divide-y-reverse: 2"></tr>
 
@@ -4374,7 +5025,7 @@ video {
       </div>
 
       <div class="mt-6 text-sm text-gray-400">
-        Created at 01 Jun 2026 18:17:45 UTC with <a href="https://cli.datacontract.com" class="text-gray-400 hover:text-gray-500">Data Contract CLI</a> v0.12.1
+        Created at 02 Jun 2026 17:46:02 UTC with <a href="https://cli.datacontract.com" class="text-gray-400 hover:text-gray-500">Data Contract CLI</a> v0.12.1
       </div>
 
     </div>
@@ -4431,9 +5082,7 @@ description:
     '
   limitations: 'Covers the event payload only (data envelope). CloudEvents metadata
     fields (specversion, type, source, id, time, datacontenttype) are documented in
-    `asyncapi.yaml` and not repeated here. Aggregate-child collections (RateCard entries,
-    Invoice line items) are intentionally NOT in the payloads at v1 — aggregate-child
-    coverage is v1.0.7 follow-up work (see BUILD-PLAN §6.11).
+    `asyncapi.yaml` and not repeated here.
 
     '
 domain: dogwalking
@@ -4680,8 +5329,8 @@ schema:
 - name: ratecard
   physicalType: topic
   description: 'RateCard root records published via the dogwalking.ratecard.updated
-    channel. Carries the rate-card root only; the contained collection of RateCardEntry
-    rows is v1.0.7 follow-up work (BUILD-PLAN §6.11).
+    channel. Carries the rate-card root plus its contained RateCardEntry rows (per
+    `## Aggregates` in domain-model.md).
 
     '
   properties:
@@ -4710,11 +5359,48 @@ schema:
     description: Last update timestamp.
     logicalType: timestamp
     required: true
+  - name: entries
+    description: Rate-card entries on this rate card at the moment of the event.
+    logicalType: array
+    required: true
+    items:
+      logicalType: object
+      properties:
+      - name: id
+        physicalType: uuid
+        description: RateCardEntry identifier.
+        logicalType: string
+        required: true
+      - name: rateCardId
+        physicalType: uuid
+        description: FK to parent RateCard.
+        logicalType: string
+        required: true
+      - name: walkType
+        description: Walk type for this entry (e.g. solo
+        logicalType: string
+        required: true
+      - name: durationMinutes
+        description: Duration of the walk in minutes.
+        logicalType: integer
+        required: true
+      - name: priceCents
+        description: Price for this entry in the rate card's currency
+        logicalType: integer
+        required: true
+      - name: createdAt
+        description: Entry creation timestamp.
+        logicalType: timestamp
+        required: true
+      - name: updatedAt
+        description: Entry last update timestamp.
+        logicalType: timestamp
+        required: true
 - name: invoice
   physicalType: topic
   description: 'Invoice root records published via dogwalking.invoice.issued and dogwalking.invoice.paid
-    channels. Carries the invoice root only; the contained collection of InvoiceLineItem
-    rows is v1.0.7 follow-up work.
+    channels. Carries the invoice root plus its contained InvoiceLineItem rows (per
+    `## Aggregates` in domain-model.md).
 
     '
   properties:
@@ -4776,6 +5462,48 @@ schema:
     description: Last update timestamp.
     logicalType: timestamp
     required: true
+  - name: lineItems
+    description: Invoice line items billing each completed walk in the period.
+    logicalType: array
+    required: true
+    items:
+      logicalType: object
+      properties:
+      - name: id
+        physicalType: uuid
+        description: InvoiceLineItem identifier.
+        logicalType: string
+        required: true
+      - name: invoiceId
+        physicalType: uuid
+        description: FK to parent Invoice.
+        logicalType: string
+        required: true
+      - name: walkId
+        physicalType: uuid
+        description: FK to the completed Walk this line bills.
+        logicalType: string
+        required: true
+      - name: walkType
+        description: Walk type copied from the Walk at issue.
+        logicalType: string
+        required: true
+      - name: durationMinutes
+        description: Duration of the walk in minutes.
+        logicalType: integer
+        required: true
+      - name: priceCents
+        description: Price in the invoice currency
+        logicalType: integer
+        required: true
+      - name: createdAt
+        description: Line item creation timestamp.
+        logicalType: timestamp
+        required: true
+      - name: updatedAt
+        description: Line item last update timestamp.
+        logicalType: timestamp
+        required: true
 team:
   name: Dog Walking Domain Spec Set
   members:

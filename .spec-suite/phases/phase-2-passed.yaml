@@ -79,10 +79,21 @@ decisions:
   - docs/specifications/contracts/asyncapi.yaml
   - docs/specifications/contracts/datacontract.yaml
   ts: '2026-06-01T17:58:57Z'
+- id: AGGREGATES-SECTION-ADDED
+  summary: Added a `## Aggregates` section to domain-model.md declaring
+    `RateCard \u2192 RateCardEntry \u2192 entries` and `Invoice \u2192 InvoiceLineItem \u2192 lineItems`.
+  rationale: Per suite v1.0.8 the `## Aggregates` section is the normative declaration
+    of aggregate-root \u2192 child-collection relationships consumed by
+    `EVENT-PAYLOAD-COVERS-ENTITY-STATE`. The relationships were already implicit in
+    the ASCII relationship diagram (`has-many`); the new section makes them
+    machine-readable and names the collection property used in the contract surface.
+  affects:
+  - docs/specifications/domain-model.md
+  ts: '2026-06-02T09:00:00Z'
 files_signed:
 - path: docs/specifications/domain-model.md
-  sha256: 0f7d59097a462d247a4550bd738c39b9f60f654417452b8f1c50015e7bfe2495
-  mtime: '2026-06-01T17:58:57Z'
+  sha256: 35f94b8f59d4cbde32cc0055dab8c1db88ce597ed5ab8955bff7aa3b25563bc0
+  mtime: '2026-06-02T09:00:00Z'
 - path: docs/specifications/glossary.md
   sha256: 58e6eea08a6b4b17181e35846dd23c5e667dc0d8bb37bd3e59a9869ca2c1eeb0
   mtime: '2026-06-01T17:58:57Z'

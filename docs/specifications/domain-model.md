@@ -510,3 +510,17 @@ on the openapi contract (per NFR-COMPAT-001).
 | `staffordshire-bull-terrier` | |
 | `mixed` | Crossbreed or pedigree not represented above |
 | `unknown` | Owner doesn't know |
+
+## Aggregates
+
+<!--
+Aggregate roots that own a child collection. Events on the root
+entity MUST carry the full child collection in the same payload —
+both in the AsyncAPI message and the matching datacontract record —
+per SUITE-DESIGN §4.5 and enforced by EVENT-PAYLOAD-COVERS-ENTITY-STATE.
+-->
+
+| Root | Child | Collection |
+|------|-------|------------|
+| `RateCard` | `RateCardEntry` | `entries` |
+| `Invoice` | `InvoiceLineItem` | `lineItems` |

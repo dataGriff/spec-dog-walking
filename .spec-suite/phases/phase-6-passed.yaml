@@ -84,13 +84,32 @@ decisions:
   - docs/index.md
   - .github/workflows/docs.yml
   ts: '2026-06-01T19:17:00Z'
+- id: AGGREGATE-CHILD-COVERAGE
+  summary: RateCardUpdated, InvoiceIssued, and InvoicePaid now carry their child
+    collections in both asyncapi (`entries`, `lineItems`) and datacontract (nested
+    ODCS array fields), per suite v1.0.8.
+  rationale: |
+    Per suite v1.0.8 the `## Aggregates` section in domain-model.md declares
+    `RateCard → RateCardEntry → entries` and `Invoice → InvoiceLineItem → lineItems`.
+    `EVENT-PAYLOAD-COVERS-ENTITY-STATE` enforces that every event on an aggregate
+    root carries its full child collection — both in the asyncapi payload (new
+    `RateCardEntryPayload` + `InvoiceLineItemPayload` schemas referenced via array
+    items in the three envelopes) and in the datacontract record (nested array
+    fields on `ratecard` and `invoice`, ODCS `logicalType` array). The v1.0.6/v1.0.7
+    docstrings claiming the children were "intentionally NOT" in the payloads were
+    removed. InvoicePaid is also an event on the Invoice aggregate root so it
+    carries `lineItems` too.
+  affects:
+  - docs/specifications/contracts/asyncapi.yaml
+  - docs/specifications/contracts/datacontract.yaml
+  ts: '2026-06-02T09:00:00Z'
 files_signed:
 - path: docs/specifications/contracts/openapi.yaml
   sha256: 29ac3684b3f7ec98fe81bbad976c5ef82e959748b389a87ee65230fe71907f35
   mtime: '2026-06-01T17:59:47Z'
 - path: docs/specifications/contracts/asyncapi.yaml
-  sha256: ced81fe939f2b38835ab0f486d6c9d8f70c6e6feca1f915af6bd884321ce64fc
-  mtime: '2026-06-01T17:59:47Z'
+  sha256: b1b0f024ec91c224d7ea8918a6562077ab30d549dbf7e89a3403d6e7f388b264
+  mtime: '2026-06-02T09:00:00Z'
 - path: docs/specifications/contracts/datacontract.yaml
-  sha256: 5c9ab88a5b7bd0cce606a1042b34506acf850d622307813cce7b75446a72cb82
-  mtime: '2026-06-01T17:59:47Z'
+  sha256: f258ecdadd5b48cd927b102cffaaec34ff81b584c520149a57490885e4568d24
+  mtime: '2026-06-02T09:00:00Z'

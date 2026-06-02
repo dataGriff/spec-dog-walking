@@ -23,10 +23,7 @@ description:
     Covers the event payload only (data envelope). CloudEvents
     metadata fields (specversion, type, source, id, time,
     datacontenttype) are documented in `asyncapi.yaml` and not
-    repeated here. Aggregate-child collections (RateCard entries,
-    Invoice line items) are intentionally NOT in the payloads at v1
-    — aggregate-child coverage is v1.0.7 follow-up work
-    (see BUILD-PLAN §6.11).
+    repeated here.
 
 team:
   name: Dog Walking Domain Spec Set
@@ -136,8 +133,8 @@ schema:
     description: >
       RateCard root records published via the
       dogwalking.ratecard.updated channel. Carries the rate-card
-      root only; the contained collection of RateCardEntry rows is
-      v1.0.7 follow-up work (BUILD-PLAN §6.11).
+      root plus its contained RateCardEntry rows (per
+      `## Aggregates` in domain-model.md).
     physicalType: topic
     properties:
       - { name: rateCardId, description: RateCard identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
@@ -145,13 +142,27 @@ schema:
       - { name: currency, description: ISO 4217 currency code., logicalType: string, required: true }
       - { name: createdAt, description: Creation timestamp., logicalType: timestamp, required: true }
       - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
+      - name: entries
+        description: Rate-card entries on this rate card at the moment of the event.
+        logicalType: array
+        required: true
+        items:
+          logicalType: object
+          properties:
+            - { name: id, description: RateCardEntry identifier., logicalType: string, physicalType: uuid, required: true }
+            - { name: rateCardId, description: FK to parent RateCard., logicalType: string, physicalType: uuid, required: true }
+            - { name: walkType, description: Walk type for this entry (e.g. solo, group)., logicalType: string, required: true }
+            - { name: durationMinutes, description: Duration of the walk in minutes., logicalType: integer, required: true }
+            - { name: priceCents, description: Price for this entry in the rate card's currency, minor units., logicalType: integer, required: true }
+            - { name: createdAt, description: Entry creation timestamp., logicalType: timestamp, required: true }
+            - { name: updatedAt, description: Entry last update timestamp., logicalType: timestamp, required: true }
 
   - name: invoice
     description: >
       Invoice root records published via dogwalking.invoice.issued
       and dogwalking.invoice.paid channels. Carries the invoice
-      root only; the contained collection of InvoiceLineItem rows
-      is v1.0.7 follow-up work.
+      root plus its contained InvoiceLineItem rows (per
+      `## Aggregates` in domain-model.md).
     physicalType: topic
     properties:
       - { name: invoiceId, description: Invoice identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
@@ -167,6 +178,21 @@ schema:
       - { name: tipCents, description: Tip amount in minor units (defaults to 0 at issue)., logicalType: integer, required: true }
       - { name: createdAt, description: Issue timestamp., logicalType: timestamp, required: true }
       - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
+      - name: lineItems
+        description: Invoice line items billing each completed walk in the period.
+        logicalType: array
+        required: true
+        items:
+          logicalType: object
+          properties:
+            - { name: id, description: InvoiceLineItem identifier., logicalType: string, physicalType: uuid, required: true }
+            - { name: invoiceId, description: FK to parent Invoice., logicalType: string, physicalType: uuid, required: true }
+            - { name: walkId, description: FK to the completed Walk this line bills., logicalType: string, physicalType: uuid, required: true }
+            - { name: walkType, description: Walk type copied from the Walk at issue., logicalType: string, required: true }
+            - { name: durationMinutes, description: Duration of the walk in minutes., logicalType: integer, required: true }
+            - { name: priceCents, description: Price in the invoice currency, minor units, from the rate-card entry in force at the Walk's scheduled transition., logicalType: integer, required: true }
+            - { name: createdAt, description: Line item creation timestamp., logicalType: timestamp, required: true }
+            - { name: updatedAt, description: Line item last update timestamp., logicalType: timestamp, required: true }
 
 slaProperties:
   - property: availability

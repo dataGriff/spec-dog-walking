@@ -435,38 +435,62 @@ components:
                 notes: { type: string, nullable: true }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
+    RateCardEntryPayload:
+      type: object
+      required: [id, rateCardId, walkType, durationMinutes, priceCents, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        rateCardId: { type: string, format: uuid }
+        walkType: { type: string }
+        durationMinutes: { type: integer, minimum: 1 }
+        priceCents: { type: integer, minimum: 1 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    InvoiceLineItemPayload:
+      type: object
+      required: [id, invoiceId, walkId, walkType, durationMinutes, priceCents, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        invoiceId: { type: string, format: uuid }
+        walkId: { type: string, format: uuid }
+        walkType: { type: string }
+        durationMinutes: { type: integer, minimum: 1 }
+        priceCents: { type: integer, minimum: 1 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
     RateCardUpdatedEnvelope:
       description: |
-        Carries the RateCard root state. The contained collection of
-        RateCardEntry rows is intentionally NOT in this payload at
-        v1 — aggregate-child coverage is v1.0.7 follow-up work (see
-        BUILD-PLAN §6.11). Consumers needing entries must re-query
-        the API for the current rate card.
+        Carries the RateCard root state plus the contained
+        RateCardEntry rows (per `## Aggregates` in domain-model.md
+        and SUITE-DESIGN §4.5).
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
           properties:
             data:
               type: object
-              required: [rateCardId, walkerId, currency, createdAt, updatedAt]
+              required: [rateCardId, walkerId, currency, createdAt, updatedAt, entries]
               properties:
                 rateCardId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
                 currency: { type: string, minLength: 3, maxLength: 3 }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
+                entries:
+                  type: array
+                  items: { $ref: '#/components/schemas/RateCardEntryPayload' }
     InvoiceIssuedEnvelope:
       description: |
-        Carries the Invoice root state. The contained collection of
-        InvoiceLineItem rows is intentionally NOT in this payload at
-        v1 — aggregate-child coverage is v1.0.7 follow-up work.
+        Carries the Invoice root state plus the contained
+        InvoiceLineItem rows (per `## Aggregates` in domain-model.md
+        and SUITE-DESIGN §4.5).
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
           properties:
             data:
               type: object
-              required: [invoiceId, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, tipCents, createdAt, updatedAt]
+              required: [invoiceId, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, tipCents, createdAt, updatedAt, lineItems]
               properties:
                 invoiceId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
@@ -481,14 +505,22 @@ components:
                 tipCents: { type: integer, minimum: 0, default: 0 }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
+                lineItems:
+                  type: array
+                  items: { $ref: '#/components/schemas/InvoiceLineItemPayload' }
     InvoicePaidEnvelope:
+      description: |
+        Carries the Invoice root state at the mark-paid transition
+        plus the contained InvoiceLineItem rows (per `## Aggregates`
+        — InvoicePaid is also an event on the Invoice aggregate
+        root, so it must carry the same children as InvoiceIssued).
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
           properties:
             data:
               type: object
-              required: [invoiceId, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, paidAt, paidVia, tipCents, createdAt, updatedAt]
+              required: [invoiceId, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, paidAt, paidVia, tipCents, createdAt, updatedAt, lineItems]
               properties:
                 invoiceId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
@@ -503,3 +535,6 @@ components:
                 tipCents: { type: integer, minimum: 0 }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
+                lineItems:
+                  type: array
+                  items: { $ref: '#/components/schemas/InvoiceLineItemPayload' }
