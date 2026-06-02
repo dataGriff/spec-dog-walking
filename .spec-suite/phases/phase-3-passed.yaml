@@ -45,10 +45,23 @@ decisions:
   affects:
   - skills/domain-access-control/gate.yaml
   ts: '2026-05-31T10:46:34Z'
+- id: IDEMPOTENCY-KEY-CONFLICT-ADDED
+  summary: Added `IDEMPOTENCY_KEY_CONFLICT` (409) to the error catalogue, paired
+    with the suite v1.0.9 `Idempotency-Key` convention on POST ops.
+  rationale: |
+    When a client retries a POST with the same `Idempotency-Key` but a changed
+    request body, the server must refuse the second call rather than honour the
+    cached response (which is for a different intent) or process the new body
+    (which destroys the safety guarantee). 409 is the right HTTP status for the
+    semantic-mismatch case. Lives under "Conflict errors (409)" alongside the
+    existing 409 codes.
+  affects:
+  - docs/specifications/error-catalogue.md
+  ts: '2026-06-02T10:00:00Z'
 files_signed:
 - path: docs/specifications/auth-matrix.md
   sha256: a2f67dfc385c558003f11ccf5d6b4b40351317f8435a9cdc04171399bf24025f
   mtime: '2026-05-31T10:46:34Z'
 - path: docs/specifications/error-catalogue.md
-  sha256: 3bcb2c597896069d136e6a54b92bbf8417c89f5f88ddc1dab1f9ca9b728601b6
-  mtime: '2026-05-31T10:46:34Z'
+  sha256: 4c5fc45f6426edf2a378a2dee9f49b9c0bffd7ecb80ed8aeecfe58560501c866
+  mtime: '2026-06-02T10:00:00Z'

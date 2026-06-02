@@ -13,6 +13,7 @@ checks_passed:
 - EVENT-PAYLOAD-COVERS-ENTITY-STATE
 - AUTH-MATRIX-OPENAPI-MATCH
 - ERROR-CODE-IN-CATALOGUE
+- IDEMPOTENCY-KEY-ON-POST-OPS
 warnings_responded: []
 rubric_findings: []
 decisions:
@@ -84,6 +85,26 @@ decisions:
   - docs/index.md
   - .github/workflows/docs.yml
   ts: '2026-06-01T19:17:00Z'
+- id: IDEMPOTENCY-KEY-CONVENTION
+  summary: Every POST operation declares a required `Idempotency-Key` header
+    parameter via `$ref` to `components.parameters.IdempotencyKey` (UUID per
+    intent), per suite v1.0.9.
+  rationale: |
+    Mobile / agentic / chat clients retry mutating calls on timeout or ambiguous
+    response. Without an idempotency key the server can't distinguish "do this
+    twice" from "the response was lost; retry" — and POST creates new state from
+    scratch, so the wrong choice produces duplicates (two walks scheduled, two
+    invoices marked paid). Stripe / IETF
+    `draft-ietf-httpapi-idempotency-key-header` is the standard convention; the
+    server stores `{key → response}` for ~24h and replays the stored response on
+    retry. PUT/PATCH/DELETE are verb-idempotent so the header is optional there;
+    not enforced on those verbs. The reusable parameter lives under
+    `components.parameters.IdempotencyKey` and is referenced from all 13 POST
+    operations. Phase 6 + audit check `IDEMPOTENCY-KEY-ON-POST-OPS` enforces
+    presence on every POST.
+  affects:
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-06-02T10:00:00Z'
 - id: AGGREGATE-CHILD-COVERAGE
   summary: RateCardUpdated, InvoiceIssued, InvoicePaid, and WalkUpdatePosted now
     carry their child collections in both asyncapi (`entries`, `lineItems`,
@@ -109,8 +130,8 @@ decisions:
   ts: '2026-06-02T09:00:00Z'
 files_signed:
 - path: docs/specifications/contracts/openapi.yaml
-  sha256: 29ac3684b3f7ec98fe81bbad976c5ef82e959748b389a87ee65230fe71907f35
-  mtime: '2026-06-01T17:59:47Z'
+  sha256: a3d1fa546bf0f35d17bf1ddf8b31eec452d37424346b91bb67bc59c16e14a6ee
+  mtime: '2026-06-02T10:00:00Z'
 - path: docs/specifications/contracts/asyncapi.yaml
   sha256: cee2f830458b2be6bbbea2bea63ff2e17b1a8fe23fe0f8ac37cf57f15fe30635
   mtime: '2026-06-02T09:00:00Z'

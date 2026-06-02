@@ -44,6 +44,8 @@ paths:
       summary: Walker self-registers
       description: Walker self-registers.
       security: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -68,6 +70,8 @@ paths:
       summary: Log in
       description: Log in.
       security: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -88,6 +92,8 @@ paths:
       summary: Request a password reset email
       description: Request a password reset email.
       security: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -102,6 +108,8 @@ paths:
       summary: Confirm a password reset with a token
       description: Confirm a password reset with a token.
       security: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -119,6 +127,7 @@ paths:
       description: Accept a client invite and set password.
       security: []
       parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
         - { name: token, in: path, required: true, schema: { type: string } }
       requestBody:
         required: true
@@ -146,6 +155,8 @@ paths:
       operationId: addClient
       summary: Walker invites a new client
       description: Walker invites a new client.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -189,6 +200,8 @@ paths:
       operationId: addDog
       summary: Add dog
       description: Add dog.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -263,6 +276,8 @@ paths:
       operationId: scheduleWalk
       summary: Schedule walk
       description: Schedule walk.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -327,6 +342,8 @@ paths:
       operationId: cancelWalk
       summary: Cancel walk
       description: Cancel walk.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
           description: Walk cancelled
@@ -345,6 +362,8 @@ paths:
       operationId: completeWalk
       summary: Complete walk
       description: Complete walk.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
           description: Walk completed
@@ -365,6 +384,8 @@ paths:
       operationId: postWalkUpdate
       summary: Post walk update
       description: Post walk update.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -424,6 +445,8 @@ paths:
       operationId: generateInvoice
       summary: Generate invoice
       description: Generate invoice.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -462,6 +485,8 @@ paths:
       operationId: markInvoicePaid
       summary: Mark invoice paid
       description: Mark invoice paid.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -522,6 +547,19 @@ components:
       bearerFormat: JWT
 
   parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: >
+        Client-generated UUID per intent. Lets the server replay the
+        original response on retry — without it, retried POSTs
+        produce duplicates. See SUITE-DESIGN §4.6 "Idempotent
+        Mutating Ops" and error-catalogue.md `IDEMPOTENCY_KEY_CONFLICT`.
+        Server-side replay store TTL is 24h.
+      schema:
+        type: string
+        format: uuid
     Page:
       name: page
       in: query

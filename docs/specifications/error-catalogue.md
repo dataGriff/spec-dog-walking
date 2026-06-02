@@ -193,6 +193,24 @@ doesn't accept updates.
 
 **Response shape:** `Error` (`code`, `message`).
 
+### `IDEMPOTENCY_KEY_CONFLICT`
+
+**HTTP status:** 409 Conflict
+
+**Meaning:** The client reused an `Idempotency-Key` on this
+endpoint with a *different* request body. The server stored the
+original `{key → request body → response}` triple and refuses to
+honour the same key for a semantically different intent.
+
+**Triggered by:**
+- Any POST whose `Idempotency-Key` header matches an existing
+  stored entry but whose request body has changed since the
+  original call.
+
+**Resolution:** Generate a fresh UUID for the new intent.
+
+**Response shape:** `Error` (`code`, `message`).
+
 ---
 
 ## Gone errors (410)
