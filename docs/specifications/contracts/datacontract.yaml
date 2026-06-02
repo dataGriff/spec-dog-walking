@@ -120,7 +120,9 @@ schema:
   - name: walkupdate
     description: >
       WalkUpdate records published via the
-      dogwalking.walkupdate.posted channel.
+      dogwalking.walkupdate.posted channel. Carries the WalkUpdate
+      root plus its contained Photo rows (per `## Aggregates` in
+      domain-model.md).
     physicalType: topic
     properties:
       - { name: walkUpdateId, description: WalkUpdate identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
@@ -128,6 +130,20 @@ schema:
       - { name: notes, description: Free-text note attached to the update., logicalType: string, required: false }
       - { name: createdAt, description: When the update was posted., logicalType: timestamp, required: true }
       - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
+      - name: photos
+        description: Photos attached to this walk update at the moment of the event.
+        logicalType: array
+        required: true
+        items:
+          logicalType: object
+          properties:
+            - { name: id, description: Photo identifier., logicalType: string, physicalType: uuid, required: true }
+            - { name: walkUpdateId, description: FK to parent WalkUpdate., logicalType: string, physicalType: uuid, required: true }
+            - { name: contentType, description: MIME type (image/jpeg, image/png, image/heic)., logicalType: string, required: true }
+            - { name: sizeBytes, description: Stored size in bytes., logicalType: integer, required: true }
+            - { name: capturedAt, description: Capture time from EXIF, if present., logicalType: timestamp, required: false }
+            - { name: createdAt, description: When the photo was uploaded., logicalType: timestamp, required: true }
+            - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
 
   - name: ratecard
     description: >

@@ -80,19 +80,28 @@ decisions:
   - docs/specifications/contracts/datacontract.yaml
   ts: '2026-06-01T17:58:57Z'
 - id: AGGREGATES-SECTION-ADDED
-  summary: Added a `## Aggregates` section to domain-model.md declaring
-    `RateCard \u2192 RateCardEntry \u2192 entries` and `Invoice \u2192 InvoiceLineItem \u2192 lineItems`.
-  rationale: Per suite v1.0.8 the `## Aggregates` section is the normative declaration
-    of aggregate-root \u2192 child-collection relationships consumed by
-    `EVENT-PAYLOAD-COVERS-ENTITY-STATE`. The relationships were already implicit in
-    the ASCII relationship diagram (`has-many`); the new section makes them
-    machine-readable and names the collection property used in the contract surface.
+  summary: Added a `## Aggregates` section to domain-model.md declaring three
+    aggregate roots \u2014 `RateCard \u2192 RateCardEntry \u2192 entries`,
+    `Invoice \u2192 InvoiceLineItem \u2192 lineItems`, and
+    `WalkUpdate \u2192 Photo \u2192 photos`.
+  rationale: |
+    Per suite v1.0.8 the `## Aggregates` section is the normative declaration of
+    aggregate-root \u2192 child-collection relationships consumed by
+    EVENT-PAYLOAD-COVERS-ENTITY-STATE. Aggregate criterion: the child has no
+    independent event or write API, and is created/mutated only through the
+    parent. RateCardEntry, InvoiceLineItem, and Photo all qualify \u2014 Photo is
+    created atomically with the WalkUpdate (POST /v1/walks/{walkId}/updates
+    with binary photo array), has only a GET-by-id later, and fires no event
+    of its own (only WalkUpdatePosted). Other has-many relationships in the
+    model (Walker \u2192 Client, Walker \u2192 Invoice, Walk \u2192 WalkUpdate, etc.) have
+    children that are first-class entities with their own APIs and events,
+    so they are not aggregates.
   affects:
   - docs/specifications/domain-model.md
   ts: '2026-06-02T09:00:00Z'
 files_signed:
 - path: docs/specifications/domain-model.md
-  sha256: 35f94b8f59d4cbde32cc0055dab8c1db88ce597ed5ab8955bff7aa3b25563bc0
+  sha256: de50ddb5fdfaa7f09b219f156b6faa78eef2465acba79b247c9ef73daf4516af
   mtime: '2026-06-02T09:00:00Z'
 - path: docs/specifications/glossary.md
   sha256: 58e6eea08a6b4b17181e35846dd23c5e667dc0d8bb37bd3e59a9869ca2c1eeb0

@@ -421,20 +421,38 @@ components:
                 completedAt: { type: string, format: date-time }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
+    PhotoPayload:
+      type: object
+      required: [id, walkUpdateId, contentType, sizeBytes, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        walkUpdateId: { type: string, format: uuid }
+        contentType: { type: string, enum: [image/jpeg, image/png, image/heic] }
+        sizeBytes: { type: integer, minimum: 0 }
+        capturedAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
     WalkUpdatePostedEnvelope:
+      description: |
+        Carries the WalkUpdate root state plus the contained Photo
+        rows (per `## Aggregates` in domain-model.md and SUITE-DESIGN
+        §4.5).
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
           properties:
             data:
               type: object
-              required: [walkUpdateId, walkId, createdAt, updatedAt]
+              required: [walkUpdateId, walkId, createdAt, updatedAt, photos]
               properties:
                 walkUpdateId: { type: string, format: uuid }
                 walkId: { type: string, format: uuid }
                 notes: { type: string, nullable: true }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
+                photos:
+                  type: array
+                  items: { $ref: '#/components/schemas/PhotoPayload' }
     RateCardEntryPayload:
       type: object
       required: [id, rateCardId, walkType, durationMinutes, priceCents, createdAt, updatedAt]

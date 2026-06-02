@@ -85,20 +85,24 @@ decisions:
   - .github/workflows/docs.yml
   ts: '2026-06-01T19:17:00Z'
 - id: AGGREGATE-CHILD-COVERAGE
-  summary: RateCardUpdated, InvoiceIssued, and InvoicePaid now carry their child
-    collections in both asyncapi (`entries`, `lineItems`) and datacontract (nested
-    ODCS array fields), per suite v1.0.8.
+  summary: RateCardUpdated, InvoiceIssued, InvoicePaid, and WalkUpdatePosted now
+    carry their child collections in both asyncapi (`entries`, `lineItems`,
+    `photos`) and datacontract (nested ODCS array fields), per suite v1.0.8.
   rationale: |
-    Per suite v1.0.8 the `## Aggregates` section in domain-model.md declares
-    `RateCard → RateCardEntry → entries` and `Invoice → InvoiceLineItem → lineItems`.
-    `EVENT-PAYLOAD-COVERS-ENTITY-STATE` enforces that every event on an aggregate
+    Per suite v1.0.8 the `## Aggregates` section in domain-model.md declares three
+    aggregate roots: RateCard → RateCardEntry → entries, Invoice → InvoiceLineItem
+    → lineItems, and WalkUpdate → Photo → photos.
+    EVENT-PAYLOAD-COVERS-ENTITY-STATE enforces that every event on an aggregate
     root carries its full child collection — both in the asyncapi payload (new
-    `RateCardEntryPayload` + `InvoiceLineItemPayload` schemas referenced via array
-    items in the three envelopes) and in the datacontract record (nested array
-    fields on `ratecard` and `invoice`, ODCS `logicalType` array). The v1.0.6/v1.0.7
-    docstrings claiming the children were "intentionally NOT" in the payloads were
-    removed. InvoicePaid is also an event on the Invoice aggregate root so it
-    carries `lineItems` too.
+    `RateCardEntryPayload`, `InvoiceLineItemPayload`, and `PhotoPayload` schemas
+    referenced via array items in the four envelopes) and in the datacontract
+    record (nested array fields on `ratecard`, `invoice`, and `walkupdate`,
+    ODCS `logicalType` array). The v1.0.6/v1.0.7 docstrings claiming the children
+    were "intentionally NOT" in the payloads were removed. InvoicePaid is also
+    an event on the Invoice aggregate root so it carries `lineItems` too.
+    WalkUpdate is itself a first-class entity (with its own WalkUpdatePosted
+    event) and also an aggregate root over Photo — Photo has no separate event
+    or write API, so it qualifies.
   affects:
   - docs/specifications/contracts/asyncapi.yaml
   - docs/specifications/contracts/datacontract.yaml
@@ -108,8 +112,8 @@ files_signed:
   sha256: 29ac3684b3f7ec98fe81bbad976c5ef82e959748b389a87ee65230fe71907f35
   mtime: '2026-06-01T17:59:47Z'
 - path: docs/specifications/contracts/asyncapi.yaml
-  sha256: b1b0f024ec91c224d7ea8918a6562077ab30d549dbf7e89a3403d6e7f388b264
+  sha256: cee2f830458b2be6bbbea2bea63ff2e17b1a8fe23fe0f8ac37cf57f15fe30635
   mtime: '2026-06-02T09:00:00Z'
 - path: docs/specifications/contracts/datacontract.yaml
-  sha256: f258ecdadd5b48cd927b102cffaaec34ff81b584c520149a57490885e4568d24
+  sha256: 3d745fa21f97d9017e943545fb497d1ac6715d22d26242b7bb44768a4224444f
   mtime: '2026-06-02T09:00:00Z'

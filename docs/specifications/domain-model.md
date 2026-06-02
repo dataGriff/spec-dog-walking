@@ -524,3 +524,4 @@ per SUITE-DESIGN §4.5 and enforced by EVENT-PAYLOAD-COVERS-ENTITY-STATE.
 |------|-------|------------|
 | `RateCard` | `RateCardEntry` | `entries` |
 | `Invoice` | `InvoiceLineItem` | `lineItems` |
+| `WalkUpdate` | `Photo` | `photos` |
