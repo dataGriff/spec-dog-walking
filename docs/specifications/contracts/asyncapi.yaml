@@ -212,22 +212,35 @@ components:
         time: { type: string, format: date-time }
         datacontenttype: { type: string, enum: [application/json] }
 
-    Breed:
+    # `Breed` is an open enum (per the `### Breed (open)` marker in
+    # domain-model.md and the ~220-value list in openapi.yaml). We
+    # don't mirror the full list here — events only carry values
+    # that have already been validated by the API at write time.
+    # Payload fields use `{ type: string }` for `breed`.
+
+    Role:
       type: string
-      description: "Closed set of breeds. Mirrors the OpenAPI Breed schema; enforced consistent by ENUM-VALUES-CONSISTENT."
-      enum:
-        - labrador
-        - poodle
-        - golden-retriever
-        - german-shepherd
-        - bulldog
-        - beagle
-        - dachshund
-        - cocker-spaniel
-        - border-collie
-        - staffordshire-bull-terrier
-        - mixed
-        - unknown
+      description: "Closed enum (mirrors openapi)."
+      enum: [walker, owner]
+    WalkStatus:
+      type: string
+      description: "Lifecycle state of a Walk (mirrors openapi)."
+      enum: [requested, scheduled, declined, cancelled, completed]
+    InvoiceStatus:
+      type: string
+      description: "Lifecycle state of an Invoice (mirrors openapi)."
+      enum: [issued, paid]
+    InviteStatus:
+      type: string
+      description: "Lifecycle state of an Invite (mirrors openapi)."
+      enum: [pending, accepted, expired]
+    # PasswordResetTokenStatus is openapi-only — no event publishes
+    # the reset token, so no asyncapi declaration is needed.
+
+    PhotoContentType:
+      type: string
+      description: "Permitted MIME types for walk-update photos (mirrors openapi)."
+      enum: [image/jpeg, image/png, image/heic]
 
     InviteCreatedEnvelope:
       allOf:
@@ -241,7 +254,7 @@ components:
                 inviteId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
                 email: { type: string, format: email }
-                status: { type: string, enum: [pending, accepted, expired] }
+                status: { $ref: '#/components/schemas/InviteStatus' }
                 expiresAt: { type: string, format: date-time }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
@@ -272,10 +285,7 @@ components:
                 dogId: { type: string, format: uuid }
                 ownerId: { type: string, format: uuid }
                 name: { type: string }
-                breed:
-                  allOf:
-                    - $ref: '#/components/schemas/Breed'
-                  nullable: true
+                breed: { type: string, nullable: true }
                 ageYears: { type: integer, nullable: true, minimum: 0 }
                 medication: { type: string, nullable: true }
                 vetName: { type: string, nullable: true }
@@ -295,10 +305,7 @@ components:
                 dogId: { type: string, format: uuid }
                 ownerId: { type: string, format: uuid }
                 name: { type: string }
-                breed:
-                  allOf:
-                    - $ref: '#/components/schemas/Breed'
-                  nullable: true
+                breed: { type: string, nullable: true }
                 ageYears: { type: integer, nullable: true, minimum: 0 }
                 medication: { type: string, nullable: true }
                 vetName: { type: string, nullable: true }
@@ -321,11 +328,14 @@ components:
                 walkType: { type: string }
                 durationMinutes: { type: integer }
                 startAt: { type: string, format: date-time }
-                requesterRole: { type: string, enum: [walker, owner] }
+                requesterRole: { $ref: '#/components/schemas/Role' }
                 notes: { type: string, nullable: true }
-                status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
+                status: { $ref: '#/components/schemas/WalkStatus' }
                 declinedReason: { type: string, nullable: true }
-                cancelledByRole: { type: string, nullable: true, enum: [walker, owner] }
+                cancelledByRole:
+                  allOf:
+                    - $ref: '#/components/schemas/Role'
+                  nullable: true
                 completedAt: { type: string, format: date-time, nullable: true }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
@@ -344,11 +354,14 @@ components:
                 walkType: { type: string }
                 durationMinutes: { type: integer }
                 startAt: { type: string, format: date-time }
-                requesterRole: { type: string, enum: [walker, owner] }
+                requesterRole: { $ref: '#/components/schemas/Role' }
                 notes: { type: string, nullable: true }
-                status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
+                status: { $ref: '#/components/schemas/WalkStatus' }
                 declinedReason: { type: string, nullable: true }
-                cancelledByRole: { type: string, nullable: true, enum: [walker, owner] }
+                cancelledByRole:
+                  allOf:
+                    - $ref: '#/components/schemas/Role'
+                  nullable: true
                 completedAt: { type: string, format: date-time, nullable: true }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
@@ -367,11 +380,14 @@ components:
                 walkType: { type: string }
                 durationMinutes: { type: integer }
                 startAt: { type: string, format: date-time }
-                requesterRole: { type: string, enum: [walker, owner] }
+                requesterRole: { $ref: '#/components/schemas/Role' }
                 notes: { type: string, nullable: true }
-                status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
+                status: { $ref: '#/components/schemas/WalkStatus' }
                 declinedReason: { type: string }
-                cancelledByRole: { type: string, nullable: true, enum: [walker, owner] }
+                cancelledByRole:
+                  allOf:
+                    - $ref: '#/components/schemas/Role'
+                  nullable: true
                 completedAt: { type: string, format: date-time, nullable: true }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
@@ -390,11 +406,11 @@ components:
                 walkType: { type: string }
                 durationMinutes: { type: integer }
                 startAt: { type: string, format: date-time }
-                requesterRole: { type: string, enum: [walker, owner] }
+                requesterRole: { $ref: '#/components/schemas/Role' }
                 notes: { type: string, nullable: true }
-                status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
+                status: { $ref: '#/components/schemas/WalkStatus' }
                 declinedReason: { type: string, nullable: true }
-                cancelledByRole: { type: string, enum: [walker, owner] }
+                cancelledByRole: { $ref: '#/components/schemas/Role' }
                 completedAt: { type: string, format: date-time, nullable: true }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
@@ -413,11 +429,14 @@ components:
                 walkType: { type: string }
                 durationMinutes: { type: integer }
                 startAt: { type: string, format: date-time }
-                requesterRole: { type: string, enum: [walker, owner] }
+                requesterRole: { $ref: '#/components/schemas/Role' }
                 notes: { type: string, nullable: true }
-                status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
+                status: { $ref: '#/components/schemas/WalkStatus' }
                 declinedReason: { type: string, nullable: true }
-                cancelledByRole: { type: string, nullable: true, enum: [walker, owner] }
+                cancelledByRole:
+                  allOf:
+                    - $ref: '#/components/schemas/Role'
+                  nullable: true
                 completedAt: { type: string, format: date-time }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
@@ -427,7 +446,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         walkUpdateId: { type: string, format: uuid }
-        contentType: { type: string, enum: [image/jpeg, image/png, image/heic] }
+        contentType: { $ref: '#/components/schemas/PhotoContentType' }
         sizeBytes: { type: integer, minimum: 0 }
         capturedAt: { type: string, format: date-time, nullable: true }
         createdAt: { type: string, format: date-time }
@@ -517,7 +536,7 @@ components:
                 periodEnd: { type: string, format: date }
                 currency: { type: string, minLength: 3, maxLength: 3 }
                 totalCents: { type: integer, minimum: 0 }
-                status: { type: string, enum: [issued, paid] }
+                status: { $ref: '#/components/schemas/InvoiceStatus' }
                 paidAt: { type: string, format: date-time, nullable: true }
                 paidVia: { type: string, nullable: true }
                 tipCents: { type: integer, minimum: 0, default: 0 }
@@ -547,7 +566,7 @@ components:
                 periodEnd: { type: string, format: date }
                 currency: { type: string, minLength: 3, maxLength: 3 }
                 totalCents: { type: integer, minimum: 0 }
-                status: { type: string, enum: [issued, paid] }
+                status: { $ref: '#/components/schemas/InvoiceStatus' }
                 paidAt: { type: string, format: date-time }
                 paidVia: { type: string }
                 tipCents: { type: integer, minimum: 0 }

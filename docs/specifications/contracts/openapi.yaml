@@ -702,7 +702,7 @@ components:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
         passwordHash: { type: string, description: "Never returned in API responses; included here for schema completeness." }
-        role: { type: string, enum: [walker, owner] }
+        role: { $ref: '#/components/schemas/Role' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     UserSummary:
@@ -711,7 +711,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
-        role: { type: string, enum: [walker, owner] }
+        role: { $ref: '#/components/schemas/Role' }
 
     Walker:
       type: object
@@ -762,7 +762,7 @@ components:
         walkerId: { type: string, format: uuid }
         email: { type: string, format: email }
         token: { type: string }
-        status: { type: string, enum: [pending, accepted, expired] }
+        status: { $ref: '#/components/schemas/InviteStatus' }
         expiresAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -774,25 +774,267 @@ components:
         id: { type: string, format: uuid }
         userId: { type: string, format: uuid }
         token: { type: string }
-        status: { type: string, enum: [pending, used, expired] }
+        status: { $ref: '#/components/schemas/PasswordResetTokenStatus' }
         expiresAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
 
+    Role:
+      type: string
+      description: "User role. Closed enum — `walker` (single walker per domain instance) and `owner` (dog owners / clients)."
+      enum: [walker, owner]
+    WalkStatus:
+      type: string
+      description: "Lifecycle state of a Walk. Closed enum. Transitions are governed by the Walk Status Lifecycle in domain-model.md."
+      enum: [requested, scheduled, declined, cancelled, completed]
+    InvoiceStatus:
+      type: string
+      description: "Lifecycle state of an Invoice. Closed enum."
+      enum: [issued, paid]
+    InviteStatus:
+      type: string
+      description: "Lifecycle state of a client Invite. Closed enum."
+      enum: [pending, accepted, expired]
+    PasswordResetTokenStatus:
+      type: string
+      description: "Lifecycle state of a password-reset token. Closed enum."
+      enum: [pending, used, expired]
+    PhotoContentType:
+      type: string
+      description: "Permitted MIME types for walk-update photos. Closed enum."
+      enum: [image/jpeg, image/png, image/heic]
     Breed:
       type: string
-      description: "Closed set of breeds the walker workforce encounters most often, plus `mixed` and `unknown` fallbacks. Extending this list is a minor version bump per NFR-COMPAT-001."
+      description: |
+        Authoritative list of dog breeds the API recognises. Sourced
+        from the UK Kennel Club's recognised-breeds list across the
+        seven groups (Hound, Working, Terrier, Toy, Utility, Gundog,
+        Pastoral), with `mixed` and `unknown` fallbacks so the field
+        is always answerable. This is an **open enum** (per the
+        `### Breed (open)` marker in domain-model.md) — adding a
+        breed here is a minor version bump per NFR-COMPAT-001 and
+        does not require a domain-model change.
       enum:
-        - labrador
-        - poodle
-        - golden-retriever
-        - german-shepherd
-        - bulldog
+        # ── Hound group ──
+        - afghan-hound
+        - azawakh
+        - basenji
+        - basset-bleu-de-gascogne
+        - basset-fauve-de-bretagne
+        - basset-griffon-vendeen-grand
+        - basset-griffon-vendeen-petit
+        - basset-hound
+        - bavarian-mountain-hound
         - beagle
-        - dachshund
-        - cocker-spaniel
-        - border-collie
+        - bloodhound
+        - borzoi
+        - cirneco-dell-etna
+        - dachshund-long-haired
+        - dachshund-miniature-long-haired
+        - dachshund-miniature-smooth-haired
+        - dachshund-miniature-wire-haired
+        - dachshund-smooth-haired
+        - dachshund-wire-haired
+        - deerhound
+        - finnish-spitz
+        - foxhound
+        - grand-bleu-de-gascogne
+        - greyhound
+        - hamiltonstovare
+        - ibizan-hound
+        - irish-wolfhound
+        - norwegian-elkhound
+        - otterhound
+        - pharaoh-hound
+        - portuguese-podengo
+        - rhodesian-ridgeback
+        - saluki
+        - segugio-italiano
+        - sloughi
+        - whippet
+        # ── Working group ──
+        - alaskan-malamute
+        - bernese-mountain-dog
+        - bouvier-des-flandres
+        - boxer
+        - bullmastiff
+        - canadian-eskimo-dog
+        - dobermann
+        - dogue-de-bordeaux
+        - entlebucher-mountain-dog
+        - german-pinscher
+        - giant-schnauzer
+        - great-dane
+        - greenland-dog
+        - hovawart
+        - kangal-shepherd-dog
+        - leonberger
+        - mastiff
+        - neapolitan-mastiff
+        - newfoundland
+        - portuguese-water-dog
+        - pyrenean-mastiff
+        - pyrenean-mountain-dog
+        - rottweiler
+        - russian-black-terrier
+        - st-bernard
+        - siberian-husky
+        - tibetan-mastiff
+        # ── Terrier group ──
+        - airedale-terrier
+        - australian-terrier
+        - bedlington-terrier
+        - border-terrier
+        - bull-terrier
+        - bull-terrier-miniature
+        - cairn-terrier
+        - cesky-terrier
+        - dandie-dinmont-terrier
+        - fox-terrier-smooth
+        - fox-terrier-wire
+        - glen-of-imaal-terrier
+        - irish-terrier
+        - jack-russell-terrier
+        - kerry-blue-terrier
+        - lakeland-terrier
+        - manchester-terrier
+        - norfolk-terrier
+        - norwich-terrier
+        - parson-russell-terrier
+        - scottish-terrier
+        - sealyham-terrier
+        - skye-terrier
+        - soft-coated-wheaten-terrier
         - staffordshire-bull-terrier
+        - welsh-terrier
+        - west-highland-white-terrier
+        # ── Toy group ──
+        - affenpinscher
+        - australian-silky-terrier
+        - bichon-frise
+        - bolognese
+        - cavalier-king-charles-spaniel
+        - chihuahua-long-coat
+        - chihuahua-smooth-coat
+        - chinese-crested
+        - coton-de-tulear
+        - english-toy-terrier
+        - griffon-bruxellois
+        - havanese
+        - italian-greyhound
+        - japanese-chin
+        - king-charles-spaniel
+        - lowchen
+        - maltese
+        - miniature-pinscher
+        - papillon
+        - pekingese
+        - pomeranian
+        - pug
+        - russian-toy
+        - yorkshire-terrier
+        # ── Utility group ──
+        - akita
+        - boston-terrier
+        - bulldog
+        - canaan-dog
+        - chow-chow
+        - dalmatian
+        - eurasier
+        - french-bulldog
+        - german-spitz-klein
+        - german-spitz-mittel
+        - japanese-shiba-inu
+        - japanese-spitz
+        - keeshond
+        - kooikerhondje
+        - lhasa-apso
+        - mexican-hairless
+        - miniature-schnauzer
+        - poodle-miniature
+        - poodle-standard
+        - poodle-toy
+        - schipperke
+        - schnauzer
+        - shar-pei
+        - shih-tzu
+        - tibetan-spaniel
+        - tibetan-terrier
+        - xoloitzcuintle
+        # ── Gundog group ──
+        - bracco-italiano
+        - brittany
+        - chesapeake-bay-retriever
+        - clumber-spaniel
+        - cocker-spaniel
+        - cocker-spaniel-american
+        - curly-coated-retriever
+        - english-setter
+        - english-springer-spaniel
+        - field-spaniel
+        - flat-coated-retriever
+        - german-longhaired-pointer
+        - german-shorthaired-pointer
+        - german-wirehaired-pointer
+        - golden-retriever
+        - gordon-setter
+        - hungarian-vizsla
+        - hungarian-wirehaired-vizsla
+        - irish-red-and-white-setter
+        - irish-setter
+        - irish-water-spaniel
+        - italian-spinone
+        - korthals-griffon
+        - labrador-retriever
+        - lagotto-romagnolo
+        - large-munsterlander
+        - nova-scotia-duck-tolling-retriever
+        - pointer
+        - small-munsterlander
+        - spanish-water-dog
+        - sussex-spaniel
+        - weimaraner
+        - welsh-springer-spaniel
+        # ── Pastoral group ──
+        - anatolian-shepherd-dog
+        - australian-cattle-dog
+        - australian-shepherd
+        - bearded-collie
+        - beauceron
+        - belgian-shepherd-dog-groenendael
+        - belgian-shepherd-dog-laekenois
+        - belgian-shepherd-dog-malinois
+        - belgian-shepherd-dog-tervueren
+        - bergamasco
+        - border-collie
+        - briard
+        - catalan-sheepdog
+        - collie-rough
+        - collie-smooth
+        - estrela-mountain-dog
+        - finnish-lapphund
+        - german-shepherd
+        - hungarian-kuvasz
+        - hungarian-puli
+        - hungarian-pumi
+        - icelandic-sheepdog
+        - komondor
+        - lancashire-heeler
+        - maremma-sheepdog
+        - mudi
+        - norwegian-buhund
+        - old-english-sheepdog
+        - polish-lowland-sheepdog
+        - samoyed
+        - shetland-sheepdog
+        - swedish-lapphund
+        - swedish-vallhund
+        - welsh-corgi-cardigan
+        - welsh-corgi-pembroke
+        # Loosely affiliated with the kept-in-the-house workforce —
+        # `bulldog` above also covers the English variant which
+        # walkers commonly call simply "bulldog".
+        # ── Fallbacks ──
         - mixed
         - unknown
     Dog:
@@ -858,11 +1100,14 @@ components:
         walkType: { type: string }
         durationMinutes: { type: integer, minimum: 1 }
         startAt: { type: string, format: date-time }
-        requesterRole: { type: string, enum: [walker, owner] }
+        requesterRole: { $ref: '#/components/schemas/Role' }
         notes: { type: string, nullable: true }
-        status: { type: string, enum: [requested, scheduled, declined, cancelled, completed] }
+        status: { $ref: '#/components/schemas/WalkStatus' }
         declinedReason: { type: string, nullable: true }
-        cancelledByRole: { type: string, nullable: true, enum: [walker, owner] }
+        cancelledByRole:
+          allOf:
+            - $ref: '#/components/schemas/Role'
+          nullable: true
         completedAt: { type: string, format: date-time, nullable: true }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -917,7 +1162,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         walkUpdateId: { type: string, format: uuid }
-        contentType: { type: string, enum: [image/jpeg, image/png, image/heic] }
+        contentType: { $ref: '#/components/schemas/PhotoContentType' }
         sizeBytes: { type: integer, minimum: 0 }
         capturedAt: { type: string, format: date-time, nullable: true }
         createdAt: { type: string, format: date-time }
@@ -973,7 +1218,7 @@ components:
         currency: { type: string, minLength: 3, maxLength: 3 }
         totalCents: { type: integer, minimum: 0 }
         tipCents: { type: integer, minimum: 0, default: 0 }
-        status: { type: string, enum: [issued, paid] }
+        status: { $ref: '#/components/schemas/InvoiceStatus' }
         paidAt: { type: string, format: date-time, nullable: true }
         paidVia: { type: string, nullable: true }
         lineItems:

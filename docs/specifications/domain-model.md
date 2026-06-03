@@ -26,7 +26,7 @@ which profile entity (Walker or Client) is attached.
 | `id` | UUID | Yes | Unique identifier |
 | `email` | string (email) | Yes | Login email (unique across all users) |
 | `passwordHash` | string | Yes | [secret] Adaptive password-hash output. Never returned in API responses, never published to events. |
-| `role` | enum | Yes | `walker` or `owner`. Set at registration; immutable. |
+| `role` | enum:Role | Yes | Set at registration; immutable. |
 | `createdAt` | ISO 8601 | Yes | Registration timestamp |
 | `updatedAt` | ISO 8601 | Yes | Last update timestamp (refresh-token rotation, etc.) |
 
@@ -98,7 +98,7 @@ invite carries the prospective client's email and a 1-day TTL.
 | `walkerId` | UUID | Yes | FK to Walker issuing the invite |
 | `email` | string (email) | Yes | Prospective client's email |
 | `token` | string (opaque) | Yes | [secret] URL-safe single-use token. Never published to events. |
-| `status` | enum | Yes | `pending` / `accepted` / `expired` |
+| `status` | enum:InviteStatus | Yes | Lifecycle state of the invite |
 | `expiresAt` | ISO 8601 | Yes | Timestamp at which the invite auto-transitions to `expired` |
 | `createdAt` | ISO 8601 | Yes | When the invite was queued |
 | `updatedAt` | ISO 8601 | Yes | Last update timestamp |
@@ -124,7 +124,7 @@ with a 1-hour TTL.
 | `id` | UUID | Yes | Unique identifier |
 | `userId` | UUID | Yes | FK to User the reset targets |
 | `token` | string (opaque) | Yes | [secret] URL-safe single-use token. Never published to events. |
-| `status` | enum | Yes | `pending` / `used` / `expired` |
+| `status` | enum:PasswordResetTokenStatus | Yes | Lifecycle state of the token |
 | `expiresAt` | ISO 8601 | Yes | Timestamp at which the token auto-transitions to `expired` |
 | `createdAt` | ISO 8601 | Yes | When the reset was requested |
 | `updatedAt` | ISO 8601 | Yes | Last update timestamp |
@@ -178,11 +178,11 @@ complete) plus the failure / cancellation paths.
 | `walkType` | string | Yes | Matches a `walkType` on the walker's rate card |
 | `durationMinutes` | integer | Yes | Matches `durationMinutes` on the rate-card entry |
 | `startAt` | ISO 8601 | Yes | Scheduled start time |
-| `requesterRole` | enum | Yes | `walker` or `owner` — who created the walk |
+| `requesterRole` | enum:Role | Yes | Who created the walk |
 | `notes` | string \| null | No | Free-text booking notes |
-| `status` | enum | Yes | `requested` / `scheduled` / `declined` / `cancelled` / `completed` |
+| `status` | enum:WalkStatus | Yes | Lifecycle state of the walk |
 | `declinedReason` | string \| null | No | Walker's reason when status=`declined` |
-| `cancelledByRole` | enum \| null | No | `walker` or `owner` — set when status=`cancelled` |
+| `cancelledByRole` | enum:Role \| null | No | Set when status=`cancelled` |
 | `completedAt` | ISO 8601 \| null | No | Set when status=`completed` |
 | `createdAt` | ISO 8601 | Yes | When the walk was first recorded |
 | `updatedAt` | ISO 8601 | Yes | Last status change |
@@ -232,7 +232,7 @@ A single image attached to a WalkUpdate. Stored by the domain
 |-----------|------|----------|-------------|
 | `id` | UUID | Yes | Unique identifier |
 | `walkUpdateId` | UUID | Yes | FK to WalkUpdate this photo belongs to |
-| `contentType` | string | Yes | MIME type (`image/jpeg` / `image/png` / `image/heic`) |
+| `contentType` | enum:PhotoContentType | Yes | MIME type of the stored bytes |
 | `sizeBytes` | integer | Yes | Stored size in bytes |
 | `capturedAt` | ISO 8601 \| null | No | Capture time from EXIF, if present |
 | `createdAt` | ISO 8601 | Yes | When the photo was uploaded |
@@ -305,7 +305,7 @@ that walk was scheduled.
 | `periodEnd` | ISO 8601 (date) | Yes | Inclusive end of billing period |
 | `currency` | string (ISO 4217) | Yes | Copied from the RateCard at issue |
 | `totalCents` | integer | Yes | Sum of line-item priceCents |
-| `status` | enum | Yes | `issued` / `paid` |
+| `status` | enum:InvoiceStatus | Yes | Lifecycle state of the invoice |
 | `paidAt` | ISO 8601 \| null | No | Set when status=`paid` |
 | `paidVia` | string \| null | No | Free-text payment channel (set with status=`paid`) |
 | `tipCents` | integer | Yes | Tip amount in the invoice's currency, minor units. Defaults to `0` at issue; can be set to a non-negative integer at mark-paid (US-019). |
@@ -482,33 +482,111 @@ pending ──── (user confirms) ──── used
 ## Enumerations
 
 <!--
-Closed-set values. Each enum named here must appear in
-contracts/openapi.yaml as components.schemas.<Name> with matching
-values (enforced by ENUM-VALUES-CONSISTENT). Cross-contract
-declarations (asyncapi, datacontract) must also match if present.
+Each enum named here must appear in contracts/openapi.yaml as
+components.schemas.<Name> with matching values (enforced by
+ENUM-VALUES-CONSISTENT). Cross-contract declarations (asyncapi,
+datacontract) must also match if present.
+
+Headings carry an `(open)` marker for expandable enums (where the
+contract is the authoritative full list and may exceed the model's
+representative subset). Default is closed: model values must equal
+contract values exactly. See SUITE-DESIGN §5 and the domain-modeling
+SKILL.
 -->
 
-### Breed
+### Role
 
-A pragmatic closed set covering the breeds the walker workforce
-encounters most often, plus `mixed` and `unknown` as fallbacks so
-the field is always answerable without forcing the owner into a
-free-text workaround. Extending this list is a minor version bump
-on the openapi contract (per NFR-COMPAT-001).
+The two roles in the dog-walking system. Closed by design — adding
+a third role is a domain-redesign event, not a minor version bump.
 
 | Value | Notes |
 |---|---|
-| `labrador` | |
-| `poodle` | |
+| `walker` | The single Walker who runs the business |
+| `owner` | Dog owners (clients of the walker) |
+
+### WalkStatus
+
+Lifecycle states of a Walk. Closed; transitions are governed by
+the Walk Status Lifecycle table above.
+
+| Value | Notes |
+|---|---|
+| `requested` | Owner-initiated, awaiting walker decision |
+| `scheduled` | Confirmed for the proposed time |
+| `declined` | Walker declined; terminal |
+| `cancelled` | Cancelled by owner or walker; terminal |
+| `completed` | Walk completed by walker; terminal |
+
+### InvoiceStatus
+
+Lifecycle states of an Invoice. Closed.
+
+| Value | Notes |
+|---|---|
+| `issued` | Invoice raised; awaiting payment |
+| `paid` | Walker has marked the invoice as paid |
+
+### InviteStatus
+
+Lifecycle states of a client Invite. Closed.
+
+| Value | Notes |
+|---|---|
+| `pending` | Issued; awaiting acceptance |
+| `accepted` | Client accepted; one-shot use complete |
+| `expired` | Past `expiresAt` without acceptance |
+
+### PasswordResetTokenStatus
+
+Lifecycle states of a password-reset token. Closed.
+
+| Value | Notes |
+|---|---|
+| `pending` | Issued; awaiting confirm |
+| `used` | Successfully consumed |
+| `expired` | Past `expiresAt` without use |
+
+### PhotoContentType
+
+Permitted MIME types for walk-update photos. Closed; expanding to
+video or other media is a domain-redesign event (storage costs,
+moderation, etc.).
+
+| Value | Notes |
+|---|---|
+| `image/jpeg` | |
+| `image/png` | |
+| `image/heic` | |
+
+### Breed (open)
+
+A representative subset of dog breeds the walker workforce
+encounters most often, plus `mixed` and `unknown` as fallbacks so
+the field is always answerable without forcing the owner into a
+free-text workaround.
+
+This enum is **open**: the openapi schema carries the authoritative
+full list (the UK Kennel Club's recognised-breeds list — ~220
+breeds — plus the two fallbacks). The model below lists the most
+common 10 plus the fallbacks as a human-readable reference;
+`ENUM-VALUES-CONSISTENT` verifies the model values are a subset of
+the openapi schema. Adding a breed to the openapi list is a minor
+version bump (per NFR-COMPAT-001); no model change required unless
+the new breed deserves to surface in the canonical examples below.
+
+| Value | Notes |
+|---|---|
+| `labrador-retriever` | The most common breed on the workforce's books |
+| `poodle-standard` | Standard variant; KC also lists miniature + toy poodle |
 | `golden-retriever` | |
 | `german-shepherd` | |
-| `bulldog` | English bulldog |
+| `bulldog` | English bulldog (KC's "Bulldog" entry) |
 | `beagle` | |
-| `dachshund` | |
-| `cocker-spaniel` | |
+| `dachshund-smooth-haired` | KC also lists wire-haired, long-haired, and miniature variants |
+| `cocker-spaniel` | English cocker (KC also has the American cocker) |
 | `border-collie` | |
 | `staffordshire-bull-terrier` | |
-| `mixed` | Crossbreed or pedigree not represented above |
+| `mixed` | Crossbreed or pedigree not represented in the full list |
 | `unknown` | Owner doesn't know |
 
 ## Aggregates

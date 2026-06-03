@@ -85,6 +85,26 @@ decisions:
   - docs/index.md
   - .github/workflows/docs.yml
   ts: '2026-06-01T19:17:00Z'
+- id: ENUMS-NAMED-AND-BREED-OPENED
+  summary: 6 implicit enums (Role, WalkStatus, InvoiceStatus, InviteStatus,
+    PasswordResetTokenStatus, PhotoContentType) promoted to named
+    `components.schemas` entries and `$ref`-ed throughout openapi + asyncapi;
+    Breed expanded to the UK Kennel Club ~190-value list and marked open.
+  rationale: |
+    Per suite v1.0.12 the `### Breed (open)` marker means the openapi schema
+    is the authoritative full list; ENUM-VALUES-CONSISTENT verifies the
+    model's representative subset is contained within. Adding a breed is now
+    a minor-version bump on the openapi schema alone — no model change
+    required unless the new breed deserves the canonical-examples table.
+    AsyncAPI Breed schema dropped: events only carry values the API has
+    already validated; the asyncapi `breed` field is `{ type: string }`.
+    AsyncAPI PasswordResetTokenStatus also dropped: no event publishes
+    reset tokens. The other 5 enums are mirrored in asyncapi for
+    payload-validation symmetry.
+  affects:
+  - docs/specifications/contracts/openapi.yaml
+  - docs/specifications/contracts/asyncapi.yaml
+  ts: '2026-06-03T10:00:00Z'
 - id: IDEMPOTENCY-KEY-CONVENTION
   summary: Every POST operation declares a required `Idempotency-Key` header
     parameter via `$ref` to `components.parameters.IdempotencyKey` (UUID per
@@ -130,11 +150,11 @@ decisions:
   ts: '2026-06-02T09:00:00Z'
 files_signed:
 - path: docs/specifications/contracts/openapi.yaml
-  sha256: a3d1fa546bf0f35d17bf1ddf8b31eec452d37424346b91bb67bc59c16e14a6ee
-  mtime: '2026-06-02T10:00:00Z'
+  sha256: 1ef49668564c180f804ce1e2408c94a7c348011e8544320a61659297b3536178
+  mtime: '2026-06-03T10:00:00Z'
 - path: docs/specifications/contracts/asyncapi.yaml
-  sha256: cee2f830458b2be6bbbea2bea63ff2e17b1a8fe23fe0f8ac37cf57f15fe30635
-  mtime: '2026-06-02T09:00:00Z'
+  sha256: d751591bca71879875c39f7b8b6a9f3a1c93dccd4a70a2562c92fea1272d9172
+  mtime: '2026-06-03T10:00:00Z'
 - path: docs/specifications/contracts/datacontract.yaml
   sha256: 3d745fa21f97d9017e943545fb497d1ac6715d22d26242b7bb44768a4224444f
   mtime: '2026-06-02T09:00:00Z'
