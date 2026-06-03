@@ -55,7 +55,7 @@ schema:
       - { name: inviteId, description: Invite identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: walkerId, description: Walker who issued the invite., logicalType: string, physicalType: uuid, required: true }
       - { name: email, description: Prospective client's email., logicalType: string, required: true }
-      - { name: status, description: Invite status at emission., logicalType: string, required: true, enum: [pending, accepted, expired], ref: '#/components/schemas/InviteStatus' }
+      - { name: status, description: Invite status at emission., logicalType: string, required: true, physicalType: enum, enum: [pending, accepted, expired], ref: '#/components/schemas/InviteStatus' }
       - { name: expiresAt, description: Timestamp at which the invite auto-transitions to expired., logicalType: timestamp, required: true }
       - { name: createdAt, description: When the invite was queued., logicalType: timestamp, required: true }
       - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
@@ -87,6 +87,7 @@ schema:
       - name: breed
         description: Dog breed (UK Kennel Club list, plus mixed/unknown). Open enum — see openapi.yaml Breed schema for the authoritative full list.
         logicalType: string
+        physicalType: enum
         required: false
         ref: '#/components/schemas/Breed'
         enum:
@@ -324,11 +325,11 @@ schema:
       - { name: walkType, description: Walk type matching the rate card., logicalType: string, required: true }
       - { name: durationMinutes, description: Walk duration in minutes., logicalType: integer, required: true }
       - { name: startAt, description: Scheduled start timestamp., logicalType: timestamp, required: true }
-      - { name: requesterRole, description: Who created the walk., logicalType: string, required: true, enum: [walker, owner], ref: '#/components/schemas/Role' }
+      - { name: requesterRole, description: Who created the walk., logicalType: string, required: true, physicalType: enum, enum: [walker, owner], ref: '#/components/schemas/Role' }
       - { name: notes, description: Free-text booking notes., logicalType: string, required: false }
-      - { name: status, description: Walk status at emission., logicalType: string, required: true, enum: [requested, scheduled, declined, cancelled, completed], ref: '#/components/schemas/WalkStatus' }
+      - { name: status, description: Walk status at emission., logicalType: string, required: true, physicalType: enum, enum: [requested, scheduled, declined, cancelled, completed], ref: '#/components/schemas/WalkStatus' }
       - { name: declinedReason, description: Walker's decline reason (when status=declined)., logicalType: string, required: false }
-      - { name: cancelledByRole, description: Who cancelled the walk (when status=cancelled)., logicalType: string, required: false, enum: [walker, owner], ref: '#/components/schemas/Role' }
+      - { name: cancelledByRole, description: Who cancelled the walk (when status=cancelled)., logicalType: string, required: false, physicalType: enum, enum: [walker, owner], ref: '#/components/schemas/Role' }
       - { name: completedAt, description: Completion timestamp (when status=completed)., logicalType: timestamp, required: false }
       - { name: createdAt, description: When the walk was first recorded., logicalType: timestamp, required: true }
       - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
@@ -355,7 +356,7 @@ schema:
           properties:
             - { name: id, description: Photo identifier., logicalType: string, physicalType: uuid, required: true }
             - { name: walkUpdateId, description: FK to parent WalkUpdate., logicalType: string, physicalType: uuid, required: true }
-            - { name: contentType, description: MIME type of the stored bytes., logicalType: string, required: true, enum: [image/jpeg, image/png, image/heic], ref: '#/components/schemas/PhotoContentType' }
+            - { name: contentType, description: MIME type of the stored bytes., logicalType: string, required: true, physicalType: enum, enum: [image/jpeg, image/png, image/heic], ref: '#/components/schemas/PhotoContentType' }
             - { name: sizeBytes, description: Stored size in bytes., logicalType: integer, required: true }
             - { name: capturedAt, description: Capture time from EXIF, if present., logicalType: timestamp, required: false }
             - { name: createdAt, description: When the photo was uploaded., logicalType: timestamp, required: true }
@@ -404,7 +405,7 @@ schema:
       - { name: periodEnd, description: Billing period end date., logicalType: date, required: true }
       - { name: currency, description: ISO 4217 currency code copied from the RateCard at issue., logicalType: string, required: true }
       - { name: totalCents, description: Total amount in minor units (sum of line-item priceCents)., logicalType: integer, required: true }
-      - { name: status, description: Invoice status at emission., logicalType: string, required: true, enum: [issued, paid], ref: '#/components/schemas/InvoiceStatus' }
+      - { name: status, description: Invoice status at emission., logicalType: string, required: true, physicalType: enum, enum: [issued, paid], ref: '#/components/schemas/InvoiceStatus' }
       - { name: paidAt, description: Payment timestamp (when status=paid)., logicalType: timestamp, required: false }
       - { name: paidVia, description: Payment channel description (when status=paid)., logicalType: string, required: false }
       - { name: tipCents, description: Tip amount in minor units (defaults to 0 at issue)., logicalType: integer, required: true }

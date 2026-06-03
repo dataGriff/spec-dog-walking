@@ -2177,6 +2177,8 @@ video {
     <td class="px-4 py-4 whitespace-nowrap">
       <div class="text-sm text-gray-900">string</div>
       
+      <div class="text-xs text-gray-500">enum</div>
+      
     </td>
     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
       
@@ -2668,6 +2670,8 @@ video {
     <td class="px-4 py-4 whitespace-nowrap">
       <div class="text-sm text-gray-900">string</div>
       
+      <div class="text-xs text-gray-500">enum</div>
+      
     </td>
     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
       
@@ -3117,6 +3121,8 @@ video {
     <td class="px-4 py-4 whitespace-nowrap">
       <div class="text-sm text-gray-900">string</div>
       
+      <div class="text-xs text-gray-500">enum</div>
+      
     </td>
     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
       
@@ -3171,6 +3177,8 @@ video {
     <td class="px-4 py-4 whitespace-nowrap">
       <div class="text-sm text-gray-900">string</div>
       
+      <div class="text-xs text-gray-500">enum</div>
+      
     </td>
     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
       
@@ -3224,6 +3232,8 @@ video {
     </td>
     <td class="px-4 py-4 whitespace-nowrap">
       <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">enum</div>
       
     </td>
     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -3673,6 +3683,8 @@ video {
     </td>
     <td class="px-4 py-4 whitespace-nowrap">
       <div class="text-sm text-gray-900">string</div>
+      
+      <div class="text-xs text-gray-500">enum</div>
       
     </td>
     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -4615,6 +4627,8 @@ video {
     <td class="px-4 py-4 whitespace-nowrap">
       <div class="text-sm text-gray-900">string</div>
       
+      <div class="text-xs text-gray-500">enum</div>
+      
     </td>
     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
       
@@ -5333,7 +5347,7 @@ video {
       </div>
 
       <div class="mt-6 text-sm text-gray-400">
-        Created at 03 Jun 2026 16:35:36 UTC with <a href="https://cli.datacontract.com" class="text-gray-400 hover:text-gray-500">Data Contract CLI</a> v0.12.1
+        Created at 03 Jun 2026 17:56:06 UTC with <a href="https://cli.datacontract.com" class="text-gray-400 hover:text-gray-500">Data Contract CLI</a> v0.12.1
       </div>
 
     </div>
@@ -5421,6 +5435,7 @@ schema:
     logicalType: string
     required: true
   - name: status
+    physicalType: enum
     description: Invite status at emission.
     logicalType: string
     required: true
@@ -5498,6 +5513,7 @@ schema:
     logicalType: string
     required: true
   - name: breed
+    physicalType: enum
     description: Dog breed (UK Kennel Club list, plus mixed/unknown). Open enum —
       see openapi.yaml Breed schema for the authoritative full list.
     logicalType: string
@@ -5570,6 +5586,7 @@ schema:
     logicalType: timestamp
     required: true
   - name: requesterRole
+    physicalType: enum
     description: Who created the walk.
     logicalType: string
     required: true
@@ -5578,6 +5595,7 @@ schema:
     logicalType: string
     required: false
   - name: status
+    physicalType: enum
     description: Walk status at emission.
     logicalType: string
     required: true
@@ -5586,6 +5604,7 @@ schema:
     logicalType: string
     required: false
   - name: cancelledByRole
+    physicalType: enum
     description: Who cancelled the walk (when status=cancelled).
     logicalType: string
     required: false
@@ -5652,6 +5671,7 @@ schema:
         logicalType: string
         required: true
       - name: contentType
+        physicalType: enum
         description: MIME type of the stored bytes.
         logicalType: string
         required: true
@@ -5784,6 +5804,7 @@ schema:
     logicalType: integer
     required: true
   - name: status
+    physicalType: enum
     description: Invoice status at emission.
     logicalType: string
     required: true

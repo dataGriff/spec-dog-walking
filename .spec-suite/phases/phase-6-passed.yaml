@@ -85,6 +85,28 @@ decisions:
   - docs/index.md
   - .github/workflows/docs.yml
   ts: '2026-06-01T19:17:00Z'
+- id: DATACONTRACT-PHYSICALTYPE-ENUM-RENDER-HINT
+  summary: |
+    Added `physicalType: enum` to the 7 datacontract fields with enum
+    constraints so the datacontract-cli HTML renderer surfaces a visible
+    "enum" signal under each field's `logicalType: string`.
+  rationale: |
+    The datacontract-cli ODCS template (`templates/datacontract_odcs.html`
+    lines 32-35) renders `physicalType` in smaller text below `logicalType`
+    whenever they differ. The template doesn't have an enum-rendering
+    branch — only its sibling native-format template does — so the
+    cleanest signal-without-upstream-patch is to use the freeform
+    `physicalType` field as a rendering hint. `physicalType: enum`
+    passes datacontract-cli lint (physicalType is freeform) and surfaces
+    "string / enum" visually on every constrained field.
+    The actual values still come from the openapi Scalar reference
+    (which renders enum schemas natively). Future work to surface the
+    values inline on the datacontract page would require either a
+    bootstrap-installed template patch or an upstream PR — neither is
+    in scope for this increment.
+  affects:
+  - docs/specifications/contracts/datacontract.yaml
+  ts: '2026-06-03T11:00:00Z'
 - id: DATACONTRACT-ENUMS-FOR-DATA-QUALITY
   summary: Every datacontract field that maps to a named enum (Role, WalkStatus,
     InvoiceStatus, InviteStatus, PhotoContentType, and the open Breed) now
@@ -178,5 +200,5 @@ files_signed:
   sha256: d751591bca71879875c39f7b8b6a9f3a1c93dccd4a70a2562c92fea1272d9172
   mtime: '2026-06-03T10:00:00Z'
 - path: docs/specifications/contracts/datacontract.yaml
-  sha256: a9880f62abd6e75be00efdae9f22c069553f706d55cba309f5221120e4e11143
-  mtime: '2026-06-03T10:30:00Z'
+  sha256: 35537e97b0dddce2a941f287f091bf94e425f68b239994ad355dc8194673cf16
+  mtime: '2026-06-03T11:00:00Z'
