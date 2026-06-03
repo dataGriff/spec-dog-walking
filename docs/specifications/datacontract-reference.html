@@ -2183,7 +2183,7 @@ video {
       <span class="text-green-600">Yes</span>
       
     </td>
-    <td class="px-4 py-4 text-sm text-gray-500">Invite status at emission (pending / accepted / expired).
+    <td class="px-4 py-4 text-sm text-gray-500">Invite status at emission.
     </td>
   </tr>
     
@@ -2674,7 +2674,7 @@ video {
       <span class="text-gray-400">No</span>
       
     </td>
-    <td class="px-4 py-4 text-sm text-gray-500">Closed-set breed (see Breed enum in openapi/asyncapi). Null when unknown.
+    <td class="px-4 py-4 text-sm text-gray-500">Dog breed (UK Kennel Club list, plus mixed/unknown). Open enum — see openapi.yaml Breed schema for the authoritative full list.
     </td>
   </tr>
     
@@ -3123,7 +3123,7 @@ video {
       <span class="text-green-600">Yes</span>
       
     </td>
-    <td class="px-4 py-4 text-sm text-gray-500">Who created the walk (walker / owner).
+    <td class="px-4 py-4 text-sm text-gray-500">Who created the walk.
     </td>
   </tr>
     
@@ -3177,7 +3177,7 @@ video {
       <span class="text-green-600">Yes</span>
       
     </td>
-    <td class="px-4 py-4 text-sm text-gray-500">Walk status at emission (requested / scheduled / declined / cancelled / completed).
+    <td class="px-4 py-4 text-sm text-gray-500">Walk status at emission.
     </td>
   </tr>
     
@@ -3680,7 +3680,7 @@ video {
       <span class="text-green-600">Yes</span>
       
     </td>
-    <td class="px-4 py-4 text-sm text-gray-500">MIME type (image/jpeg
+    <td class="px-4 py-4 text-sm text-gray-500">MIME type of the stored bytes.
     </td>
   </tr>
     
@@ -4621,7 +4621,7 @@ video {
       <span class="text-green-600">Yes</span>
       
     </td>
-    <td class="px-4 py-4 text-sm text-gray-500">Invoice status at emission (issued / paid).
+    <td class="px-4 py-4 text-sm text-gray-500">Invoice status at emission.
     </td>
   </tr>
     
@@ -5333,7 +5333,7 @@ video {
       </div>
 
       <div class="mt-6 text-sm text-gray-400">
-        Created at 03 Jun 2026 16:24:36 UTC with <a href="https://cli.datacontract.com" class="text-gray-400 hover:text-gray-500">Data Contract CLI</a> v0.12.1
+        Created at 03 Jun 2026 16:35:36 UTC with <a href="https://cli.datacontract.com" class="text-gray-400 hover:text-gray-500">Data Contract CLI</a> v0.12.1
       </div>
 
     </div>
@@ -5421,7 +5421,7 @@ schema:
     logicalType: string
     required: true
   - name: status
-    description: Invite status at emission (pending / accepted / expired).
+    description: Invite status at emission.
     logicalType: string
     required: true
   - name: expiresAt
@@ -5498,8 +5498,8 @@ schema:
     logicalType: string
     required: true
   - name: breed
-    description: Closed-set breed (see Breed enum in openapi/asyncapi). Null when
-      unknown.
+    description: Dog breed (UK Kennel Club list, plus mixed/unknown). Open enum —
+      see openapi.yaml Breed schema for the authoritative full list.
     logicalType: string
     required: false
   - name: ageYears
@@ -5570,7 +5570,7 @@ schema:
     logicalType: timestamp
     required: true
   - name: requesterRole
-    description: Who created the walk (walker / owner).
+    description: Who created the walk.
     logicalType: string
     required: true
   - name: notes
@@ -5578,8 +5578,7 @@ schema:
     logicalType: string
     required: false
   - name: status
-    description: Walk status at emission (requested / scheduled / declined / cancelled
-      / completed).
+    description: Walk status at emission.
     logicalType: string
     required: true
   - name: declinedReason
@@ -5653,7 +5652,7 @@ schema:
         logicalType: string
         required: true
       - name: contentType
-        description: MIME type (image/jpeg
+        description: MIME type of the stored bytes.
         logicalType: string
         required: true
       - name: sizeBytes
@@ -5785,7 +5784,7 @@ schema:
     logicalType: integer
     required: true
   - name: status
-    description: Invoice status at emission (issued / paid).
+    description: Invoice status at emission.
     logicalType: string
     required: true
   - name: paidAt

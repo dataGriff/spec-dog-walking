@@ -55,7 +55,7 @@ schema:
       - { name: inviteId, description: Invite identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: walkerId, description: Walker who issued the invite., logicalType: string, physicalType: uuid, required: true }
       - { name: email, description: Prospective client's email., logicalType: string, required: true }
-      - { name: status, description: Invite status at emission (pending / accepted / expired)., logicalType: string, required: true }
+      - { name: status, description: Invite status at emission., logicalType: string, required: true, enum: [pending, accepted, expired], ref: '#/components/schemas/InviteStatus' }
       - { name: expiresAt, description: Timestamp at which the invite auto-transitions to expired., logicalType: timestamp, required: true }
       - { name: createdAt, description: When the invite was queued., logicalType: timestamp, required: true }
       - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
@@ -84,7 +84,223 @@ schema:
       - { name: dogId, description: Dog identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: ownerId, description: Client (owner) identifier., logicalType: string, physicalType: uuid, required: true }
       - { name: name, description: Dog's name., logicalType: string, required: true }
-      - { name: breed, description: Closed-set breed (see Breed enum in openapi/asyncapi). Null when unknown., logicalType: string, required: false }
+      - name: breed
+        description: Dog breed (UK Kennel Club list, plus mixed/unknown). Open enum — see openapi.yaml Breed schema for the authoritative full list.
+        logicalType: string
+        required: false
+        ref: '#/components/schemas/Breed'
+        enum:
+          - afghan-hound
+          - azawakh
+          - basenji
+          - basset-bleu-de-gascogne
+          - basset-fauve-de-bretagne
+          - basset-griffon-vendeen-grand
+          - basset-griffon-vendeen-petit
+          - basset-hound
+          - bavarian-mountain-hound
+          - beagle
+          - bloodhound
+          - borzoi
+          - cirneco-dell-etna
+          - dachshund-long-haired
+          - dachshund-miniature-long-haired
+          - dachshund-miniature-smooth-haired
+          - dachshund-miniature-wire-haired
+          - dachshund-smooth-haired
+          - dachshund-wire-haired
+          - deerhound
+          - finnish-spitz
+          - foxhound
+          - grand-bleu-de-gascogne
+          - greyhound
+          - hamiltonstovare
+          - ibizan-hound
+          - irish-wolfhound
+          - norwegian-elkhound
+          - otterhound
+          - pharaoh-hound
+          - portuguese-podengo
+          - rhodesian-ridgeback
+          - saluki
+          - segugio-italiano
+          - sloughi
+          - whippet
+          - alaskan-malamute
+          - bernese-mountain-dog
+          - bouvier-des-flandres
+          - boxer
+          - bullmastiff
+          - canadian-eskimo-dog
+          - dobermann
+          - dogue-de-bordeaux
+          - entlebucher-mountain-dog
+          - german-pinscher
+          - giant-schnauzer
+          - great-dane
+          - greenland-dog
+          - hovawart
+          - kangal-shepherd-dog
+          - leonberger
+          - mastiff
+          - neapolitan-mastiff
+          - newfoundland
+          - portuguese-water-dog
+          - pyrenean-mastiff
+          - pyrenean-mountain-dog
+          - rottweiler
+          - russian-black-terrier
+          - st-bernard
+          - siberian-husky
+          - tibetan-mastiff
+          - airedale-terrier
+          - australian-terrier
+          - bedlington-terrier
+          - border-terrier
+          - bull-terrier
+          - bull-terrier-miniature
+          - cairn-terrier
+          - cesky-terrier
+          - dandie-dinmont-terrier
+          - fox-terrier-smooth
+          - fox-terrier-wire
+          - glen-of-imaal-terrier
+          - irish-terrier
+          - jack-russell-terrier
+          - kerry-blue-terrier
+          - lakeland-terrier
+          - manchester-terrier
+          - norfolk-terrier
+          - norwich-terrier
+          - parson-russell-terrier
+          - scottish-terrier
+          - sealyham-terrier
+          - skye-terrier
+          - soft-coated-wheaten-terrier
+          - staffordshire-bull-terrier
+          - welsh-terrier
+          - west-highland-white-terrier
+          - affenpinscher
+          - australian-silky-terrier
+          - bichon-frise
+          - bolognese
+          - cavalier-king-charles-spaniel
+          - chihuahua-long-coat
+          - chihuahua-smooth-coat
+          - chinese-crested
+          - coton-de-tulear
+          - english-toy-terrier
+          - griffon-bruxellois
+          - havanese
+          - italian-greyhound
+          - japanese-chin
+          - king-charles-spaniel
+          - lowchen
+          - maltese
+          - miniature-pinscher
+          - papillon
+          - pekingese
+          - pomeranian
+          - pug
+          - russian-toy
+          - yorkshire-terrier
+          - akita
+          - boston-terrier
+          - bulldog
+          - canaan-dog
+          - chow-chow
+          - dalmatian
+          - eurasier
+          - french-bulldog
+          - german-spitz-klein
+          - german-spitz-mittel
+          - japanese-shiba-inu
+          - japanese-spitz
+          - keeshond
+          - kooikerhondje
+          - lhasa-apso
+          - mexican-hairless
+          - miniature-schnauzer
+          - poodle-miniature
+          - poodle-standard
+          - poodle-toy
+          - schipperke
+          - schnauzer
+          - shar-pei
+          - shih-tzu
+          - tibetan-spaniel
+          - tibetan-terrier
+          - xoloitzcuintle
+          - bracco-italiano
+          - brittany
+          - chesapeake-bay-retriever
+          - clumber-spaniel
+          - cocker-spaniel
+          - cocker-spaniel-american
+          - curly-coated-retriever
+          - english-setter
+          - english-springer-spaniel
+          - field-spaniel
+          - flat-coated-retriever
+          - german-longhaired-pointer
+          - german-shorthaired-pointer
+          - german-wirehaired-pointer
+          - golden-retriever
+          - gordon-setter
+          - hungarian-vizsla
+          - hungarian-wirehaired-vizsla
+          - irish-red-and-white-setter
+          - irish-setter
+          - irish-water-spaniel
+          - italian-spinone
+          - korthals-griffon
+          - labrador-retriever
+          - lagotto-romagnolo
+          - large-munsterlander
+          - nova-scotia-duck-tolling-retriever
+          - pointer
+          - small-munsterlander
+          - spanish-water-dog
+          - sussex-spaniel
+          - weimaraner
+          - welsh-springer-spaniel
+          - anatolian-shepherd-dog
+          - australian-cattle-dog
+          - australian-shepherd
+          - bearded-collie
+          - beauceron
+          - belgian-shepherd-dog-groenendael
+          - belgian-shepherd-dog-laekenois
+          - belgian-shepherd-dog-malinois
+          - belgian-shepherd-dog-tervueren
+          - bergamasco
+          - border-collie
+          - briard
+          - catalan-sheepdog
+          - collie-rough
+          - collie-smooth
+          - estrela-mountain-dog
+          - finnish-lapphund
+          - german-shepherd
+          - hungarian-kuvasz
+          - hungarian-puli
+          - hungarian-pumi
+          - icelandic-sheepdog
+          - komondor
+          - lancashire-heeler
+          - maremma-sheepdog
+          - mudi
+          - norwegian-buhund
+          - old-english-sheepdog
+          - polish-lowland-sheepdog
+          - samoyed
+          - shetland-sheepdog
+          - swedish-lapphund
+          - swedish-vallhund
+          - welsh-corgi-cardigan
+          - welsh-corgi-pembroke
+          - mixed
+          - unknown
       - { name: ageYears, description: Age in whole years., logicalType: integer, required: false }
       - { name: medication, description: Free-text medication notes., logicalType: string, required: false }
       - { name: vetName, description: Vet practice name., logicalType: string, required: false }
@@ -108,11 +324,11 @@ schema:
       - { name: walkType, description: Walk type matching the rate card., logicalType: string, required: true }
       - { name: durationMinutes, description: Walk duration in minutes., logicalType: integer, required: true }
       - { name: startAt, description: Scheduled start timestamp., logicalType: timestamp, required: true }
-      - { name: requesterRole, description: Who created the walk (walker / owner)., logicalType: string, required: true }
+      - { name: requesterRole, description: Who created the walk., logicalType: string, required: true, enum: [walker, owner], ref: '#/components/schemas/Role' }
       - { name: notes, description: Free-text booking notes., logicalType: string, required: false }
-      - { name: status, description: Walk status at emission (requested / scheduled / declined / cancelled / completed)., logicalType: string, required: true }
+      - { name: status, description: Walk status at emission., logicalType: string, required: true, enum: [requested, scheduled, declined, cancelled, completed], ref: '#/components/schemas/WalkStatus' }
       - { name: declinedReason, description: Walker's decline reason (when status=declined)., logicalType: string, required: false }
-      - { name: cancelledByRole, description: Who cancelled the walk (when status=cancelled)., logicalType: string, required: false }
+      - { name: cancelledByRole, description: Who cancelled the walk (when status=cancelled)., logicalType: string, required: false, enum: [walker, owner], ref: '#/components/schemas/Role' }
       - { name: completedAt, description: Completion timestamp (when status=completed)., logicalType: timestamp, required: false }
       - { name: createdAt, description: When the walk was first recorded., logicalType: timestamp, required: true }
       - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
@@ -139,7 +355,7 @@ schema:
           properties:
             - { name: id, description: Photo identifier., logicalType: string, physicalType: uuid, required: true }
             - { name: walkUpdateId, description: FK to parent WalkUpdate., logicalType: string, physicalType: uuid, required: true }
-            - { name: contentType, description: MIME type (image/jpeg, image/png, image/heic)., logicalType: string, required: true }
+            - { name: contentType, description: MIME type of the stored bytes., logicalType: string, required: true, enum: [image/jpeg, image/png, image/heic], ref: '#/components/schemas/PhotoContentType' }
             - { name: sizeBytes, description: Stored size in bytes., logicalType: integer, required: true }
             - { name: capturedAt, description: Capture time from EXIF, if present., logicalType: timestamp, required: false }
             - { name: createdAt, description: When the photo was uploaded., logicalType: timestamp, required: true }
@@ -188,7 +404,7 @@ schema:
       - { name: periodEnd, description: Billing period end date., logicalType: date, required: true }
       - { name: currency, description: ISO 4217 currency code copied from the RateCard at issue., logicalType: string, required: true }
       - { name: totalCents, description: Total amount in minor units (sum of line-item priceCents)., logicalType: integer, required: true }
-      - { name: status, description: Invoice status at emission (issued / paid)., logicalType: string, required: true }
+      - { name: status, description: Invoice status at emission., logicalType: string, required: true, enum: [issued, paid], ref: '#/components/schemas/InvoiceStatus' }
       - { name: paidAt, description: Payment timestamp (when status=paid)., logicalType: timestamp, required: false }
       - { name: paidVia, description: Payment channel description (when status=paid)., logicalType: string, required: false }
       - { name: tipCents, description: Tip amount in minor units (defaults to 0 at issue)., logicalType: integer, required: true }
