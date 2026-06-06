@@ -59,9 +59,19 @@ tasks:
       - datacontract export html docs/specifications/contracts/datacontract.yaml --output docs/specifications/datacontract-reference.html
 
   docs:generate:
-    desc: Generate the domain overview HTML page and the data contract HTML reference from OpenAPI, AsyncAPI, and Data Contract specs
+    desc: 'Generate the domain overview HTML page and the data contract HTML reference. Delegates to the suite-side overview renderer (resolves the suite via DOMAIN_SPEC_SUITE_ROOT or sibling ../domain-spec-suite/).'
+    vars:
+      SUITE: '{{.DOMAIN_SPEC_SUITE_ROOT | default "../domain-spec-suite"}}'
     cmds:
-      - python3 scripts/generate_domain_overview.py
+      - |
+        if [ ! -f "{{.SUITE}}/scripts/generate_domain_overview.py" ]; then
+          echo "docs:generate: suite not found at '{{.SUITE}}'." >&2
+          echo "               set DOMAIN_SPEC_SUITE_ROOT to its location, or clone the" >&2
+          echo "               domain-spec-suite as a sibling directory:" >&2
+          echo "                 git clone https://github.com/dataGriff/domain-spec-suite ../domain-spec-suite" >&2
+          exit 1
+        fi
+        mise exec -- python3 "{{.SUITE}}/scripts/generate_domain_overview.py" --repo .
       - task: docs:render-datacontract
 
   docs:serve:
