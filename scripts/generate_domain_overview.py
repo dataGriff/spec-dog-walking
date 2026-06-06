@@ -57,6 +57,23 @@ METHOD_COLORS = {
 # domain entities, and are excluded from entity and ERD sections.
 _NON_ENTITY_SUFFIXES = ("Request", "Response", "Error", "List", "Pagination")
 
+# Above this count an enum's values are rendered inside a <details> collapsible,
+# and the heading carries an "open" badge instead of "closed".
+_ENUM_OPEN_THRESHOLD = 20
+
+
+def _collect_named_enums(openapi):
+    """Return {name: schema} for components.schemas entries that are enum-only
+    (type: string, has enum, no properties)."""
+    schemas = openapi.get("components", {}).get("schemas", {})
+    out = {}
+    for name, schema in schemas.items():
+        if not isinstance(schema, dict):
+            continue
+        if schema.get("type") == "string" and schema.get("enum") and not schema.get("properties"):
+            out[name] = schema
+    return out
+
 
 def method_badge(method):
     color = METHOD_COLORS.get(method.lower(), "#aaa")
@@ -125,45 +142,6 @@ def build_summary_section(openapi):
   <div class="description">{desc_html}</div>
   {contact_html}
   {"<h3>Servers</h3><table><thead><tr><th>URL</th><th>Description</th></tr></thead><tbody>" + server_rows + "</tbody></table>" if server_rows else ""}
-</section>
-"""
-
-
-def _extract_roles(openapi):
-    """Extract role enum values from the RegisterRequest schema."""
-    schemas = openapi.get("components", {}).get("schemas", {})
-    register = schemas.get("RegisterRequest", {})
-    props = register.get("properties", {})
-    role_prop = props.get("role", {})
-    return role_prop.get("enum", [])
-
-
-def build_roles_section(openapi):
-    roles = _extract_roles(openapi)
-    if not roles:
-        return ""
-
-    # Static descriptions — these come from what is defined in the specs.
-    role_descriptions = {
-        "contributor": "Can add items and edit/remove their own items.",
-        "viewer": "Read-only access to items.",
-    }
-
-    rows = "".join(
-        f"<tr><td><code>{h(r)}</code></td><td>{h(role_descriptions.get(r, ''))}</td></tr>"
-        for r in roles
-    )
-
-    return f"""
-<section id="roles" class="card">
-  <h2>👤 Roles</h2>
-  <table>
-    <thead><tr><th>Role</th><th>Description</th></tr></thead>
-    <tbody>{rows}</tbody>
-  </table>
-  <p class="note">All protected routes require a <code>Bearer</code> JWT in the
-  <code>Authorization</code> header. Unauthenticated requests return
-  <code>401 Unauthorized</code>.</p>
 </section>
 """
 
@@ -349,12 +327,61 @@ def _schema_type(prop):
     return display
 
 
+def build_enumerations_section(openapi):
+    enums = _collect_named_enums(openapi)
+    if not enums:
+        return ""
+
+    blocks = []
+    for name, schema in enums.items():
+        values = schema.get("enum", [])
+        description = (schema.get("description") or "").strip()
+        is_open = len(values) > _ENUM_OPEN_THRESHOLD
+        badge_class = "enum-open" if is_open else "enum-closed"
+        badge_text = "open" if is_open else "closed"
+
+        chips = " ".join(f"<code>{h(v)}</code>" for v in values)
+        if is_open:
+            values_html = (
+                f'<details class="enum-values">'
+                f'<summary>Show all {len(values)} values</summary>'
+                f'<div class="enum-chips">{chips}</div>'
+                f'</details>'
+            )
+        else:
+            values_html = f'<div class="enum-chips">{chips}</div>'
+
+        desc_html = f"<p>{h(description)}</p>" if description else ""
+
+        blocks.append(
+            f'<div class="enum-block">'
+            f'<h3><code>{h(name)}</code> '
+            f'<span class="badge {badge_class}">{badge_text}</span></h3>'
+            f'{desc_html}'
+            f'{values_html}'
+            f'</div>'
+        )
+
+    return f"""
+<section id="enumerations" class="card">
+  <h2>🔤 Enumerations</h2>
+  <p>Named enum schemas authored in <code>openapi.yaml</code>. Closed enums are
+  fixed sets; open enums (e.g. <code>Breed</code>) carry the authoritative full
+  list in the contract and may grow on a minor-version bump.</p>
+  {"".join(blocks)}
+</section>
+"""
+
+
 def build_entities_section(openapi):
     schemas = openapi.get("components", {}).get("schemas", {})
-    # Show main domain entities only (skip request/response wrappers)
+    enum_names = set(_collect_named_enums(openapi).keys())
+    # Show main domain entities only (skip request/response wrappers and
+    # named enum schemas, which render in the Enumerations section).
     entity_names = [
         name for name in schemas
         if not any(name.endswith(s) for s in _NON_ENTITY_SUFFIXES)
+        and name not in enum_names
     ]
 
     blocks = []
@@ -420,10 +447,12 @@ def build_data_contract_section(datacontract):
 def build_erd_section(openapi):
     """Generate a Mermaid ER diagram from OpenAPI component schemas."""
     schemas = openapi.get("components", {}).get("schemas", {})
+    enum_names = set(_collect_named_enums(openapi).keys())
 
     entity_names = {
         name for name in schemas
         if not any(name.endswith(s) for s in _NON_ENTITY_SUFFIXES)
+        and name not in enum_names
     }
 
     lines = ["erDiagram"]
@@ -472,10 +501,10 @@ def build_page(openapi, asyncapi, datacontract):
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
     summary = build_summary_section(openapi)
-    roles = build_roles_section(openapi)
     operations = build_operations_section(openapi)
     events = build_events_section(asyncapi)
     correlation = build_event_operation_correlation(openapi, asyncapi)
+    enumerations = build_enumerations_section(openapi)
     entities = build_entities_section(openapi)
     contract = build_data_contract_section(datacontract)
     erd = build_erd_section(openapi)
@@ -637,6 +666,15 @@ def build_page(openapi, asyncapi, datacontract):
     .auth-public   {{ background: #1c2c42; color: #58a6ff; border: 1px solid #388bfd; }}
     .tag-badge     {{ background: #21262d; color: var(--muted); border: 1px solid var(--border); }}
     .domain-version {{ background: #21262d; color: var(--muted); border: 1px solid var(--border); font-size: 12px; }}
+    .enum-closed   {{ background: #21262d; color: var(--muted); border: 1px solid var(--border); margin-left: 6px; vertical-align: middle; }}
+    .enum-open     {{ background: #1f3a24; color: #56d364; border: 1px solid #238636; margin-left: 6px; vertical-align: middle; }}
+
+    /* ── Enum value chips ── */
+    .enum-block    {{ margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px dashed var(--border); }}
+    .enum-block:last-child {{ border-bottom: none; }}
+    .enum-chips    {{ display: flex; flex-wrap: wrap; gap: 4px; margin-top: 0.25rem; }}
+    .enum-values   {{ margin-top: 0.25rem; }}
+    .enum-values summary {{ cursor: pointer; color: var(--accent); font-size: 12px; }}
 
     /* ── Summary header ── */
     .summary-header {{
@@ -705,10 +743,10 @@ def build_page(openapi, asyncapi, datacontract):
 
 <nav id="toc">
   <a href="#summary">📋 Summary</a>
-  <a href="#roles">👤 Roles</a>
   <a href="#operations">🔌 Operations</a>
   <a href="#events">📡 Events</a>
   <a href="#event-correlation">🔗 Correlation</a>
+  <a href="#enumerations">🔤 Enumerations</a>
   <a href="#entities">🗂️ Entities</a>
   <a href="#erd">🏗️ ERD</a>
   <a href="#data-contract">📄 Data Contract</a>
@@ -716,10 +754,10 @@ def build_page(openapi, asyncapi, datacontract):
 
 <main id="content">
   {summary}
-  {roles}
   {operations}
   {events}
   {correlation}
+  {enumerations}
   {entities}
   {erd}
   {contract}

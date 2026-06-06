@@ -155,6 +155,15 @@
     .auth-public   { background: #1c2c42; color: #58a6ff; border: 1px solid #388bfd; }
     .tag-badge     { background: #21262d; color: var(--muted); border: 1px solid var(--border); }
     .domain-version { background: #21262d; color: var(--muted); border: 1px solid var(--border); font-size: 12px; }
+    .enum-closed   { background: #21262d; color: var(--muted); border: 1px solid var(--border); margin-left: 6px; vertical-align: middle; }
+    .enum-open     { background: #1f3a24; color: #56d364; border: 1px solid #238636; margin-left: 6px; vertical-align: middle; }
+
+    /* ── Enum value chips ── */
+    .enum-block    { margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px dashed var(--border); }
+    .enum-block:last-child { border-bottom: none; }
+    .enum-chips    { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 0.25rem; }
+    .enum-values   { margin-top: 0.25rem; }
+    .enum-values summary { cursor: pointer; color: var(--accent); font-size: 12px; }
 
     /* ── Summary header ── */
     .summary-header {
@@ -218,15 +227,15 @@
 
 <header id="page-header">
   <h1>Dog Walking API — Domain Overview</h1>
-  <p class="subtitle">Deterministically generated from OpenAPI, AsyncAPI &amp; Data Contract · 2026-06-01 18:17 UTC</p>
+  <p class="subtitle">Deterministically generated from OpenAPI, AsyncAPI &amp; Data Contract · 2026-06-06 11:26 UTC</p>
 </header>
 
 <nav id="toc">
   <a href="#summary">📋 Summary</a>
-  <a href="#roles">👤 Roles</a>
   <a href="#operations">🔌 Operations</a>
   <a href="#events">📡 Events</a>
   <a href="#event-correlation">🔗 Correlation</a>
+  <a href="#enumerations">🔤 Enumerations</a>
   <a href="#entities">🗂️ Entities</a>
   <a href="#erd">🏗️ ERD</a>
   <a href="#data-contract">📄 Data Contract</a>
@@ -245,7 +254,6 @@
   <h3>Servers</h3><table><thead><tr><th>URL</th><th>Description</th></tr></thead><tbody><tr><td>http://localhost:3000</td><td>Local development server</td></tr></tbody></table>
 </section>
 
-  
   
 <section id="operations" class="card">
   <h2>🔌 API Operations</h2>
@@ -318,6 +326,22 @@
 </section>
 
   
+<section id="enumerations" class="card">
+  <h2>🔤 Enumerations</h2>
+  <p>Named enum schemas authored in <code>openapi.yaml</code>. Closed enums are
+  fixed sets; open enums (e.g. <code>Breed</code>) carry the authoritative full
+  list in the contract and may grow on a minor-version bump.</p>
+  <div class="enum-block"><h3><code>Role</code> <span class="badge enum-closed">closed</span></h3><p>User role. Closed enum — `walker` (single walker per domain instance) and `owner` (dog owners / clients).</p><div class="enum-chips"><code>walker</code> <code>owner</code></div></div><div class="enum-block"><h3><code>WalkStatus</code> <span class="badge enum-closed">closed</span></h3><p>Lifecycle state of a Walk. Closed enum. Transitions are governed by the Walk Status Lifecycle in domain-model.md.</p><div class="enum-chips"><code>requested</code> <code>scheduled</code> <code>declined</code> <code>cancelled</code> <code>completed</code></div></div><div class="enum-block"><h3><code>InvoiceStatus</code> <span class="badge enum-closed">closed</span></h3><p>Lifecycle state of an Invoice. Closed enum.</p><div class="enum-chips"><code>issued</code> <code>paid</code></div></div><div class="enum-block"><h3><code>InviteStatus</code> <span class="badge enum-closed">closed</span></h3><p>Lifecycle state of a client Invite. Closed enum.</p><div class="enum-chips"><code>pending</code> <code>accepted</code> <code>expired</code></div></div><div class="enum-block"><h3><code>PasswordResetTokenStatus</code> <span class="badge enum-closed">closed</span></h3><p>Lifecycle state of a password-reset token. Closed enum.</p><div class="enum-chips"><code>pending</code> <code>used</code> <code>expired</code></div></div><div class="enum-block"><h3><code>PhotoContentType</code> <span class="badge enum-closed">closed</span></h3><p>Permitted MIME types for walk-update photos. Closed enum.</p><div class="enum-chips"><code>image/jpeg</code> <code>image/png</code> <code>image/heic</code></div></div><div class="enum-block"><h3><code>Breed</code> <span class="badge enum-open">open</span></h3><p>Authoritative list of dog breeds the API recognises. Sourced
+from the UK Kennel Club's recognised-breeds list across the
+seven groups (Hound, Working, Terrier, Toy, Utility, Gundog,
+Pastoral), with `mixed` and `unknown` fallbacks so the field
+is always answerable. This is an **open enum** (per the
+`### Breed (open)` marker in domain-model.md) — adding a
+breed here is a minor version bump per NFR-COMPAT-001 and
+does not require a domain-model change.</p><details class="enum-values"><summary>Show all 211 values</summary><div class="enum-chips"><code>afghan-hound</code> <code>azawakh</code> <code>basenji</code> <code>basset-bleu-de-gascogne</code> <code>basset-fauve-de-bretagne</code> <code>basset-griffon-vendeen-grand</code> <code>basset-griffon-vendeen-petit</code> <code>basset-hound</code> <code>bavarian-mountain-hound</code> <code>beagle</code> <code>bloodhound</code> <code>borzoi</code> <code>cirneco-dell-etna</code> <code>dachshund-long-haired</code> <code>dachshund-miniature-long-haired</code> <code>dachshund-miniature-smooth-haired</code> <code>dachshund-miniature-wire-haired</code> <code>dachshund-smooth-haired</code> <code>dachshund-wire-haired</code> <code>deerhound</code> <code>finnish-spitz</code> <code>foxhound</code> <code>grand-bleu-de-gascogne</code> <code>greyhound</code> <code>hamiltonstovare</code> <code>ibizan-hound</code> <code>irish-wolfhound</code> <code>norwegian-elkhound</code> <code>otterhound</code> <code>pharaoh-hound</code> <code>portuguese-podengo</code> <code>rhodesian-ridgeback</code> <code>saluki</code> <code>segugio-italiano</code> <code>sloughi</code> <code>whippet</code> <code>alaskan-malamute</code> <code>bernese-mountain-dog</code> <code>bouvier-des-flandres</code> <code>boxer</code> <code>bullmastiff</code> <code>canadian-eskimo-dog</code> <code>dobermann</code> <code>dogue-de-bordeaux</code> <code>entlebucher-mountain-dog</code> <code>german-pinscher</code> <code>giant-schnauzer</code> <code>great-dane</code> <code>greenland-dog</code> <code>hovawart</code> <code>kangal-shepherd-dog</code> <code>leonberger</code> <code>mastiff</code> <code>neapolitan-mastiff</code> <code>newfoundland</code> <code>portuguese-water-dog</code> <code>pyrenean-mastiff</code> <code>pyrenean-mountain-dog</code> <code>rottweiler</code> <code>russian-black-terrier</code> <code>st-bernard</code> <code>siberian-husky</code> <code>tibetan-mastiff</code> <code>airedale-terrier</code> <code>australian-terrier</code> <code>bedlington-terrier</code> <code>border-terrier</code> <code>bull-terrier</code> <code>bull-terrier-miniature</code> <code>cairn-terrier</code> <code>cesky-terrier</code> <code>dandie-dinmont-terrier</code> <code>fox-terrier-smooth</code> <code>fox-terrier-wire</code> <code>glen-of-imaal-terrier</code> <code>irish-terrier</code> <code>jack-russell-terrier</code> <code>kerry-blue-terrier</code> <code>lakeland-terrier</code> <code>manchester-terrier</code> <code>norfolk-terrier</code> <code>norwich-terrier</code> <code>parson-russell-terrier</code> <code>scottish-terrier</code> <code>sealyham-terrier</code> <code>skye-terrier</code> <code>soft-coated-wheaten-terrier</code> <code>staffordshire-bull-terrier</code> <code>welsh-terrier</code> <code>west-highland-white-terrier</code> <code>affenpinscher</code> <code>australian-silky-terrier</code> <code>bichon-frise</code> <code>bolognese</code> <code>cavalier-king-charles-spaniel</code> <code>chihuahua-long-coat</code> <code>chihuahua-smooth-coat</code> <code>chinese-crested</code> <code>coton-de-tulear</code> <code>english-toy-terrier</code> <code>griffon-bruxellois</code> <code>havanese</code> <code>italian-greyhound</code> <code>japanese-chin</code> <code>king-charles-spaniel</code> <code>lowchen</code> <code>maltese</code> <code>miniature-pinscher</code> <code>papillon</code> <code>pekingese</code> <code>pomeranian</code> <code>pug</code> <code>russian-toy</code> <code>yorkshire-terrier</code> <code>akita</code> <code>boston-terrier</code> <code>bulldog</code> <code>canaan-dog</code> <code>chow-chow</code> <code>dalmatian</code> <code>eurasier</code> <code>french-bulldog</code> <code>german-spitz-klein</code> <code>german-spitz-mittel</code> <code>japanese-shiba-inu</code> <code>japanese-spitz</code> <code>keeshond</code> <code>kooikerhondje</code> <code>lhasa-apso</code> <code>mexican-hairless</code> <code>miniature-schnauzer</code> <code>poodle-miniature</code> <code>poodle-standard</code> <code>poodle-toy</code> <code>schipperke</code> <code>schnauzer</code> <code>shar-pei</code> <code>shih-tzu</code> <code>tibetan-spaniel</code> <code>tibetan-terrier</code> <code>xoloitzcuintle</code> <code>bracco-italiano</code> <code>brittany</code> <code>chesapeake-bay-retriever</code> <code>clumber-spaniel</code> <code>cocker-spaniel</code> <code>cocker-spaniel-american</code> <code>curly-coated-retriever</code> <code>english-setter</code> <code>english-springer-spaniel</code> <code>field-spaniel</code> <code>flat-coated-retriever</code> <code>german-longhaired-pointer</code> <code>german-shorthaired-pointer</code> <code>german-wirehaired-pointer</code> <code>golden-retriever</code> <code>gordon-setter</code> <code>hungarian-vizsla</code> <code>hungarian-wirehaired-vizsla</code> <code>irish-red-and-white-setter</code> <code>irish-setter</code> <code>irish-water-spaniel</code> <code>italian-spinone</code> <code>korthals-griffon</code> <code>labrador-retriever</code> <code>lagotto-romagnolo</code> <code>large-munsterlander</code> <code>nova-scotia-duck-tolling-retriever</code> <code>pointer</code> <code>small-munsterlander</code> <code>spanish-water-dog</code> <code>sussex-spaniel</code> <code>weimaraner</code> <code>welsh-springer-spaniel</code> <code>anatolian-shepherd-dog</code> <code>australian-cattle-dog</code> <code>australian-shepherd</code> <code>bearded-collie</code> <code>beauceron</code> <code>belgian-shepherd-dog-groenendael</code> <code>belgian-shepherd-dog-laekenois</code> <code>belgian-shepherd-dog-malinois</code> <code>belgian-shepherd-dog-tervueren</code> <code>bergamasco</code> <code>border-collie</code> <code>briard</code> <code>catalan-sheepdog</code> <code>collie-rough</code> <code>collie-smooth</code> <code>estrela-mountain-dog</code> <code>finnish-lapphund</code> <code>german-shepherd</code> <code>hungarian-kuvasz</code> <code>hungarian-puli</code> <code>hungarian-pumi</code> <code>icelandic-sheepdog</code> <code>komondor</code> <code>lancashire-heeler</code> <code>maremma-sheepdog</code> <code>mudi</code> <code>norwegian-buhund</code> <code>old-english-sheepdog</code> <code>polish-lowland-sheepdog</code> <code>samoyed</code> <code>shetland-sheepdog</code> <code>swedish-lapphund</code> <code>swedish-vallhund</code> <code>welsh-corgi-cardigan</code> <code>welsh-corgi-pembroke</code> <code>mixed</code> <code>unknown</code></div></details></div>
+</section>
+
+  
 <section id="entities" class="card">
   <h2>🗂️ Entity Schemas</h2>
   
@@ -330,13 +354,13 @@
 <h3><code>User</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>email</code></td><td>string(email)</td><td>✓</td><td></td></tr><tr><td><code>passwordHash</code></td><td>string</td><td></td><td>Never returned in API responses; included here for schema completeness.</td></tr><tr><td><code>role</code></td><td>enum(walker, owner)</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>email</code></td><td>string(email)</td><td>✓</td><td></td></tr><tr><td><code>passwordHash</code></td><td>string</td><td></td><td>Never returned in API responses; included here for schema completeness.</td></tr><tr><td><code>role</code></td><td>→ Role</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>UserSummary</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>email</code></td><td>string(email)</td><td>✓</td><td></td></tr><tr><td><code>role</code></td><td>enum(walker, owner)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>email</code></td><td>string(email)</td><td>✓</td><td></td></tr><tr><td><code>role</code></td><td>→ Role</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>Walker</code></h3>
@@ -354,13 +378,13 @@
 <h3><code>Invite</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkerId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>email</code></td><td>string(email)</td><td>✓</td><td></td></tr><tr><td><code>token</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>status</code></td><td>enum(pending, accepted, expired)</td><td>✓</td><td></td></tr><tr><td><code>expiresAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkerId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>email</code></td><td>string(email)</td><td>✓</td><td></td></tr><tr><td><code>token</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>status</code></td><td>→ InviteStatus</td><td>✓</td><td></td></tr><tr><td><code>expiresAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>PasswordResetToken</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>userId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>token</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>status</code></td><td>enum(pending, used, expired)</td><td>✓</td><td></td></tr><tr><td><code>expiresAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>userId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>token</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>status</code></td><td>→ PasswordResetTokenStatus</td><td>✓</td><td></td></tr><tr><td><code>expiresAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>Dog</code></h3>
@@ -372,7 +396,7 @@
 <h3><code>Walk</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>dogId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkerId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkType</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>durationMinutes</code></td><td>integer</td><td>✓</td><td></td></tr><tr><td><code>startAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>requesterRole</code></td><td>enum(walker, owner)</td><td>✓</td><td></td></tr><tr><td><code>notes</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>status</code></td><td>enum(requested, scheduled, declined, cancelled, completed)</td><td>✓</td><td></td></tr><tr><td><code>declinedReason</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>cancelledByRole</code></td><td>enum(walker, owner)</td><td></td><td></td></tr><tr><td><code>completedAt</code></td><td>string(date-time) | null</td><td></td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>dogId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkerId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkType</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>durationMinutes</code></td><td>integer</td><td>✓</td><td></td></tr><tr><td><code>startAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>requesterRole</code></td><td>→ Role</td><td>✓</td><td></td></tr><tr><td><code>notes</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>status</code></td><td>→ WalkStatus</td><td>✓</td><td></td></tr><tr><td><code>declinedReason</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>cancelledByRole</code></td><td> | null</td><td></td><td></td></tr><tr><td><code>completedAt</code></td><td>string(date-time) | null</td><td></td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>WalkUpdate</code></h3>
@@ -384,7 +408,7 @@
 <h3><code>Photo</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkUpdateId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>contentType</code></td><td>enum(image/jpeg, image/png, image/heic)</td><td>✓</td><td></td></tr><tr><td><code>sizeBytes</code></td><td>integer</td><td>✓</td><td></td></tr><tr><td><code>capturedAt</code></td><td>string(date-time) | null</td><td></td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkUpdateId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>contentType</code></td><td>→ PhotoContentType</td><td>✓</td><td></td></tr><tr><td><code>sizeBytes</code></td><td>integer</td><td>✓</td><td></td></tr><tr><td><code>capturedAt</code></td><td>string(date-time) | null</td><td></td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>RateCard</code></h3>
@@ -402,7 +426,7 @@
 <h3><code>Invoice</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkerId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>clientId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>periodStart</code></td><td>string(date)</td><td>✓</td><td></td></tr><tr><td><code>periodEnd</code></td><td>string(date)</td><td>✓</td><td></td></tr><tr><td><code>currency</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>totalCents</code></td><td>integer</td><td>✓</td><td></td></tr><tr><td><code>tipCents</code></td><td>integer</td><td>✓</td><td></td></tr><tr><td><code>status</code></td><td>enum(issued, paid)</td><td>✓</td><td></td></tr><tr><td><code>paidAt</code></td><td>string(date-time) | null</td><td></td><td></td></tr><tr><td><code>paidVia</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>lineItems</code></td><td>array</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkerId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>clientId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>periodStart</code></td><td>string(date)</td><td>✓</td><td></td></tr><tr><td><code>periodEnd</code></td><td>string(date)</td><td>✓</td><td></td></tr><tr><td><code>currency</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>totalCents</code></td><td>integer</td><td>✓</td><td></td></tr><tr><td><code>tipCents</code></td><td>integer</td><td>✓</td><td></td></tr><tr><td><code>status</code></td><td>→ InvoiceStatus</td><td>✓</td><td></td></tr><tr><td><code>paidAt</code></td><td>string(date-time) | null</td><td></td><td></td></tr><tr><td><code>paidVia</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>lineItems</code></td><td>array</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>InvoiceLineItem</code></h3>
@@ -566,7 +590,7 @@ erDiagram
     Invoice ||--o{ InvoiceLineItem : "owns"
     Walk ||--o{ InvoiceLineItem : "owns"
     User ||--o{ PasswordResetToken : "owns"
-    WalkUpdate ||--o{ Photo : "owns"
+    Walk ||--o{ Photo : "owns"
     Walker ||--o{ RateCard : "owns"
     RateCard ||--o{ RateCardEntry : "owns"
     Dog ||--o{ Walk : "owns"
@@ -595,7 +619,7 @@ erDiagram
 </main>
 
 <footer id="footer">
-  <p>Generated by <code>scripts/generate_domain_overview.py</code> · 2026-06-01 18:17 UTC</p>
+  <p>Generated by <code>scripts/generate_domain_overview.py</code> · 2026-06-06 11:26 UTC</p>
 </footer>
 
 <script type="module">
