@@ -8,9 +8,9 @@ name: Audit
 # checks locally. This workflow is the heavy authoritative gate.
 #
 # CI mirrors the local developer layout exactly: the suite is cloned
-# as a sibling of the spec repo, tools come from .mise.toml, and every
-# step goes through the same Taskfile targets the hooks and agents use
-# (no CI-only command paths).
+# as a sibling of the domain repo, tools come from .mise.toml, and
+# every step goes through the same Taskfile targets the hooks and
+# agents use (no CI-only command paths).
 
 on:
   push:
@@ -33,14 +33,15 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: spec-dog-walking
+        working-directory: domain-repo
     steps:
       - uses: actions/checkout@v4
         with:
-          path: spec-dog-walking
+          path: domain-repo
 
       # The Taskfile resolves the suite via DOMAIN_SPEC_SUITE_ROOT or
       # the sibling ../domain-spec-suite — same as a local checkout.
+      # Bootstrap: point `repository` at wherever your suite fork lives.
       - uses: actions/checkout@v4
         with:
           repository: dataGriff/domain-spec-suite

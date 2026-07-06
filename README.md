@@ -55,7 +55,7 @@ Run it:
 - Periodically as hygiene
 - On demand when something feels off
 
-Output lands at `docs/specifications/_review-<timestamp>.md` (each
+Output lands at `.spec-suite/reviews/<timestamp>.md` (each
 run is a new file; old reviews stay for reference). The review is
 read-only: the user reads findings and decides what to action via
 the normal update-mode flow.
@@ -68,7 +68,8 @@ the normal update-mode flow.
 |------|----------|
 | Product + domain requirements | `docs/specifications/*.md` |
 | API / event / data contracts | `docs/specifications/contracts/*.yaml` |
-| Blank spec templates | `docs/specifications/_template/` |
+| Implementation guide (for engineers + AI agents) | `.github/instructions/api-implementation.instructions.md` |
+| Suite bookkeeping (progress, sidecars, ambiguities, reviews) | `.spec-suite/` |
 | Contract linting + docs tasks | `Taskfile.yml` |
 | Published docs config | `mkdocs.yml`, `docs/`, `.github/workflows/docs.yml` |
 | PR-time conformance audit | `.github/workflows/audit.yml` |
@@ -87,5 +88,13 @@ audit phase is the source of truth for whether a spec set is
 
 To continue or update this spec set, invoke the
 `domain-orchestrator` skill from the suite — it reads
-`docs/specifications/_progress.yaml` and routes you to the right
+`.spec-suite/progress.yaml` and routes you to the right
 phase.
+
+## Implementing from this spec set
+
+Engineers and AI coding agents building a service from these specs
+should start at
+[`.github/instructions/api-implementation.instructions.md`](.github/instructions/api-implementation.instructions.md)
+— the technology-agnostic guide covering reading order, authority
+hierarchy, build workflow, and the verification loop.

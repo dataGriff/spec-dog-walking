@@ -1,8 +1,8 @@
 site_name: DogWalking Domain Docs
-site_url: https://example.com/dogwalking
+site_url: https://datagriff.github.io/spec-dog-walking
 docs_dir: docs
-repo_url: https://example.com/dogwalking
-repo_name: dogwalking
+repo_url: https://github.com/dataGriff/spec-dog-walking
+repo_name: dataGriff/spec-dog-walking
 
 theme:
   name: material
@@ -31,16 +31,21 @@ nav:
     - Sequence Diagrams: specifications/sequence-diagrams.md
     - Non-Functional Requirements: specifications/nfr.md
     - Acceptance Scenarios: specifications/acceptance-scenarios.md
+  # Generated HTML views live in docs/specifications/ but aren't MkDocs
+  # pages, so they're linked absolutely (via site_url) to stay valid
+  # from any page depth. Regenerate with `task docs:generate`.
+  - Generated Views:
+    - Domain Overview: https://datagriff.github.io/spec-dog-walking/specifications/domain-overview.html
+    - Traceability Matrix: https://datagriff.github.io/spec-dog-walking/specifications/traceability.html
+    - API Reference: https://datagriff.github.io/spec-dog-walking/specifications/api-reference.html
+    - AsyncAPI Reference: https://datagriff.github.io/spec-dog-walking/specifications/asyncapi-reference.html
+    - Data Contract Reference: https://datagriff.github.io/spec-dog-walking/specifications/datacontract-reference.html
 
-# Suite-internal state files under docs/ that should not appear in the
-# rendered site.
+# Suite bookkeeping now lives in `.spec-suite/` (outside `docs/`), so
+# nothing in `docs/specifications/` needs to be hidden from the site.
+# This list is intentionally empty; kept here so future spec-set
+# authors know where to add per-domain exclusions if they need them.
 exclude_docs: |
-  specifications/_ambiguities.md
-  specifications/_bootstrap.yaml
-  specifications/_progress.yaml
-  specifications/_template_manifest.yaml
-  specifications/_phase-*-passed.yaml
-  specifications/_template/
 
 markdown_extensions:
   - pymdownx.superfences:
