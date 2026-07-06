@@ -1,10 +1,10 @@
 phase: modeling
-signed_off_at: '2026-07-06T05:36:01Z'
-gate_version: '1.2'
+signed_off_at: '2026-07-06T10:35:33Z'
+gate_version: '1.4'
 checks_passed:
 - MODEL-ENTITY-NAME-UNIQUE
 - ENTITY-IN-GLOSSARY
-- GLOSSARY-COVERS-ATTRIBUTES
+- GLOSSARY-COVERS-DOMAIN-TERMS
 - MODEL-ENTITY-HAS-ID-TIMESTAMPS
 - MODEL-ENTITY-BUSINESS-RULE
 - MODEL-LIFECYCLE-DEFINED
@@ -62,10 +62,20 @@ decisions:
   - docs/specifications/glossary.md
   - docs/specifications/contracts/openapi.yaml
   ts: '2026-07-06T05:36:01Z'
+- id: GLOSSARY-LEXICON-ONLY
+  summary: Glossary rewritten as a lexicon (entities, roles, events, enumerations,
+    auth records, key terms); per-attribute sections removed.
+  rationale: "Gate 1.4: domain-model.md's entity tables are the single attribute authority\
+    \ \u2014 the ~130-entry duplication carried no extra information (every load-bearing\
+    \ detail was already in the model's tables/business rules) and doubled the maintenance\
+    \ surface."
+  affects:
+  - docs/specifications/glossary.md
+  ts: '2026-07-06T11:00:00Z'
 files_signed:
 - path: docs/specifications/domain-model.md
   sha256: 8d049ee17e0ca0b86745cd0526b91b72ca2c2b269dd3e5b824e6e456f5299c57
-  mtime: '2026-07-06T05:36:01Z'
+  mtime: '2026-07-06T10:35:33Z'
 - path: docs/specifications/glossary.md
-  sha256: af07eaec82f20e9cd556cba1b0e92908d54a5709ad4dbb7dd5e5f87f6db36d58
-  mtime: '2026-07-06T05:36:01Z'
+  sha256: 021766f8184354ea395fdae43c1213cab68d34b18c26e8cf68a456aa4b978eb3
+  mtime: '2026-07-06T10:35:33Z'

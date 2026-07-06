@@ -1,9 +1,10 @@
 phase: nfrs
-signed_off_at: '2026-07-06T06:08:33Z'
-gate_version: '1.3'
+signed_off_at: '2026-07-06T10:35:33Z'
+gate_version: '1.4'
 checks_passed:
 - NFR-THRESHOLD-MEASURABLE
 - ACCEPTANCE-SCENARIO-GWT
+- US-HAS-SCENARIO
 warnings_responded:
 - id: NFR-THRESHOLD-MEASURABLE
   response: n-a
@@ -66,10 +67,19 @@ decisions:
   affects:
   - docs/specifications/acceptance-scenarios.md
   ts: '2026-07-06T05:49:06Z'
+- id: TRACEABILITY-FLAGS-CLOSED
+  summary: 'Added the failure scenarios the traceability matrix flagged: US-007-E,
+    US-008-D, US-011-D, US-012-I/J (visibility 404s and owner-role 403s).'
+  rationale: Each flagged AC named a status/error code no scenario asserted; the new
+    scenarios make the 404-for-invisible / 403-for-visible-but-forbidden split executable
+    per story.
+  affects:
+  - docs/specifications/acceptance-scenarios.md
+  ts: '2026-07-06T11:00:00Z'
 files_signed:
 - path: docs/specifications/nfr.md
   sha256: cc4f7bc0d1cbe64223ba26bdffa8cf60d84f5eb0641d85e870387522173f889e
-  mtime: '2026-07-06T06:08:33Z'
+  mtime: '2026-07-06T10:35:33Z'
 - path: docs/specifications/acceptance-scenarios.md
-  sha256: c8c8fd604b9d928f18d2505b943a8d3f6624c045978de81abee9ea1f1bbd0ee3
-  mtime: '2026-07-06T06:08:33Z'
+  sha256: 58a4a0cdec682ef04b09ec56f4679216e7348a7e7953af798db806f0f3c112ca
+  mtime: '2026-07-06T10:35:33Z'
