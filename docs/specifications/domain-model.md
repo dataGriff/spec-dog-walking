@@ -114,29 +114,6 @@ invite carries the prospective client's email and a 1-day TTL.
 
 ---
 
-### PasswordResetToken
-
-A single-use token issued by the password-reset request endpoint
-with a 1-hour TTL.
-
-| Attribute | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | UUID | Yes | Unique identifier |
-| `userId` | UUID | Yes | FK to User the reset targets |
-| `token` | string (opaque) | Yes | [secret] URL-safe single-use token. Never published to events. |
-| `status` | enum:PasswordResetTokenStatus | Yes | Lifecycle state of the token |
-| `expiresAt` | ISO 8601 | Yes | Timestamp at which the token auto-transitions to `expired` |
-| `createdAt` | ISO 8601 | Yes | When the reset was requested |
-| `updatedAt` | ISO 8601 | Yes | Last update timestamp |
-
-**Business Rules:**
-- TTL is 1 hour from `createdAt`. Lazily evaluated on confirm.
-- Single-use: confirming once moves status to `used`.
-- On successful confirm, every refresh token for the target User is
-  revoked (forces re-login on other devices).
-
----
-
 ### Dog
 
 A dog owned by a Client. Carries the operational details the walker
@@ -180,6 +157,7 @@ complete) plus the failure / cancellation paths.
 | `startAt` | ISO 8601 | Yes | Scheduled start time |
 | `requesterRole` | enum:Role | Yes | Who created the walk |
 | `notes` | string \| null | No | Free-text booking notes |
+| `priceCents` | integer \| null | No | Recorded price in the rate card's currency, minor units. Snapshotted from the matching rate-card entry when the walk enters `scheduled`; null while `requested` or when `declined`/`cancelled` before scheduling. |
 | `status` | enum:WalkStatus | Yes | Lifecycle state of the walk |
 | `declinedReason` | string \| null | No | Walker's reason when status=`declined` |
 | `cancelledByRole` | enum:Role \| null | No | Set when status=`cancelled` |
@@ -194,10 +172,17 @@ complete) plus the failure / cancellation paths.
   otherwise).
 - Walker-created walks start in `scheduled`; owner-created walks
   start in `requested`.
+- On entering `scheduled` (walker-created directly, or via the
+  decision endpoint), the walk records `priceCents` from the
+  rate-card entry matching `(walkType, durationMinutes)` at that
+  moment. Later rate-card changes never alter it (Decision Log:
+  WALK-PRICE-SNAPSHOT-AT-SCHEDULING).
 - The walker assigned to the walk is the only party who can move
   status to `scheduled` / `declined` / `completed`.
-- Either party can move status to `cancelled` while the walk is in
-  `requested` or `scheduled`.
+- A `requested` walk is withdrawn (→ `cancelled`) by its owner only;
+  the walker's route out of `requested` is the decision endpoint
+  (decline). Either party can cancel a `scheduled` walk (Decision
+  Log: REQUESTED-CANCEL-IS-OWNER-WITHDRAWAL).
 
 ---
 
@@ -340,12 +325,54 @@ One line on an Invoice, one per completed Walk in the billing period.
 **Business Rules:**
 - A walk can appear on at most one issued invoice (uniqueness on
   `walkId`).
-- `priceCents` is captured from the rate-card entry that was in force
-  at the Walk's `scheduled` transition (matching the attribute
-  description above). The InvoiceLineItem row is created when the
-  invoice is generated, but the *value* it carries is the
-  scheduled-time price, not the issue-time price. Later rate-card
-  edits do not alter historical line items.
+- `priceCents` is copied from `Walk.priceCents` — the value the walk
+  recorded when it entered `scheduled`. The InvoiceLineItem row is
+  created when the invoice is generated, but the *value* it carries
+  is the scheduled-time snapshot, not the issue-time rate. Later
+  rate-card edits do not alter historical line items.
+
+---
+
+## Supporting auth records
+
+These records power the auth mechanics but are deliberately **not**
+domain entities: they carry secrets, have no consumer value in the
+historic record, and are excluded from the event stream and data
+contract by design (Decision Log: AUTH-TOKENS-NOT-DOMAIN-ENTITIES).
+Their behaviour is still fully specified and observable through the
+auth endpoints.
+
+### PasswordResetToken
+
+A single-use token issued by the password-reset request endpoint with
+a 1-hour TTL. Fields: `id`, `userId` (FK to User), `token`
+([secret], never published), `status`
+(`pending` → `used` | `expired`), `expiresAt`, `createdAt`,
+`updatedAt`.
+
+- TTL is 1 hour from `createdAt`; expiry is lazily evaluated on
+  confirm (`RESET_TOKEN_EXPIRED`).
+- Single-use: confirming once moves status to `used`; reuse returns
+  `RESET_TOKEN_ALREADY_USED`. A token that never existed returns
+  `RESOURCE_NOT_FOUND`.
+- On successful confirm, every RefreshToken for the target User is
+  revoked — observable as `INVALID_REFRESH_TOKEN` on the next
+  POST /v1/auth/refresh from other devices.
+
+### RefreshToken
+
+The long-lived session credential issued alongside every access token
+(US-000, US-002, US-003, US-021). Fields: `id`, `userId` (FK to
+User), `token` ([secret]), `status` (`active` → `rotated` |
+`revoked` | `expired`), `expiresAt`, `createdAt`, `updatedAt`.
+
+- 30-day lifetime (NFR-SEC-001); rotated on every successful
+  POST /v1/auth/refresh — the presented token is retired and a new
+  one issued.
+- Revoked by POST /v1/auth/logout and by password-reset confirm.
+- Expired, rotated, revoked, and never-existed tokens are
+  indistinguishable at the API (`INVALID_REFRESH_TOKEN`, 401) to
+  prevent token probing.
 
 ---
 
@@ -363,9 +390,6 @@ Client              ──── belongs-to ──  Walker
 
 Walker              ──── has-many ────  Invite
 Invite              ──── belongs-to ──  Walker
-
-User                ──── has-many ────  PasswordResetToken
-PasswordResetToken  ──── belongs-to ──  User
 
 Client              ──── has-many ────  Dog
 Dog                 ──── belongs-to ──  Client
@@ -407,7 +431,11 @@ Walk                ──── billed-by ───  InvoiceLineItem
 
 | Event | Trigger | Channel |
 |-------|---------|---------|
+| `UserRegistered` | POST /v1/auth/register → 201 (walker) or POST /v1/invites/{token}/accept → 200 (owner) | `dogwalking.user.registered` |
+| `WalkerRegistered` | POST /v1/auth/register → 201 | `dogwalking.walker.registered` |
 | `InviteCreated` | POST /v1/clients → 201 | `dogwalking.invite.created` |
+| `InviteAccepted` | POST /v1/invites/{token}/accept → 200 | `dogwalking.invite.accepted` |
+| `InviteExpired` | Lazy: accept attempt after `expiresAt` → 410 | `dogwalking.invite.expired` |
 | `ClientRegistered` | POST /v1/invites/{token}/accept → 200 | `dogwalking.client.registered` |
 | `DogAdded` | POST /v1/dogs → 201 | `dogwalking.dog.added` |
 | `DogUpdated` | PATCH /v1/dogs/{dogId} → 200 | `dogwalking.dog.updated` |
@@ -439,7 +467,7 @@ requested ──── (walker accepts) ────── scheduled ───�
 |------|----|---------|
 | `requested` | `scheduled` | PATCH /v1/walks/{id}/decision=scheduled (walker accepts) |
 | `requested` | `declined` | PATCH /v1/walks/{id}/decision=declined (walker declines) |
-| `requested` | `cancelled` | POST /v1/walks/{id}/cancel (owner withdraws) |
+| `requested` | `cancelled` | POST /v1/walks/{id}/cancel (owner withdrawal only — the walker's route out of `requested` is decline) |
 | `scheduled` | `cancelled` | POST /v1/walks/{id}/cancel (either party) |
 | `scheduled` | `completed` | POST /v1/walks/{id}/complete (walker) |
 
@@ -465,19 +493,6 @@ pending ──── (recipient accepts) ──── accepted
 |------|----|---------|
 | `pending` | `accepted` | POST /v1/invites/{token}/accept (valid + unexpired) |
 | `pending` | `expired` | Lazy: any accept attempt after `expiresAt` |
-
-### PasswordResetToken Status
-
-```
-pending ──── (user confirms) ──── used
-   │
-   └── (TTL elapses) ── expired
-```
-
-| From | To | Trigger |
-|------|----|---------|
-| `pending` | `used` | POST /v1/auth/password-reset/confirm (valid + unexpired) |
-| `pending` | `expired` | Lazy: any confirm attempt after `expiresAt` |
 
 ## Enumerations
 
@@ -535,16 +550,6 @@ Lifecycle states of a client Invite. Closed.
 | `pending` | Issued; awaiting acceptance |
 | `accepted` | Client accepted; one-shot use complete |
 | `expired` | Past `expiresAt` without acceptance |
-
-### PasswordResetTokenStatus
-
-Lifecycle states of a password-reset token. Closed.
-
-| Value | Notes |
-|---|---|
-| `pending` | Issued; awaiting confirm |
-| `used` | Successfully consumed |
-| `expired` | Past `expiresAt` without use |
 
 ### PhotoContentType
 

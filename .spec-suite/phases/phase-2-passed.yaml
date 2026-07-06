@@ -1,6 +1,6 @@
 phase: modeling
-signed_off_at: '2026-06-01T17:58:57Z'
-gate_version: '1.0'
+signed_off_at: '2026-07-06T05:36:01Z'
+gate_version: '1.2'
 checks_passed:
 - MODEL-ENTITY-NAME-UNIQUE
 - ENTITY-IN-GLOSSARY
@@ -9,121 +9,63 @@ checks_passed:
 - MODEL-ENTITY-BUSINESS-RULE
 - MODEL-LIFECYCLE-DEFINED
 - MODEL-RELATIONSHIP-BIDIRECTIONAL
+- ENTITY-HAS-EVENT
 warnings_responded: []
 rubric_findings: []
 decisions:
-- id: INVOICELINEITEM-PRICE-AT-SCHEDULED-NOT-ISSUE
-  summary: 'Disambiguated InvoiceLineItem.priceCents snapshot timing: captured at
-    the Walk''s scheduled transition, NOT at invoice issue.'
-  rationale: Original Business Rules text said 'snapshotted at issue' which contradicted
-    the attribute description ('in force at scheduled transition') and the M6.2 decision
-    INVOICE-LINEITEM-FK-PLUS-COPY. The whole point of denormalising walkType/durationMinutes
-    onto LineItem is to preserve the agreed price; locking at scheduled is the right
-    semantic. Independent review surfaced the contradiction.
-  affects:
-  - docs/specifications/domain-model.md
-  ts: '2026-06-01T17:58:57Z'
-- id: WALKER-NO-API-SURFACE-EXPLICIT
-  summary: Documented that Walker has no dedicated REST API in v1 (single-walker constraint);
-    access is via auth/register, GET /v1/rate-card, and embedded walker data on Walk
-    responses.
-  rationale: 'Independent review noticed Walker is modeled as a first-class entity
-    but no API exposes it. That''s intentional (non-goal: no multi-walker teams) but
-    wasn''t explicit; an implementer might add unnecessary endpoints. Now stated in
-    Walker''s Business Rules.'
-  affects:
-  - docs/specifications/domain-model.md
-  ts: '2026-06-01T17:58:57Z'
-- id: GLOSSARY-INVOICE-INDEFINITE-ISSUED
-  summary: Glossary Invoice entry clarified that an invoice can remain `issued` indefinitely
-    (it's not guaranteed to move to `paid`).
-  rationale: "Original wording 'status moves issued \u2192 paid' implied paid was\
-    \ inevitable. In reality some invoices stay issued forever (client never pays).\
-    \ Minor prose for accuracy."
-  affects:
-  - docs/specifications/glossary.md
-  ts: '2026-06-01T17:58:57Z'
-- id: BREED-CLOSED-ENUM
-  summary: Dog.breed is a closed enum (12 values) rather than free-text string.
-  rationale: Breed varies widely but the walker workforce sees a stable top-10 list
-    day-to-day. Closing the set with `mixed` + `unknown` fallbacks gives the API a
-    queryable + reportable column without forcing owners into free-text. Extending
-    the list is a minor-version openapi bump per NFR-COMPAT-001.
+- id: AUTH-TOKENS-NOT-DOMAIN-ENTITIES
+  summary: PasswordResetToken demoted from `## Entities` to a new `## Supporting auth
+    records` section, which also documents RefreshToken (previously unmodelled despite
+    rules depending on it). Neither is published to the event stream or data contract.
+  rationale: "Critique H10/L5 \u2014 token records are auth mechanics carrying secrets,\
+    \ with no consumer value in the historic record; modelling them as entities forced\
+    \ dead openapi schemas. Their behaviour stays fully specified and observable via\
+    \ the auth endpoints (INVALID_REFRESH_TOKEN on refresh, RESET_TOKEN_* on confirm)."
   affects:
   - docs/specifications/domain-model.md
   - docs/specifications/contracts/openapi.yaml
-  ts: '2026-06-01T17:58:57Z'
-- id: SECRET-MARKER-ON-TOKENS-AND-PASSWORDHASH
-  summary: "Marked User.passwordHash, Invite.token, PasswordResetToken.token as `[secret]`\
-    \ in the model \u2014 never published to events or the data contract."
-  rationale: "Per SUITE-DESIGN \xA74.5 the `[secret]` marker excludes a field from\
-    \ the must-appear-in-events set enforced by EVENT-PAYLOAD-COVERS-ENTITY-STATE.\
-    \ All three are security-sensitive: password hash gives offline cracking surface;\
-    \ opaque tokens grant one-shot privilege escalation. They stay in the model +\
-    \ OpenAPI request/response shapes where the API boundary needs them, but the historic\
-    \ event record does not."
+  ts: '2026-07-06T05:36:01Z'
+- id: USER-AND-WALKER-EVENTS
+  summary: UserRegistered (published on walker registration and invite acceptance)
+    and WalkerRegistered events added, with matching channels, so User and Walker
+    exist in the historic record and the stream's walkerId/userId FKs resolve.
+  rationale: "Critique H5 \u2014 Walker and User were invisible to the event stream,\
+    \ leaving dangling FKs in four datacontract tables and contradicting the stream's\
+    \ reconstruct-without-the-API claim."
   affects:
   - docs/specifications/domain-model.md
-  ts: '2026-06-01T17:58:57Z'
-- id: INVITE-CREATED-EVENT-RENAMED
-  summary: Renamed `ClientInvited` event (channel `dogwalking.client.invited`) to
-    `InviteCreated` (channel `dogwalking.invite.created`).
-  rationale: "The event fires when an Invite is created, not when a Client is created\
-    \ (Client doesn't exist until invite acceptance). The old name forced the EVENT-PAYLOAD-COVERS-ENTITY-STATE\
-    \ check to require Client fields in the payload \u2014 but no Client record exists\
-    \ at that point. Renaming aligns the channel to the entity actually created."
-  affects:
-  - docs/specifications/domain-model.md
-  - docs/specifications/sequence-diagrams.md
-  - docs/specifications/acceptance-scenarios.md
   - docs/specifications/contracts/asyncapi.yaml
   - docs/specifications/contracts/datacontract.yaml
-  ts: '2026-06-01T17:58:57Z'
-- id: ENUMS-PROMOTED-AND-BREED-EXPANDED
-  summary: Promoted 6 implicit enums to named `## Enumerations` entries
-    (`Role`, `WalkStatus`, `InvoiceStatus`, `InviteStatus`,
-    `PasswordResetTokenStatus`, `PhotoContentType`) and marked `Breed`
-    as `(open)` with a UK Kennel Club ~190-value expansion in the openapi
-    schema (per suite v1.0.12).
-  rationale: |
-    Before v1.0.12 only Breed was a named enum. Every other closed value
-    set (Role, lifecycle statuses, MIME types) was duplicated inline
-    across openapi + asyncapi without ENUM-VALUES-CONSISTENT enforcement
-    — drift between contracts was unprevented. Promoting them gives
-    cross-contract consistency on those 6 sets too.
-    Breed itself was constrained to 12 representative breeds + fallbacks,
-    which forced extending the list to be a model edit even though the
-    contract was the real consumer. The new `(open)` marker means the
-    openapi schema is the authoritative full list (~190 KC breeds);
-    the model lists 10 canonical examples + the two fallbacks. Adding a
-    breed is now a contract-only minor-version bump.
+  ts: '2026-07-06T05:36:01Z'
+- id: REQUESTED-CANCEL-IS-OWNER-WITHDRAWAL
+  summary: "requested\u2192cancelled is owner withdrawal only; the walker's route\
+    \ out of `requested` is the decision endpoint (decline). Either party cancels\
+    \ a `scheduled` walk. A walker cancel attempt on a `requested` walk returns 403\
+    \ FORBIDDEN."
+  rationale: "Critique M10 \u2014 model prose said \"either party\", the lifecycle\
+    \ table said owner-only, and the auth matrix said unconditional walker cancel.\
+    \ Owner-only keeps decline (with its recorded reason) the single walker path out\
+    \ of `requested`."
   affects:
   - docs/specifications/domain-model.md
-  ts: '2026-06-03T10:00:00Z'
-- id: AGGREGATES-SECTION-ADDED
-  summary: Added a `## Aggregates` section to domain-model.md declaring three
-    aggregate roots \u2014 `RateCard \u2192 RateCardEntry \u2192 entries`,
-    `Invoice \u2192 InvoiceLineItem \u2192 lineItems`, and
-    `WalkUpdate \u2192 Photo \u2192 photos`.
-  rationale: |
-    Per suite v1.0.8 the `## Aggregates` section is the normative declaration of
-    aggregate-root \u2192 child-collection relationships consumed by
-    EVENT-PAYLOAD-COVERS-ENTITY-STATE. Aggregate criterion: the child has no
-    independent event or write API, and is created/mutated only through the
-    parent. RateCardEntry, InvoiceLineItem, and Photo all qualify \u2014 Photo is
-    created atomically with the WalkUpdate (POST /v1/walks/{walkId}/updates
-    with binary photo array), has only a GET-by-id later, and fires no event
-    of its own (only WalkUpdatePosted). Other has-many relationships in the
-    model (Walker \u2192 Client, Walker \u2192 Invoice, Walk \u2192 WalkUpdate, etc.) have
-    children that are first-class entities with their own APIs and events,
-    so they are not aggregates.
+  - docs/specifications/auth-matrix.md
+  ts: '2026-07-06T05:36:01Z'
+- id: WALK-PRICE-SNAPSHOT-ATTRIBUTE
+  summary: "Walk gains nullable priceCents, snapshotted at the requested\u2192scheduled\
+    \ transition (or at creation for walker-created walks); InvoiceLineItem.priceCents\
+    \ copies it. There is no reschedule endpoint in v1, so no re-snapshot path exists."
+  rationale: "Critique H7 \u2014 the recorded-price invariant had no recording mechanism;\
+    \ PUT /v1/rate-card wholesale-replaces entries and would have destroyed the pricing\
+    \ history invoices depend on."
   affects:
   - docs/specifications/domain-model.md
-  ts: '2026-06-02T09:00:00Z'
+  - docs/specifications/glossary.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-06T05:36:01Z'
 files_signed:
 - path: docs/specifications/domain-model.md
-  sha256: a4d2e1ce50ee29463364b63120c50449dd39b9ca94f59b4118f293b015357704
-  mtime: '2026-06-03T10:00:00Z'
+  sha256: 8d049ee17e0ca0b86745cd0526b91b72ca2c2b269dd3e5b824e6e456f5299c57
+  mtime: '2026-07-06T05:36:01Z'
 - path: docs/specifications/glossary.md
-  sha256: 58e6eea08a6b4b17181e35846dd23c5e667dc0d8bb37bd3e59a9869ca2c1eeb0
-  mtime: '2026-06-01T17:58:57Z'
+  sha256: af07eaec82f20e9cd556cba1b0e92908d54a5709ad4dbb7dd5e5f87f6db36d58
+  mtime: '2026-07-06T05:36:01Z'
