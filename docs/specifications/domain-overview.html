@@ -227,7 +227,7 @@
 
 <header id="page-header">
   <h1>Dog Walking API — Domain Overview</h1>
-  <p class="subtitle">Deterministically generated from OpenAPI, AsyncAPI &amp; Data Contract · 2026-06-06 19:38 UTC</p>
+  <p class="subtitle">Deterministically generated from OpenAPI, AsyncAPI &amp; Data Contract · 2026-07-06 06:09 UTC</p>
 </header>
 
 <nav id="toc">
@@ -261,7 +261,7 @@
 <h3>Auth</h3>
 <table>
   <thead><tr><th>Method</th><th>Path</th><th>Summary</th><th>Auth</th></tr></thead>
-  <tbody><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/auth/register</code></td><td>Walker self-registers</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/auth/login</code></td><td>Log in</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/auth/password-reset/request</code></td><td>Request a password reset email</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/auth/password-reset/confirm</code></td><td>Confirm a password reset with a token</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/invites/{token}/accept</code></td><td>Accept a client invite and set password</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr></tbody>
+  <tbody><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/auth/register</code></td><td>Walker self-registers</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/auth/login</code></td><td>Log in</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/auth/refresh</code></td><td>Exchange a refresh token for a fresh token pair</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/auth/logout</code></td><td>Revoke the presented refresh token</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/auth/password-reset/request</code></td><td>Request a password reset email</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/auth/password-reset/confirm</code></td><td>Confirm a password reset with a token</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr><tr><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span></td><td><code>/v1/invites/{token}/accept</code></td><td>Accept a client invite and set password</td><td><span class="badge auth-badge auth-public">🌐 Public</span></td></tr></tbody>
 </table>
 
 <h3>Clients</h3>
@@ -308,7 +308,7 @@
   <p>Domain event contract for the **Dog Walking** domain. Events are</p>
   <table>
     <thead><tr><th>Channel</th><th>Event</th><th>Description</th></tr></thead>
-    <tbody><tr><td><code>dogwalking.invite.created</code></td><td><strong>Invite created</strong></td><td>On invite created consumer.</td></tr><tr><td><code>dogwalking.client.registered</code></td><td><strong>Client registered</strong></td><td>On client registered consumer.</td></tr><tr><td><code>dogwalking.dog.added</code></td><td><strong>Dog added</strong></td><td>On dog added consumer.</td></tr><tr><td><code>dogwalking.dog.updated</code></td><td><strong>Dog updated</strong></td><td>On dog updated consumer.</td></tr><tr><td><code>dogwalking.walk.requested</code></td><td><strong>Walk requested</strong></td><td>On walk requested consumer.</td></tr><tr><td><code>dogwalking.walk.scheduled</code></td><td><strong>Walk scheduled</strong></td><td>On walk scheduled consumer.</td></tr><tr><td><code>dogwalking.walk.declined</code></td><td><strong>Walk declined</strong></td><td>On walk declined consumer.</td></tr><tr><td><code>dogwalking.walk.cancelled</code></td><td><strong>Walk cancelled</strong></td><td>On walk cancelled consumer.</td></tr><tr><td><code>dogwalking.walk.completed</code></td><td><strong>Walk completed</strong></td><td>On walk completed consumer.</td></tr><tr><td><code>dogwalking.walkupdate.posted</code></td><td><strong>Walk update posted</strong></td><td>On walk update posted consumer.</td></tr><tr><td><code>dogwalking.ratecard.updated</code></td><td><strong>Rate card updated</strong></td><td>On rate card updated consumer.</td></tr><tr><td><code>dogwalking.invoice.issued</code></td><td><strong>Invoice issued</strong></td><td>On invoice issued consumer.</td></tr><tr><td><code>dogwalking.invoice.paid</code></td><td><strong>Invoice paid</strong></td><td>On invoice paid.</td></tr></tbody>
+    <tbody><tr><td><code>dogwalking.user.registered</code></td><td><strong>User registered</strong></td><td>On user registered consumer.</td></tr><tr><td><code>dogwalking.walker.registered</code></td><td><strong>Walker registered</strong></td><td>On walker registered consumer.</td></tr><tr><td><code>dogwalking.invite.created</code></td><td><strong>Invite created</strong></td><td>On invite created consumer.</td></tr><tr><td><code>dogwalking.invite.accepted</code></td><td><strong>Invite accepted</strong></td><td>On invite accepted consumer.</td></tr><tr><td><code>dogwalking.invite.expired</code></td><td><strong>Invite expired</strong></td><td>On invite expired consumer.</td></tr><tr><td><code>dogwalking.client.registered</code></td><td><strong>Client registered</strong></td><td>On client registered consumer.</td></tr><tr><td><code>dogwalking.dog.added</code></td><td><strong>Dog added</strong></td><td>On dog added consumer.</td></tr><tr><td><code>dogwalking.dog.updated</code></td><td><strong>Dog updated</strong></td><td>On dog updated consumer.</td></tr><tr><td><code>dogwalking.walk.requested</code></td><td><strong>Walk requested</strong></td><td>On walk requested consumer.</td></tr><tr><td><code>dogwalking.walk.scheduled</code></td><td><strong>Walk scheduled</strong></td><td>On walk scheduled consumer.</td></tr><tr><td><code>dogwalking.walk.declined</code></td><td><strong>Walk declined</strong></td><td>On walk declined consumer.</td></tr><tr><td><code>dogwalking.walk.cancelled</code></td><td><strong>Walk cancelled</strong></td><td>On walk cancelled consumer.</td></tr><tr><td><code>dogwalking.walk.completed</code></td><td><strong>Walk completed</strong></td><td>On walk completed consumer.</td></tr><tr><td><code>dogwalking.walkupdate.posted</code></td><td><strong>Walk update posted</strong></td><td>On walk update posted consumer.</td></tr><tr><td><code>dogwalking.ratecard.updated</code></td><td><strong>Rate card updated</strong></td><td>On rate card updated consumer.</td></tr><tr><td><code>dogwalking.invoice.issued</code></td><td><strong>Invoice issued</strong></td><td>On invoice issued consumer.</td></tr><tr><td><code>dogwalking.invoice.paid</code></td><td><strong>Invoice paid</strong></td><td>On invoice paid.</td></tr></tbody>
   </table>
   <p class="note">All events follow the
   <a href="https://cloudevents.io/" target="_blank" rel="noopener">CloudEvents 1.0</a>
@@ -321,7 +321,7 @@
   <p>Each write operation publishes a corresponding domain event.</p>
   <table>
     <thead><tr><th>Event</th><th>Channel</th><th>Triggered By</th></tr></thead>
-    <tbody><tr><td><strong>Invite created</strong></td><td><code>dogwalking.invite.created</code></td><td>—</td></tr><tr><td><strong>Client registered</strong></td><td><code>dogwalking.client.registered</code></td><td>—</td></tr><tr><td><strong>Dog added</strong></td><td><code>dogwalking.dog.added</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/dogs</code> — Add dog</td></tr><tr><td><strong>Dog updated</strong></td><td><code>dogwalking.dog.updated</code></td><td>—</td></tr><tr><td><strong>Walk requested</strong></td><td><code>dogwalking.walk.requested</code></td><td>—</td></tr><tr><td><strong>Walk scheduled</strong></td><td><code>dogwalking.walk.scheduled</code></td><td>—</td></tr><tr><td><strong>Walk declined</strong></td><td><code>dogwalking.walk.declined</code></td><td>—</td></tr><tr><td><strong>Walk cancelled</strong></td><td><code>dogwalking.walk.cancelled</code></td><td>—</td></tr><tr><td><strong>Walk completed</strong></td><td><code>dogwalking.walk.completed</code></td><td>—</td></tr><tr><td><strong>Walk update posted</strong></td><td><code>dogwalking.walkupdate.posted</code></td><td>—</td></tr><tr><td><strong>Rate card updated</strong></td><td><code>dogwalking.ratecard.updated</code></td><td>—</td></tr><tr><td><strong>Invoice issued</strong></td><td><code>dogwalking.invoice.issued</code></td><td>—</td></tr><tr><td><strong>Invoice paid</strong></td><td><code>dogwalking.invoice.paid</code></td><td>—</td></tr></tbody>
+    <tbody><tr><td><strong>User registered</strong></td><td><code>dogwalking.user.registered</code></td><td>—</td></tr><tr><td><strong>Walker registered</strong></td><td><code>dogwalking.walker.registered</code></td><td>—</td></tr><tr><td><strong>Invite created</strong></td><td><code>dogwalking.invite.created</code></td><td>—</td></tr><tr><td><strong>Invite accepted</strong></td><td><code>dogwalking.invite.accepted</code></td><td>—</td></tr><tr><td><strong>Invite expired</strong></td><td><code>dogwalking.invite.expired</code></td><td>—</td></tr><tr><td><strong>Client registered</strong></td><td><code>dogwalking.client.registered</code></td><td>—</td></tr><tr><td><strong>Dog added</strong></td><td><code>dogwalking.dog.added</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/dogs</code> — Add dog</td></tr><tr><td><strong>Dog updated</strong></td><td><code>dogwalking.dog.updated</code></td><td>—</td></tr><tr><td><strong>Walk requested</strong></td><td><code>dogwalking.walk.requested</code></td><td>—</td></tr><tr><td><strong>Walk scheduled</strong></td><td><code>dogwalking.walk.scheduled</code></td><td>—</td></tr><tr><td><strong>Walk declined</strong></td><td><code>dogwalking.walk.declined</code></td><td>—</td></tr><tr><td><strong>Walk cancelled</strong></td><td><code>dogwalking.walk.cancelled</code></td><td>—</td></tr><tr><td><strong>Walk completed</strong></td><td><code>dogwalking.walk.completed</code></td><td>—</td></tr><tr><td><strong>Walk update posted</strong></td><td><code>dogwalking.walkupdate.posted</code></td><td>—</td></tr><tr><td><strong>Rate card updated</strong></td><td><code>dogwalking.ratecard.updated</code></td><td>—</td></tr><tr><td><strong>Invoice issued</strong></td><td><code>dogwalking.invoice.issued</code></td><td>—</td></tr><tr><td><strong>Invoice paid</strong></td><td><code>dogwalking.invoice.paid</code></td><td>—</td></tr></tbody>
   </table>
 </section>
 
@@ -331,7 +331,7 @@
   <p>Named enum schemas authored in <code>openapi.yaml</code>. Closed enums are
   fixed sets; open enums (e.g. <code>Breed</code>) carry the authoritative full
   list in the contract and may grow on a minor-version bump.</p>
-  <div class="enum-block"><h3><code>Role</code> <span class="badge enum-closed">closed</span></h3><p>User role. Closed enum — `walker` (single walker per domain instance) and `owner` (dog owners / clients).</p><div class="enum-chips"><code>walker</code> <code>owner</code></div></div><div class="enum-block"><h3><code>WalkStatus</code> <span class="badge enum-closed">closed</span></h3><p>Lifecycle state of a Walk. Closed enum. Transitions are governed by the Walk Status Lifecycle in domain-model.md.</p><div class="enum-chips"><code>requested</code> <code>scheduled</code> <code>declined</code> <code>cancelled</code> <code>completed</code></div></div><div class="enum-block"><h3><code>InvoiceStatus</code> <span class="badge enum-closed">closed</span></h3><p>Lifecycle state of an Invoice. Closed enum.</p><div class="enum-chips"><code>issued</code> <code>paid</code></div></div><div class="enum-block"><h3><code>InviteStatus</code> <span class="badge enum-closed">closed</span></h3><p>Lifecycle state of a client Invite. Closed enum.</p><div class="enum-chips"><code>pending</code> <code>accepted</code> <code>expired</code></div></div><div class="enum-block"><h3><code>PasswordResetTokenStatus</code> <span class="badge enum-closed">closed</span></h3><p>Lifecycle state of a password-reset token. Closed enum.</p><div class="enum-chips"><code>pending</code> <code>used</code> <code>expired</code></div></div><div class="enum-block"><h3><code>PhotoContentType</code> <span class="badge enum-closed">closed</span></h3><p>Permitted MIME types for walk-update photos. Closed enum.</p><div class="enum-chips"><code>image/jpeg</code> <code>image/png</code> <code>image/heic</code></div></div><div class="enum-block"><h3><code>Breed</code> <span class="badge enum-open">open</span></h3><p>Authoritative list of dog breeds the API recognises. Sourced
+  <div class="enum-block"><h3><code>Role</code> <span class="badge enum-closed">closed</span></h3><p>User role. Closed enum — `walker` (single walker per domain instance) and `owner` (dog owners / clients).</p><div class="enum-chips"><code>walker</code> <code>owner</code></div></div><div class="enum-block"><h3><code>WalkStatus</code> <span class="badge enum-closed">closed</span></h3><p>Lifecycle state of a Walk. Closed enum. Transitions are governed by the Walk Status Lifecycle in domain-model.md.</p><div class="enum-chips"><code>requested</code> <code>scheduled</code> <code>declined</code> <code>cancelled</code> <code>completed</code></div></div><div class="enum-block"><h3><code>InvoiceStatus</code> <span class="badge enum-closed">closed</span></h3><p>Lifecycle state of an Invoice. Closed enum.</p><div class="enum-chips"><code>issued</code> <code>paid</code></div></div><div class="enum-block"><h3><code>InviteStatus</code> <span class="badge enum-closed">closed</span></h3><p>Lifecycle state of a client Invite. Closed enum.</p><div class="enum-chips"><code>pending</code> <code>accepted</code> <code>expired</code></div></div><div class="enum-block"><h3><code>PhotoContentType</code> <span class="badge enum-closed">closed</span></h3><p>Permitted MIME types for walk-update photos. Closed enum.</p><div class="enum-chips"><code>image/jpeg</code> <code>image/png</code> <code>image/heic</code></div></div><div class="enum-block"><h3><code>Breed</code> <span class="badge enum-open">open</span></h3><p>Authoritative list of dog breeds the API recognises. Sourced
 from the UK Kennel Club's recognised-breeds list across the
 seven groups (Hound, Working, Terrier, Toy, Utility, Gundog,
 Pastoral), with `mixed` and `unknown` fallbacks so the field
@@ -354,7 +354,7 @@ does not require a domain-model change.</p><details class="enum-values"><summary
 <h3><code>User</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>email</code></td><td>string(email)</td><td>✓</td><td></td></tr><tr><td><code>passwordHash</code></td><td>string</td><td></td><td>Never returned in API responses; included here for schema completeness.</td></tr><tr><td><code>role</code></td><td>→ Role</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>email</code></td><td>string(email)</td><td>✓</td><td></td></tr><tr><td><code>role</code></td><td>→ Role</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>UserSummary</code></h3>
@@ -378,13 +378,7 @@ does not require a domain-model change.</p><details class="enum-values"><summary
 <h3><code>Invite</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkerId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>email</code></td><td>string(email)</td><td>✓</td><td></td></tr><tr><td><code>token</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>status</code></td><td>→ InviteStatus</td><td>✓</td><td></td></tr><tr><td><code>expiresAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
-</table>
-
-<h3><code>PasswordResetToken</code></h3>
-<table>
-  <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>userId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>token</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>status</code></td><td>→ PasswordResetTokenStatus</td><td>✓</td><td></td></tr><tr><td><code>expiresAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkerId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>email</code></td><td>string(email)</td><td>✓</td><td></td></tr><tr><td><code>status</code></td><td>→ InviteStatus</td><td>✓</td><td></td></tr><tr><td><code>expiresAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>Dog</code></h3>
@@ -396,19 +390,20 @@ does not require a domain-model change.</p><details class="enum-values"><summary
 <h3><code>Walk</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>dogId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkerId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkType</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>durationMinutes</code></td><td>integer</td><td>✓</td><td></td></tr><tr><td><code>startAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>requesterRole</code></td><td>→ Role</td><td>✓</td><td></td></tr><tr><td><code>notes</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>status</code></td><td>→ WalkStatus</td><td>✓</td><td></td></tr><tr><td><code>declinedReason</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>cancelledByRole</code></td><td> | null</td><td></td><td></td></tr><tr><td><code>completedAt</code></td><td>string(date-time) | null</td><td></td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>dogId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkerId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkType</code></td><td>string</td><td>✓</td><td></td></tr><tr><td><code>durationMinutes</code></td><td>integer</td><td>✓</td><td></td></tr><tr><td><code>startAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>requesterRole</code></td><td>→ Role</td><td>✓</td><td></td></tr><tr><td><code>notes</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>priceCents</code></td><td>integer | null</td><td></td><td>Recorded price in the rate card's currency, minor units. Snapshotted from the matching rate-card entry when the walk enters `scheduled`; null while `requested` or when the walk left the lifecycle before being scheduled. Never repriced by later rate-card changes.
+</td></tr><tr><td><code>status</code></td><td>→ WalkStatus</td><td>✓</td><td></td></tr><tr><td><code>declinedReason</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>cancelledByRole</code></td><td> | null</td><td></td><td></td></tr><tr><td><code>completedAt</code></td><td>string(date-time) | null</td><td></td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>WalkUpdate</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>notes</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>photos</code></td><td>array</td><td></td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>notes</code></td><td>string | null</td><td></td><td></td></tr><tr><td><code>photos</code></td><td>array</td><td>✓</td><td>Always present; empty for notes-only updates.</td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>Photo</code></h3>
 <table>
   <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkUpdateId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>contentType</code></td><td>→ PhotoContentType</td><td>✓</td><td></td></tr><tr><td><code>sizeBytes</code></td><td>integer</td><td>✓</td><td></td></tr><tr><td><code>capturedAt</code></td><td>string(date-time) | null</td><td></td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
+  <tbody><tr><td><code>id</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>walkUpdateId</code></td><td>string(uuid)</td><td>✓</td><td></td></tr><tr><td><code>contentType</code></td><td>→ PhotoContentType</td><td>✓</td><td></td></tr><tr><td><code>sizeBytes</code></td><td>integer</td><td>✓</td><td>10 MB ceiling per PRD US-012.</td></tr><tr><td><code>capturedAt</code></td><td>string(date-time) | null</td><td></td><td></td></tr><tr><td><code>createdAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr><tr><td><code>updatedAt</code></td><td>string(date-time)</td><td>✓</td><td></td></tr></tbody>
 </table>
 
 <h3><code>RateCard</code></h3>
@@ -467,7 +462,6 @@ erDiagram
         uuid id
         uuid walkerId
         email email
-        string token
         string status
         date_time expiresAt
         date_time createdAt
@@ -503,15 +497,6 @@ erDiagram
         string token
         string newPassword
     }
-    PasswordResetToken {
-        uuid id
-        uuid userId
-        string token
-        string status
-        date_time expiresAt
-        date_time createdAt
-        date_time updatedAt
-    }
     Photo {
         uuid id
         uuid walkUpdateId
@@ -541,7 +526,6 @@ erDiagram
     User {
         uuid id
         email email
-        string passwordHash
         string role
         date_time createdAt
         date_time updatedAt
@@ -560,6 +544,7 @@ erDiagram
         date_time startAt
         string requesterRole
         string notes
+        integer priceCents
         string status
         string declinedReason
         string cancelledByRole
@@ -589,7 +574,6 @@ erDiagram
     Client ||--o{ Invoice : "owns"
     Invoice ||--o{ InvoiceLineItem : "owns"
     Walk ||--o{ InvoiceLineItem : "owns"
-    User ||--o{ PasswordResetToken : "owns"
     WalkUpdate ||--o{ Photo : "owns"
     Walker ||--o{ RateCard : "owns"
     RateCard ||--o{ RateCardEntry : "owns"
@@ -609,7 +593,7 @@ erDiagram
   </div>
   <p>Defines the structure and quality expectations for data published by the Dog Walking domain via domain events. This contract is the authoritative historical integration point for downstream consumers (reporting, analytics, downstream sync). Per SUITE-DESIGN §4.5 every record carries the full state of its affected entity at the moment of the event — the contract is the audit-grade historic record.</p>
   <p>
-    The full data contract (7 records)
+    The full data contract (9 records)
     is rendered as a standalone interactive reference at
     <a href="datacontract-reference.html"><code>datacontract-reference.html</code></a>
     — generated via <code>datacontract export html</code>.
@@ -619,7 +603,7 @@ erDiagram
 </main>
 
 <footer id="footer">
-  <p>Generated by <code>scripts/generate_domain_overview.py</code> · 2026-06-06 19:38 UTC</p>
+  <p>Generated by <code>scripts/generate_domain_overview.py</code> · 2026-07-06 06:09 UTC</p>
 </footer>
 
 <script type="module">

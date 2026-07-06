@@ -13,9 +13,12 @@ missed reminders that turn into missed walks, and invoicing errors
 that turn into late or wrong payments.
 
 The **Dog Walking** domain is the single place a solo walker can
-manage clients, dogs, scheduled walks, daily reminders, and invoices
-— so that information lives in one place and a booking made once
-flows through every downstream concern without re-entry.
+manage clients, dogs, scheduled walks, and invoices — so that
+information lives in one place and a booking made once flows through
+every downstream concern without re-entry. The single authoritative
+schedule replaces the fridge board as the place both sides check
+what's happening; proactive reminder delivery is deferred (see
+Non-Goals).
 
 ## Target Users / Personas
 
@@ -60,9 +63,9 @@ after each walk.
 
 ## Goals
 
-1. Give Alison a single place to manage clients, dogs, walks, daily
-   reminders, and invoices so a piece of information entered once
-   flows through every downstream concern without re-entry.
+1. Give Alison a single place to manage clients, dogs, walks, and
+   invoices so a piece of information entered once flows through
+   every downstream concern without re-entry.
 2. Give Clancy a single view of her dog's upcoming and completed
    walks plus a clear running balance of what's been billed and paid.
 3. Replace the WhatsApp / calendar / fridge-board / paper-folder
@@ -85,10 +88,32 @@ after each walk.
 4. **A marketplace for finding walkers.** Alison's clients are
    already her clients; the domain doesn't onboard strangers,
    surface walkers to new owners, or rank/review walkers.
+5. **Proactive walk reminders / notifications.** v1 replaces the
+   fridge board with a single authoritative schedule both sides can
+   check at any time; pushing reminders out ahead of walks (email,
+   push, SMS) is a notification subsystem deferred to a later
+   release (Decision Log: REMINDERS-DESCOPED-TO-NON-GOAL).
 
 ## User Stories
 
 ### Auth / Onboarding
+
+#### US-000: Register as a walker
+
+**As a** solo dog walker,
+**I want to** create my account with email, password, and display name,
+**So that** I have a domain instance of my own to run my business in.
+
+**Acceptance Criteria:**
+- POST /v1/auth/register creates the walker account with
+  `{email, password, displayName}` and returns access + refresh tokens
+- Registration is walker-only; dog owners join by invitation (US-001,
+  US-002), never by self-registration
+- Returns 409 with `EMAIL_ALREADY_REGISTERED` if the email is already
+  in use
+- Returns 400 with `VALIDATION_ERROR` if the password is shorter than
+  8 characters
+- A `WalkerRegistered` event is published
 
 #### US-001: Add a new client
 
@@ -97,10 +122,14 @@ after each walk.
 **So that** they exist as a record I can later attach dogs and bookings to.
 
 **Acceptance Criteria:**
-- POST /v1/clients creates a client with name + email
-- The client is associated with the authenticated walker
+- POST /v1/clients issues an invite with name + email and queues an
+  invite email containing a single-use registration link; an
+  `InviteCreated` event is published
+- The Client record itself is created when the invite is accepted
+  (US-002), so every client on the books has a registered user behind
+  it (Decision Log: CLIENT-CREATED-AT-ACCEPTANCE)
+- The invite is associated with the authenticated walker
 - Returns 409 with `EMAIL_ALREADY_REGISTERED` if the email is already in use
-- The system queues an invite email containing a single-use registration link
 
 #### US-002: Accept invite and set password
 
@@ -110,10 +139,15 @@ after each walk.
 
 **Acceptance Criteria:**
 - POST /v1/invites/{token}/accept accepts the registration with a chosen password
-- Returns 410 with `INVITE_EXPIRED` if the token is older than 1 day
+- Returns 410 with `INVITE_EXPIRED` if the token is older than 1 day;
+  an invite that passes its expiry is marked `expired` and an
+  `InviteExpired` event is published
 - Returns 410 with `INVITE_ALREADY_USED` if the token was already redeemed
-- On success returns access + refresh tokens
-- The client is now able to log in and is linked to the walker who invited them
+- Returns 404 with `RESOURCE_NOT_FOUND` if the token never existed
+- On success the Client record is created and linked to the walker who
+  invited them, access + refresh tokens are returned, and
+  `InviteAccepted` and `ClientRegistered` events are published (both
+  carrying the invite id so the lineage is joinable from the stream)
 
 #### US-003: Log in
 
@@ -139,8 +173,40 @@ after each walk.
 - POST /v1/auth/password-reset/confirm accepts a token + new password
 - Returns 410 with `RESET_TOKEN_EXPIRED` if the token is older than 1 hour
 - Returns 410 with `RESET_TOKEN_ALREADY_USED` if the token was already redeemed
+- Returns 404 with `RESOURCE_NOT_FOUND` if the token never existed
 - On success the password is updated and all existing refresh tokens for that
-  user are revoked (forces re-login on other devices)
+  user are revoked — observable because a subsequent POST /v1/auth/refresh
+  with a pre-reset refresh token returns 401 (forces re-login on other
+  devices)
+
+#### US-021: Stay logged in without re-entering credentials
+
+**As a** registered dog owner or solo dog walker,
+**I want to** exchange my refresh token for a fresh access token,
+**So that** my session continues across the short access-token
+lifetime (15 minutes, NFR-SEC-001) without logging in again on my
+phone mid-walk.
+
+**Acceptance Criteria:**
+- POST /v1/auth/refresh accepts `{refreshToken}` and returns a fresh
+  access + refresh token pair (the presented refresh token is rotated
+  and can't be reused)
+- Returns 401 with `INVALID_REFRESH_TOKEN` if the token is expired,
+  revoked, already rotated, or never existed (indistinguishable, to
+  avoid token probing)
+
+#### US-022: Log out
+
+**As a** registered dog owner or solo dog walker,
+**I want to** log out and have my refresh token revoked,
+**So that** a device I've stopped using can't silently keep my session
+alive.
+
+**Acceptance Criteria:**
+- POST /v1/auth/logout revokes the presented refresh token and returns
+  204
+- Subsequent POST /v1/auth/refresh with the revoked token returns 401
+  with `INVALID_REFRESH_TOKEN`
 
 ### Dogs
 
@@ -152,12 +218,16 @@ free-text quirks/notes,
 **So that** the dog exists as a record both sides can read and update.
 
 **Acceptance Criteria:**
-- POST /v1/dogs creates a dog
+- POST /v1/dogs creates a dog; a `DogAdded` event is published
 - If the requester is an owner, the dog is associated with them automatically
 - If the requester is the walker, the request must include `ownerId` (a
-  client they invited); returns 403 with `FORBIDDEN` if the named owner
-  isn't one of their clients
+  client they invited); returns 404 with `RESOURCE_NOT_FOUND` if the
+  named owner doesn't exist or isn't one of their clients (no
+  existence oracle — Decision Log: TENANCY-404-FOR-BOTH)
 - Required: name. Optional: breed, age, medication, vet contact, notes
+- Breed values come from the UK Kennel Club breed list, modelled as an
+  open enumeration — unlisted breeds are added as a minor contract
+  change (Decision Log: BREED-UK-KENNEL-CLUB-OPEN-ENUM)
 - Returns 400 with `VALIDATION_ERROR` if `name` is missing
 
 #### US-006: Update dog details
@@ -168,8 +238,9 @@ free-text quirks/notes,
 
 **Acceptance Criteria:**
 - PATCH /v1/dogs/{dogId} edits the named fields
-- Returns 403 with `FORBIDDEN` if the requester is neither the owner nor
-  the walker assigned to the owner
+- Returns 404 with `RESOURCE_NOT_FOUND` if the dog doesn't exist or the
+  requester is neither the owner nor the walker assigned to the owner
+  (not-yours is indistinguishable from not-there)
 - A `DogUpdated` event is published
 
 #### US-020: View a single dog
@@ -183,10 +254,10 @@ to verify she's updated her dog's details since last week.
 
 **Acceptance Criteria:**
 - GET /v1/dogs/{dogId} returns the full dog record
-- Returns 404 with `RESOURCE_NOT_FOUND` if the id does not exist
-- Returns 403 with `FORBIDDEN` if the requester is neither the owner
-  nor the walker assigned to the owner (same ownership rule as
-  US-006)
+- Returns 404 with `RESOURCE_NOT_FOUND` if the id does not exist or
+  the requester is neither the owner nor the walker assigned to the
+  owner (same ownership rule as US-006; not-yours is
+  indistinguishable from not-there)
 
 ### Bookings
 
@@ -204,10 +275,14 @@ walk-type, and optional notes,
   for Alison)
 - If the requester is the walker → walk is in status `scheduled` directly
 - Returns 400 with `VALIDATION_ERROR` if `startAt` is in the past
-- Returns 403 with `FORBIDDEN` if the walker is creating a walk for a dog
-  whose owner isn't their client
+- Returns 404 with `RESOURCE_NOT_FOUND` if `dogId` doesn't exist or
+  the dog isn't visible to the requester (walker booking for a
+  non-client's dog, owner booking for someone else's dog)
 - Returns 400 with `INVALID_WALK_TYPE` if `walkType` / `durationMinutes`
   doesn't match an entry on the walker's rate card
+- A walk entering `scheduled` records the rate-card price for its
+  (walkType, durationMinutes) at that moment; later rate-card changes
+  don't reprice it (Decision Log: WALK-PRICE-SNAPSHOT-AT-SCHEDULING)
 - A `WalkRequested` (owner path) or `WalkScheduled` (walker path) event
   is published
 
@@ -221,7 +296,8 @@ find another option.
 **Acceptance Criteria:**
 - PATCH /v1/walks/{walkId}/decision accepts `{decision: scheduled |
   declined, reason?: string}`
-- Returns 403 with `FORBIDDEN` if the walk isn't for one of my clients
+- Returns 404 with `RESOURCE_NOT_FOUND` if the walk doesn't exist or
+  isn't for one of my clients
 - Returns 409 with `WALK_NOT_PENDING` if the walk is not in status
   `requested`
 - On `scheduled`: walk moves to `scheduled`, `WalkScheduled` event published
@@ -235,8 +311,9 @@ find another option.
 
 **Acceptance Criteria:**
 - POST /v1/walks/{walkId}/cancel cancels the walk
-- Returns 403 with `FORBIDDEN` if the requester isn't the owner or the
-  assigned walker
+- Returns 404 with `RESOURCE_NOT_FOUND` if the walk doesn't exist or
+  isn't visible to the requester (owner of the dog or the assigned
+  walker)
 - Returns 409 with `WALK_NOT_CANCELLABLE` if the walk is already
   `completed`, `declined`, or `cancelled`
 - The walk moves to status `cancelled`; the cancelling party is recorded
@@ -264,7 +341,11 @@ find another option.
 
 **Acceptance Criteria:**
 - POST /v1/walks/{walkId}/complete
-- Returns 403 with `FORBIDDEN` if the walker isn't assigned
+- Returns 404 with `RESOURCE_NOT_FOUND` if the walk doesn't exist or
+  isn't visible to the requester
+- Returns 403 with `FORBIDDEN` if the walk is visible but the
+  requester isn't the assigned walker (an owner can't complete their
+  own walk)
 - Returns 409 with `WALK_NOT_SCHEDULED` if not in status `scheduled`
 - Walk moves to `completed`; completion timestamp recorded
 - A `WalkCompleted` event is published
@@ -283,7 +364,10 @@ and/or attached photos,
   `VALIDATION_ERROR` if both empty)
 - Photos: max 5 per update, max 10MB each, JPEG/PNG/HEIC only (returns
   400 with `INVALID_PHOTO` otherwise)
-- Returns 403 with `FORBIDDEN` if walker isn't assigned
+- Returns 404 with `RESOURCE_NOT_FOUND` if the walk doesn't exist or
+  isn't visible to the requester; 403 with `FORBIDDEN` if it's visible
+  but the requester isn't the assigned walker (owners can't post
+  updates)
 - Returns 409 with `WALK_UPDATE_NOT_ALLOWED` if walk is in `requested`,
   `declined`, or `cancelled`
 - A `WalkUpdatePosted` event is published; payload includes the update id
@@ -301,8 +385,9 @@ photos in chronological order,
   with notes + an array of photo metadata (id, content-type, size,
   captured-at)
 - GET /v1/walk-updates/{updateId}/photos/{photoId} returns the photo bytes
-- Both endpoints return 403 with `FORBIDDEN` if the requester is neither
-  the owner nor the assigned walker
+- Both endpoints return 404 with `RESOURCE_NOT_FOUND` if the resource
+  doesn't exist or the requester is neither the owner nor the assigned
+  walker
 
 ### Invoicing
 
@@ -316,11 +401,13 @@ completed walks,
 **Acceptance Criteria:**
 - POST /v1/invoices accepts `{clientId, periodStart, periodEnd}`
 - The invoice contains line items for every `completed` walk in the
-  period for that client's dogs, priced per the walker's rate card
+  period for that client's dogs, priced at the rate recorded on each
+  walk when it entered `scheduled` — not the rate card at invoicing
+  time (Decision Log: WALK-PRICE-SNAPSHOT-AT-SCHEDULING)
 - Returns 400 with `NO_BILLABLE_WALKS` if no completed walks fall in the
   period
-- Returns 403 with `FORBIDDEN` if the client isn't one of the walker's
-  clients
+- Returns 404 with `RESOURCE_NOT_FOUND` if `clientId` doesn't exist or
+  isn't one of the walker's clients
 - Invoice is created in status `issued`; an `InvoiceIssued` event is
   published
 
@@ -362,12 +449,19 @@ duration (e.g. 30 / 45 / 60 min) as a structured table,
 
 **Acceptance Criteria:**
 - PUT /v1/rate-card replaces the walker's full rate card with
-  `{entries: [{walkType, durationMinutes, priceCents, currency}]}`
+  `{currency, entries: [{walkType, durationMinutes, priceCents}]}` —
+  currency is card-level, not per-entry (Decision Log:
+  CURRENCY-CARD-LEVEL)
 - Returns 400 with `VALIDATION_ERROR` if any entry has a zero or
   negative price, or if there's a duplicate (walkType, durationMinutes)
   tuple
+- Returns 409 with `CURRENCY_IMMUTABLE` if the request's currency
+  differs from the card's established currency (currency is fixed once
+  set)
 - The rate card is per-walker; changes apply prospectively to walks
-  scheduled after the change
+  entering `scheduled` after the change (already-scheduled walks keep
+  their recorded price)
+- A `RateCardUpdated` event is published
 
 #### US-018: View the rate card
 
@@ -402,7 +496,22 @@ expect before booking.
 
 <!-- Technical, legal, or business constraints. -->
 
-1. TODO
+1. **UK-only.** The service operates in the United Kingdom: UK GDPR
+   governs personal data (see the Privacy & data rights NFRs), prices
+   are GBP, and the product ships in English only.
+2. **One walker per domain instance.** The data model, auth matrix,
+   and rate card all assume a single walker; there is no
+   walker-discovery, team, or franchise capability (see Non-Goals 1
+   and 4).
+3. **Walker-initiated, invite-only client onboarding.** Owners cannot
+   self-register; they join only via a walker's invite (US-001/US-002).
+   Self-registration exists solely for walkers (US-000).
+4. **No payment processing.** Invoices are bookkeeping records;
+   settlement happens off-platform and is recorded after the fact
+   (US-016, Non-Goal 3).
+5. **API-first.** The domain is exposed as a versioned REST API plus
+   published domain events; mobile-first clients consume it online
+   (no offline mode in v1).
 
 ## Success Metrics
 

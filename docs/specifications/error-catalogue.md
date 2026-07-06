@@ -20,6 +20,9 @@ include a bearer token in the `Authorization` header.
 **Triggered by:**
 - Any authenticated route called with no `Authorization` header.
 - An `Authorization` header that does not start with `Bearer `.
+- A bearer token whose signature does not verify (tampered, signed
+  with the wrong key, or structurally not a JWT) — the most common
+  real-world 401.
 
 **Response shape:** `Error` (`code`, `message`).
 
@@ -27,11 +30,31 @@ include a bearer token in the `Authorization` header.
 
 **HTTP status:** 401 Unauthorized
 
-**Meaning:** The bearer token presented was valid signature but its
-`exp` claim is in the past.
+**Meaning:** The bearer token presented has a valid signature but its
+`exp` claim is in the past. Distinguished from
+`AUTHENTICATION_REQUIRED` so clients know a silent refresh will fix
+it.
 
 **Triggered by:**
 - An access token used after its expiry (lifetime defined in `nfr.md`).
+
+**Resolution path:** Exchange the refresh token via
+`POST /v1/auth/refresh`; re-log in only if that also fails.
+
+**Response shape:** `Error` (`code`, `message`).
+
+### `INVALID_REFRESH_TOKEN`
+
+**HTTP status:** 401 Unauthorized
+
+**Meaning:** The refresh token presented cannot be exchanged. It is
+expired, revoked (logout or password reset), already rotated, or
+never existed — deliberately indistinguishable to prevent token
+probing.
+
+**Triggered by:**
+- `POST /v1/auth/refresh` with any token that isn't the currently
+  active refresh token for a live session.
 
 **Resolution path:** Re-log in via `POST /v1/auth/login`.
 
@@ -59,18 +82,18 @@ which field was wrong (account enumeration).
 
 **HTTP status:** 403 Forbidden
 
-**Meaning:** The caller is authenticated but the operation is
-forbidden — either because of role (wrong role for this operation)
-or ownership (correct role but the resource isn't theirs). The
-response does not distinguish; both look identical.
+**Meaning:** The caller is authenticated and can see the resource,
+but their role doesn't permit this operation on it. Ownership-trace
+failures are **not** 403 — they return `404 RESOURCE_NOT_FOUND` so
+that "exists but isn't yours" is indistinguishable from "doesn't
+exist" (Decision Log: TENANCY-404-FOR-BOTH).
 
 **Triggered by:**
 - An `owner` calling a `walker`-only operation (add client, generate
-  invoice, mark paid, set rate card, etc.).
-- A `walker` calling against a Client / Dog / Walk / Invoice whose
-  ownership trace doesn't match (see auth-matrix Ownership Rule).
-- An `owner` calling against a Client / Dog / Walk / Invoice owned
-  by a different `owner`.
+  invoice, mark paid, set rate card) or a walker-only action on a
+  walk they can see (complete, post update, decide).
+- A `walker` cancelling a walk still in `requested` (declining via
+  the decision endpoint is the walker's route out of `requested`).
 
 **Response shape:** `Error` (`code`, `message`).
 
@@ -82,12 +105,23 @@ response does not distinguish; both look identical.
 
 **HTTP status:** 404 Not Found
 
-**Meaning:** The requested resource id doesn't exist (Dog, Walk,
-Invoice, WalkUpdate, Photo, etc.).
+**Meaning:** The requested resource is not visible to the caller —
+either the id doesn't exist (Dog, Walk, Invoice, WalkUpdate, Photo,
+etc.) or it exists but the caller's ownership trace doesn't reach it.
+The two cases are deliberately identical (no existence oracle;
+Decision Log: TENANCY-404-FOR-BOTH).
 
 **Triggered by:**
 - Any GET / PATCH / POST routed against a `{resourceId}` that has
   no matching row.
+- Any GET / PATCH / POST routed against a `{resourceId}` owned by a
+  different walker's instance or a different owner.
+- A body-referenced id (`ownerId` on add-dog, `dogId` on
+  schedule-walk, `clientId` on generate-invoice) that doesn't exist
+  or isn't in the caller's tenancy.
+- `POST /v1/invites/{token}/accept` or
+  `POST /v1/auth/password-reset/confirm` with a token that never
+  existed (as opposed to expired/used, which return 410).
 
 **Resolution path:** Check the id; refresh the list endpoint to see
 the current set.
@@ -122,8 +156,9 @@ instance. Only one Walker exists per instance per non-goal #1 (no
 multi-walker teams).
 
 **Triggered by:**
-- `POST /v1/auth/register` with `role: walker` when a Walker record
-  already exists.
+- `POST /v1/auth/register` when a Walker record already exists
+  (registration is walker-only — owners join via invite, so any
+  second registration attempt hits this).
 
 **Response shape:** `Error` (`code`, `message`).
 
@@ -193,6 +228,41 @@ doesn't accept updates.
 
 **Response shape:** `Error` (`code`, `message`).
 
+### `STORAGE_QUOTA_EXCEEDED`
+
+**HTTP status:** 409 Conflict
+
+**Meaning:** The walker's 10 GB photo-storage cap (NFR-DATA-003) is
+exhausted. A state condition of the instance, not a defect in the
+request — a byte-identical upload would succeed after space is
+freed, which is why this is not a `VALIDATION_ERROR`.
+
+**Triggered by:**
+- `POST /v1/walks/{walkId}/updates` with photo parts when total
+  stored photo bytes already exceed the cap.
+
+**Resolution path:** Free space (future deletion tooling) or contact
+support; the cap is per NFR-DATA-003.
+
+**Response shape:** `Error` (`code`, `message`).
+
+### `CURRENCY_IMMUTABLE`
+
+**HTTP status:** 409 Conflict
+
+**Meaning:** The rate card's currency is fixed once set (changing it
+mid-history creates accounting ambiguity on invoices that span the
+change — Decision Log: CURRENCY-CARD-LEVEL).
+
+**Triggered by:**
+- `PUT /v1/rate-card` whose `currency` differs from the currency
+  already established on the walker's card.
+
+**Resolution path:** Keep the established currency. A currency change
+is a domain-migration event, not an API call.
+
+**Response shape:** `Error` (`code`, `message`).
+
 ### `IDEMPOTENCY_KEY_CONFLICT`
 
 **HTTP status:** 409 Conflict
@@ -208,6 +278,31 @@ honour the same key for a semantically different intent.
   original call.
 
 **Resolution:** Generate a fresh UUID for the new intent.
+
+**Response shape:** `Error` (`code`, `message`).
+
+---
+
+## Rate-limiting errors (429)
+
+### `RATE_LIMITED`
+
+**HTTP status:** 429 Too Many Requests
+
+**Meaning:** The caller exceeded the request-rate threshold on a
+rate-limited endpoint (NFR-SEC-004). The response includes a
+`Retry-After` header (seconds).
+
+**Triggered by:**
+- `POST /v1/auth/register`, `POST /v1/auth/login`,
+  `POST /v1/auth/password-reset/request`,
+  `POST /v1/auth/password-reset/confirm`,
+  `POST /v1/auth/refresh`, or `POST /v1/invites/{token}/accept`
+  called beyond the per-IP / per-account threshold. The token-taking
+  endpoints are included because single-use opaque tokens are
+  brute-forceable.
+
+**Resolution path:** Wait for the `Retry-After` interval and retry.
 
 **Response shape:** `Error` (`code`, `message`).
 

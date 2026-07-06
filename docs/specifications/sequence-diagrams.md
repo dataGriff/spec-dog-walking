@@ -8,7 +8,9 @@ and the conventional system actors (`API`, `EventBus`).
 
 ---
 
-## Flow 1: Authentication — Walker self-registers and logs in
+## Flow 1: Authentication — Walker self-registers, logs in, refreshes, logs out
+
+Covers US-000, US-003, US-021, US-022.
 
 ```mermaid
 sequenceDiagram
@@ -16,12 +18,25 @@ sequenceDiagram
     participant API
     participant EventBus
 
-    walker->>API: POST /v1/auth/register<br/>{ email, password, role: "walker" }
-    API-->>walker: 201 { accessToken, refreshToken, user }
+    walker->>API: POST /v1/auth/register<br/>{ email, password, displayName }
+    API-->>walker: 201 { accessToken, refreshToken }
+    API->>EventBus: publish dogwalking.user.registered
+    API->>EventBus: publish dogwalking.walker.registered
 
     Note over API: Subsequent logins use POST /v1/auth/login
     walker->>API: POST /v1/auth/login<br/>{ email, password }
     API-->>walker: 200 { accessToken, refreshToken }
+
+    Note over walker: Access token expires after 15 minutes (NFR-SEC-001)
+    walker->>API: POST /v1/auth/refresh<br/>{ refreshToken }
+    API-->>walker: 200 { accessToken, refreshToken }
+    Note over API: Presented refresh token is rotated — reuse returns 401 INVALID_REFRESH_TOKEN
+
+    walker->>API: POST /v1/auth/logout<br/>{ refreshToken }
+    API-->>walker: 204 No Content
+
+    walker->>API: POST /v1/auth/refresh<br/>{ refreshToken (revoked) }
+    API-->>walker: 401 INVALID_REFRESH_TOKEN
 ```
 
 ---
@@ -39,13 +54,16 @@ sequenceDiagram
     participant owner
 
     walker->>API: POST /v1/clients<br/>{ name, email }
+    API-->>walker: 201 { id, email, status: "pending", expiresAt }
     API->>EventBus: publish dogwalking.invite.created
-    API-->>walker: 201 { clientId, inviteId }
-    Note over API: Invite email queued with 1-day TTL
+    Note over API: Invite email queued with 1-day TTL.<br/>No Client record yet — it is created at acceptance.
 
     owner->>API: POST /v1/invites/{token}/accept<br/>{ password }
-    API->>EventBus: publish dogwalking.client.registered
     API-->>owner: 200 { accessToken, refreshToken }
+    API->>EventBus: publish dogwalking.invite.accepted
+    API->>EventBus: publish dogwalking.user.registered
+    API->>EventBus: publish dogwalking.client.registered
+    Note over API: Client record created here; invite.accepted and<br/>client.registered both carry inviteId for lineage
 
     owner->>API: POST /v1/auth/login<br/>{ email, password }
     API-->>owner: 200 { accessToken, refreshToken }
@@ -53,25 +71,29 @@ sequenceDiagram
 
 ---
 
-## Flow 3a: Authentication — Invite lifecycle (pending → accepted; expired path)
+## Flow 2a: Authentication — Invite lifecycle (pending → accepted; expired path)
 
 ```mermaid
 sequenceDiagram
     participant walker
     participant API
+    participant EventBus
     participant owner
 
     walker->>API: POST /v1/clients
     Note over API: Invite created with status "pending", expiresAt = now + 1 day
+    API->>EventBus: publish dogwalking.invite.created
 
     alt Recipient accepts in time
         owner->>API: POST /v1/invites/{token}/accept
         Note over API: Invite transitions pending → accepted
         API-->>owner: 200 (tokens)
+        API->>EventBus: publish dogwalking.invite.accepted
     else TTL elapses first
         owner->>API: POST /v1/invites/{token}/accept (more than 1 day later)
         Note over API: Invite lazily transitions pending → expired
         API-->>owner: 410 INVITE_EXPIRED
+        API->>EventBus: publish dogwalking.invite.expired
     end
 ```
 
@@ -93,6 +115,10 @@ sequenceDiagram
     owner->>API: POST /v1/auth/password-reset/confirm<br/>{ token, newPassword }
     API-->>owner: 200 OK
     Note over API: All existing refresh tokens for the user are revoked
+
+    owner->>API: POST /v1/auth/refresh<br/>{ refreshToken (issued before the reset) }
+    API-->>owner: 401 INVALID_REFRESH_TOKEN
+    Note over API: The revocation is observable — pre-reset refresh tokens no longer exchange
 ```
 
 ---
@@ -120,9 +146,9 @@ sequenceDiagram
 
 ---
 
-## Flow 4: Dogs — Owner adds and updates a dog
+## Flow 4: Dogs — Owner adds, views, and updates a dog
 
-Covers US-005, US-006.
+Covers US-005, US-006, US-020.
 
 ```mermaid
 sequenceDiagram
@@ -130,12 +156,15 @@ sequenceDiagram
     participant API
     participant EventBus
 
-    owner->>API: POST /v1/dogs<br/>{ name, breed, age, medication, vetName, vetPhone, notes }
-    API-->>owner: 201 { dogId, ... }
+    owner->>API: POST /v1/dogs<br/>{ name, breed, ageYears, medication, vetName, vetPhone, notes }
+    API-->>owner: 201 { id, ... }
     API->>EventBus: publish dogwalking.dog.added
 
+    owner->>API: GET /v1/dogs/{dogId}
+    API-->>owner: 200 { id, name, breed, ageYears, medication, ... }
+
     owner->>API: PATCH /v1/dogs/{dogId}<br/>{ medication: "updated" }
-    API-->>owner: 200 { dogId, ... }
+    API-->>owner: 200 { id, ... }
     API->>EventBus: publish dogwalking.dog.updated
 ```
 
@@ -153,17 +182,18 @@ sequenceDiagram
     participant EventBus
 
     owner->>API: POST /v1/walks<br/>{ dogId, startAt, durationMinutes, walkType }
-    API-->>owner: 201 { walkId, status: "requested" }
+    API-->>owner: 201 { id, status: "requested", priceCents: null }
     API->>EventBus: publish dogwalking.walk.requested
 
     walker->>API: PATCH /v1/walks/{walkId}/decision<br/>{ decision: "scheduled" }
-    API-->>walker: 200 { walkId, status: "scheduled" }
+    API-->>walker: 200 { id, status: "scheduled", priceCents }
     API->>EventBus: publish dogwalking.walk.scheduled
+    Note over API: priceCents snapshotted from the matching rate-card entry at this transition
 
-    Note over walker,owner: Either party may cancel before the walk happens
+    Note over walker,owner: Either party may cancel a scheduled walk before it happens
 
     owner->>API: POST /v1/walks/{walkId}/cancel
-    API-->>owner: 200 { walkId, status: "cancelled" }
+    API-->>owner: 200 { id, status: "cancelled" }
     API->>EventBus: publish dogwalking.walk.cancelled
 
     owner->>API: GET /v1/walks?status=scheduled
@@ -184,15 +214,15 @@ sequenceDiagram
     participant EventBus
 
     owner->>API: POST /v1/walks<br/>{ dogId, startAt, durationMinutes, walkType }
-    API-->>owner: 201 { walkId, status: "requested" }
+    API-->>owner: 201 { id, status: "requested" }
     API->>EventBus: publish dogwalking.walk.requested
 
     walker->>API: PATCH /v1/walks/{walkId}/decision<br/>{ decision: "declined", reason: "already booked" }
-    API-->>walker: 200 { walkId, status: "declined" }
+    API-->>walker: 200 { id, status: "declined" }
     API->>EventBus: publish dogwalking.walk.declined
 
     owner->>API: GET /v1/walks?status=declined
-    API-->>owner: 200 { data: [{walkId, status: "declined", declinedReason}] }
+    API-->>owner: 200 { data: [{id, status: "declined", declinedReason}] }
 ```
 
 ---
@@ -209,9 +239,9 @@ sequenceDiagram
     participant EventBus
 
     walker->>API: POST /v1/walks<br/>{ dogId, startAt, durationMinutes, walkType }
-    API-->>walker: 201 { walkId, status: "scheduled" }
+    API-->>walker: 201 { id, status: "scheduled", priceCents }
     API->>EventBus: publish dogwalking.walk.scheduled
-    Note over API: Walker-created walks skip the `requested` state
+    Note over API: Walker-created walks skip the `requested` state<br/>and record priceCents immediately
 ```
 
 ---
@@ -228,22 +258,22 @@ sequenceDiagram
     participant owner
 
     walker->>API: POST /v1/walks/{walkId}/updates<br/>multipart: notes + photos[]
-    API-->>walker: 201 { updateId, photoIds: [...] }
+    API-->>walker: 201 { id, notes, photos: [...] }
     API->>EventBus: publish dogwalking.walkupdate.posted
     Note over walker: Live update during the walk
 
     walker->>API: POST /v1/walks/{walkId}/complete
-    API-->>walker: 200 { walkId, status: "completed", completedAt }
+    API-->>walker: 200 { id, status: "completed", completedAt }
     API->>EventBus: publish dogwalking.walk.completed
     Note over API: Walk transitions scheduled → completed
 
     walker->>API: POST /v1/walks/{walkId}/updates<br/>multipart: notes + photos[]
-    API-->>walker: 201 { updateId, photoIds: [...] }
+    API-->>walker: 201 { id, notes, photos: [...] }
     API->>EventBus: publish dogwalking.walkupdate.posted
     Note over walker: Post-hoc update — allowed in `completed` too
 
     owner->>API: GET /v1/walks/{walkId}/updates
-    API-->>owner: 200 [{ updateId, notes, photos: [{id, contentType, ...}] }]
+    API-->>owner: 200 [{ id, notes, photos: [{id, contentType, ...}] }]
 
     owner->>API: GET /v1/walk-updates/{updateId}/photos/{photoId}
     API-->>owner: 200 (image bytes)
@@ -262,12 +292,12 @@ sequenceDiagram
     participant EventBus
     participant owner
 
-    walker->>API: PUT /v1/rate-card<br/>{ entries: [{walkType, durationMinutes, priceCents, currency}] }
-    API-->>walker: 200 { entries: [...] }
+    walker->>API: PUT /v1/rate-card<br/>{ currency, entries: [{walkType, durationMinutes, priceCents}] }
+    API-->>walker: 200 { id, currency, entries: [...] }
     API->>EventBus: publish dogwalking.ratecard.updated
 
     owner->>API: GET /v1/rate-card
-    API-->>owner: 200 { entries: [...] }
+    API-->>owner: 200 { id, currency, entries: [...] }
     Note over API: Owner sees only the rate card of their assigned walker
 ```
 
@@ -285,18 +315,18 @@ sequenceDiagram
     participant owner
 
     walker->>API: POST /v1/invoices<br/>{ clientId, periodStart, periodEnd }
-    API-->>walker: 201 { invoiceId, totalCents, lineItems: [...] }
+    API-->>walker: 201 { id, totalCents, lineItems: [...] }
     API->>EventBus: publish dogwalking.invoice.issued
-    Note over API: Line-item prices snapshotted from rate card at each walk's scheduled transition
+    Note over API: Line-item prices copied from each walk's recorded priceCents<br/>(snapshotted at its scheduled transition)
 
-    owner->>API: GET /v1/invoices?status=issued
-    API-->>owner: 200 { data: [{invoiceId, totalCents, status: "issued"}], ... }
+    owner->>API: GET /v1/invoices?status=issued&from=2026-06-01&to=2026-06-30
+    API-->>owner: 200 { data: [{id, totalCents, status: "issued"}], ... }
 
     walker->>API: POST /v1/invoices/{invoiceId}/mark-paid<br/>{ paidAt, paidVia: "bank transfer", tipCents: 500 }
     Note over walker,API: US-019 — tipCents is optional (defaults to 0)
-    API-->>walker: 200 { invoiceId, status: "paid", paidAt, paidVia }
+    API-->>walker: 200 { id, status: "paid", paidAt, paidVia, tipCents }
     API->>EventBus: publish dogwalking.invoice.paid
 
     owner->>API: GET /v1/invoices?status=paid
-    API-->>owner: 200 { data: [{invoiceId, status: "paid"}], ... }
+    API-->>owner: 200 { data: [{id, status: "paid"}], ... }
 ```

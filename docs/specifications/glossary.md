@@ -254,7 +254,10 @@ String. Dog's name.
 
 ### breed
 
-String or `null`. Breed.
+Enum (`Breed`, open) or `null`. The dog's breed, from the UK Kennel
+Club recognised-breeds list plus `mixed` and `unknown` fallbacks.
+Open enumeration: additions to the openapi list are a minor version
+bump.
 
 ### ageYears
 
@@ -320,6 +323,14 @@ Enum. One of `walker` or `owner` — who created the walk.
 ### notes
 
 String or `null`. Free-text booking notes.
+
+### priceCents
+
+Integer or `null`. The walk's recorded price in the rate card's
+currency, minor units — snapshotted from the matching rate-card entry
+when the walk enters `scheduled`, and never repriced by later
+rate-card changes. `null` while `requested`, or when the walk left
+the lifecycle before ever being scheduled.
 
 ### status
 

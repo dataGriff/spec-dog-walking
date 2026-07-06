@@ -59,10 +59,11 @@ paths:
               schema: { $ref: '#/components/schemas/AuthResponse' }
         '400': { $ref: '#/components/responses/ValidationError' }
         '409':
-          description: Email or walker conflict
+          description: Email or walker conflict, or Idempotency-Key reuse
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
+        '429': { $ref: '#/components/responses/RateLimited' }
   /v1/auth/login:
     post:
       tags: [Auth]
@@ -85,6 +86,59 @@ paths:
               schema: { $ref: '#/components/schemas/AuthResponse' }
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /v1/auth/refresh:
+    post:
+      tags: [Auth]
+      operationId: refreshSession
+      summary: Exchange a refresh token for a fresh token pair
+      description: >
+        Rotates the presented refresh token — the old token is retired
+        and a new access + refresh pair issued (US-021). Public: the
+        refresh token in the body is the credential, so an expired
+        access token never blocks the exchange. Expired, revoked,
+        rotated, and never-existed tokens are indistinguishable
+        (`INVALID_REFRESH_TOKEN`).
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefreshRequest' }
+      responses:
+        '200':
+          description: Fresh token pair issued; presented token rotated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /v1/auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logout
+      summary: Revoke the presented refresh token
+      description: >
+        Revokes the presented refresh token so the device's session
+        cannot be silently renewed (US-022). Requires a valid bearer
+        token; the refresh token to revoke travels in the body.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LogoutRequest' }
+      responses:
+        '204': { description: Refresh token revoked }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
   /v1/auth/password-reset/request:
     post:
       tags: [Auth]
@@ -101,6 +155,9 @@ paths:
             schema: { $ref: '#/components/schemas/PasswordResetRequest' }
       responses:
         '204': { description: Always returned (enumeration defense) }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/RateLimited' }
   /v1/auth/password-reset/confirm:
     post:
       tags: [Auth]
@@ -118,7 +175,14 @@ paths:
       responses:
         '200': { description: Password updated; refresh tokens revoked }
         '400': { $ref: '#/components/responses/ValidationError' }
+        '404':
+          description: Token never existed (expired/used tokens return 410)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '410': { $ref: '#/components/responses/Gone' }
+        '429': { $ref: '#/components/responses/RateLimited' }
   /v1/invites/{token}/accept:
     post:
       tags: [Auth]
@@ -141,12 +205,18 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/AuthResponse' }
         '400': { $ref: '#/components/responses/ValidationError' }
+        '404':
+          description: Token never existed (expired/used tokens return 410)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
         '409':
-          description: Email already registered
+          description: Email already registered, or Idempotency-Key reuse
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
         '410': { $ref: '#/components/responses/Gone' }
+        '429': { $ref: '#/components/responses/RateLimited' }
 
   # ── Clients ───────────────────────────────────────────────────
   /v1/clients:
@@ -154,7 +224,11 @@ paths:
       tags: [Clients]
       operationId: addClient
       summary: Walker invites a new client
-      description: Walker invites a new client.
+      description: >
+        Walker issues an invite to a prospective client. The Client
+        record itself is created when the invite is accepted (Decision
+        Log: CLIENT-CREATED-AT-ACCEPTANCE), so this returns the Invite,
+        not a Client. Walker-only.
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -164,15 +238,15 @@ paths:
             schema: { $ref: '#/components/schemas/ClientCreateRequest' }
       responses:
         '201':
-          description: Client created; invite queued
+          description: Invite created and email queued
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ClientCreateResponse' }
+              schema: { $ref: '#/components/schemas/Invite' }
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409':
-          description: Email already registered
+          description: Email already registered, or Idempotency-Key reuse
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
@@ -180,7 +254,9 @@ paths:
       tags: [Clients]
       operationId: listClients
       summary: Walker lists their clients
-      description: Walker lists their clients.
+      description: >
+        Walker lists the clients who have accepted their invites.
+        Walker-only — owners have no client list.
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
@@ -199,7 +275,11 @@ paths:
       tags: [Dogs]
       operationId: addDog
       summary: Add dog
-      description: Add dog.
+      description: >
+        Owner adds their own dog (ownerId inferred), or the walker adds
+        one for a client via `ownerId`. An unknown or non-client
+        `ownerId` returns 404 — indistinguishable from nonexistent
+        (Decision Log: TENANCY-404-FOR-BOTH).
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -215,12 +295,15 @@ paths:
               schema: { $ref: '#/components/schemas/Dog' }
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
     get:
       tags: [Dogs]
       operationId: listDogs
       summary: List dogs
-      description: List dogs.
+      description: >
+        Owners see only their own dogs; the walker sees all dogs
+        belonging to their clients.
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
@@ -238,7 +321,10 @@ paths:
       tags: [Dogs]
       operationId: viewDog
       summary: View dog
-      description: View dog.
+      description: >
+        Full dog record. Visible to the dog's owner and their walker
+        only; a dog outside the caller's tenancy returns 404,
+        indistinguishable from nonexistent.
       responses:
         '200':
           description: Dog detail
@@ -246,13 +332,15 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Dog' }
         '401': { $ref: '#/components/responses/Unauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
     patch:
       tags: [Dogs]
       operationId: editDog
       summary: Edit dog
-      description: Edit dog.
+      description: >
+        Editable by the dog's owner and their walker. A dog outside
+        the caller's tenancy returns 404, indistinguishable from
+        nonexistent.
       requestBody:
         required: true
         content:
@@ -266,7 +354,6 @@ paths:
               schema: { $ref: '#/components/schemas/Dog' }
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
   # ── Walks ─────────────────────────────────────────────────────
@@ -275,7 +362,11 @@ paths:
       tags: [Walks]
       operationId: scheduleWalk
       summary: Schedule walk
-      description: Schedule walk.
+      description: >
+        Owner-created walks start `requested` with a null price;
+        walker-created walks start `scheduled` and record `priceCents`
+        from the matching rate-card entry immediately. An unknown or
+        out-of-tenancy `dogId` returns 404.
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -291,12 +382,15 @@ paths:
               schema: { $ref: '#/components/schemas/Walk' }
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
     get:
       tags: [Walks]
       operationId: listWalks
       summary: List walks
-      description: List walks.
+      description: >
+        Owners see only their own dogs' walks; the walker sees all
+        walks for their clients (PRD US-010).
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
@@ -341,7 +435,11 @@ paths:
       tags: [Walks]
       operationId: cancelWalk
       summary: Cancel walk
-      description: Cancel walk.
+      description: >
+        Owner withdraws a `requested` walk or either party cancels a
+        `scheduled` one. A walker cancelling a `requested` walk gets
+        403 — decline via the decision endpoint is the walker's route
+        out of `requested`.
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
@@ -383,7 +481,11 @@ paths:
       tags: [WalkUpdates]
       operationId: postWalkUpdate
       summary: Post walk update
-      description: Post walk update.
+      description: >
+        Walker-only. Allowed while the walk is `scheduled` (live) or
+        `completed` (post-hoc). Requires notes or at least one photo.
+        Rejected with 409 `STORAGE_QUOTA_EXCEEDED` when the instance's
+        photo-storage cap (NFR-DATA-003) is exhausted.
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -406,7 +508,11 @@ paths:
       tags: [WalkUpdates]
       operationId: listWalkUpdates
       summary: List walk updates
-      description: List walk updates.
+      description: >
+        Updates in posted-at order, visible to the walk's owner and
+        walker only (out-of-tenancy walks return 404). Deliberately
+        unpaginated — the per-walk timeline is bounded and only
+        meaningful whole (NFR-PERF-006).
       responses:
         '200':
           description: Walk updates in posted-at order
@@ -416,7 +522,6 @@ paths:
                 type: array
                 items: { $ref: '#/components/schemas/WalkUpdate' }
         '401': { $ref: '#/components/responses/Unauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
   /v1/walk-updates/{updateId}/photos/{photoId}:
     parameters:
@@ -426,7 +531,10 @@ paths:
       tags: [WalkUpdates]
       operationId: getWalkUpdatePhoto
       summary: Get walk update photo
-      description: Get walk update photo.
+      description: >
+        Streams the photo bytes over the authenticated endpoint (never
+        a public URL). Visible to the walk's owner and walker only;
+        out-of-tenancy photos return 404.
       responses:
         '200':
           description: Photo bytes
@@ -435,7 +543,6 @@ paths:
             image/png: { schema: { type: string, format: binary } }
             image/heic: { schema: { type: string, format: binary } }
         '401': { $ref: '#/components/responses/Unauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
   # ── Invoices ──────────────────────────────────────────────────
@@ -444,7 +551,12 @@ paths:
       tags: [Invoices]
       operationId: generateInvoice
       summary: Generate invoice
-      description: Generate invoice.
+      description: >
+        Walker-only. Line items cover every completed walk in the
+        period, priced from each walk's recorded `priceCents`
+        (snapshotted at its `scheduled` transition — later rate-card
+        changes never reprice). An unknown or non-client `clientId`
+        returns 404.
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -461,15 +573,24 @@ paths:
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
     get:
       tags: [Invoices]
       operationId: listInvoices
       summary: List invoices
-      description: List invoices.
+      description: >
+        Walkers see all their issued invoices; owners see only
+        invoices addressed to them (PRD US-015). `from`/`to` filter on
+        the issue date; `balanceOwedCents` in the response sums
+        `totalCents` over `issued` invoices across the whole filtered
+        set, giving the running balance owed.
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
         - { name: status, in: query, schema: { type: string, enum: [issued, paid] } }
+        - { name: from, in: query, description: 'Inclusive lower bound on the invoice issue date', schema: { type: string, format: date } }
+        - { name: to, in: query, description: 'Inclusive upper bound on the invoice issue date', schema: { type: string, format: date } }
       responses:
         '200':
           description: Paginated list of invoices
@@ -510,7 +631,12 @@ paths:
       tags: [RateCard]
       operationId: setRateCard
       summary: Set rate card
-      description: Set rate card.
+      description: >
+        Walker-only. Replaces the full entry table. Currency is
+        card-level and immutable once established — a differing
+        currency returns 409 `CURRENCY_IMMUTABLE` (Decision Log:
+        CURRENCY-CARD-LEVEL). Changes apply prospectively; walks keep
+        the `priceCents` they recorded at scheduling.
       requestBody:
         required: true
         content:
@@ -525,11 +651,15 @@ paths:
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
     get:
       tags: [RateCard]
       operationId: viewRateCard
       summary: View rate card
-      description: View rate card.
+      description: >
+        Singleton — always resolves to the instance's single walker's
+        card. Owners may view it (being a client of this walker is
+        what admitted them). Returns 404 before the first PUT.
       responses:
         '200':
           description: Walker's rate card
@@ -538,6 +668,7 @@ paths:
               schema: { $ref: '#/components/schemas/RateCard' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
 
 components:
   securitySchemes:
@@ -586,12 +717,24 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
     Conflict:
-      description: Resource is in a state that disallows the operation
+      description: >
+        Resource is in a state that disallows the operation, or the
+        Idempotency-Key was reused with a different request body
+        (`IDEMPOTENCY_KEY_CONFLICT`)
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
     Gone:
       description: Token has expired or been used
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    RateLimited:
+      description: Request rate exceeded the NFR-SEC-004 threshold
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying
+          schema: { type: integer, minimum: 1 }
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
@@ -626,18 +769,29 @@ components:
             - INVITE_ALREADY_USED
             - RESET_TOKEN_EXPIRED
             - RESET_TOKEN_ALREADY_USED
-            - INVALID_WALK_TYPE
-            - INVALID_PHOTO
-            - NO_BILLABLE_WALKS
+            - INVALID_REFRESH_TOKEN
+            - IDEMPOTENCY_KEY_CONFLICT
+            - CURRENCY_IMMUTABLE
+            - STORAGE_QUOTA_EXCEEDED
+            - RATE_LIMITED
         message:
           type: string
     ValidationError:
       type: object
       required: [code, message]
+      description: >
+        400-level envelope. `details[]` carries per-field diagnostics
+        for `VALIDATION_ERROR`; the domain-specific 400 codes
+        (`INVALID_WALK_TYPE`, `INVALID_PHOTO`, `NO_BILLABLE_WALKS`)
+        use `message` alone.
       properties:
         code:
           type: string
-          enum: [VALIDATION_ERROR]
+          enum:
+            - VALIDATION_ERROR
+            - INVALID_WALK_TYPE
+            - INVALID_PHOTO
+            - NO_BILLABLE_WALKS
         message:
           type: string
         details:
@@ -686,6 +840,16 @@ components:
       required: [password]
       properties:
         password: { type: string, minLength: 8 }
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken: { type: string }
+    LogoutRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken: { type: string }
     AuthResponse:
       type: object
       required: [accessToken, refreshToken, user]
@@ -697,11 +861,14 @@ components:
     # ── Entities ───────────────────────────────────────────────
     User:
       type: object
+      description: >
+        The authentication record behind every login. Secrets
+        (password hash) are deliberately absent — they never cross
+        the API boundary.
       required: [id, email, role, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
-        passwordHash: { type: string, description: "Never returned in API responses; included here for schema completeness." }
         role: { $ref: '#/components/schemas/Role' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -739,12 +906,6 @@ components:
       properties:
         name: { type: string }
         email: { type: string, format: email }
-    ClientCreateResponse:
-      type: object
-      required: [clientId, inviteId]
-      properties:
-        clientId: { type: string, format: uuid }
-        inviteId: { type: string, format: uuid }
     ClientList:
       type: object
       required: [data, pagination]
@@ -756,25 +917,15 @@ components:
 
     Invite:
       type: object
-      required: [id, walkerId, email, token, status, expiresAt, createdAt, updatedAt]
+      description: >
+        Returned by addClient. The single-use `token` is deliberately
+        absent — it travels only in the invite email.
+      required: [id, walkerId, email, status, expiresAt, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         walkerId: { type: string, format: uuid }
         email: { type: string, format: email }
-        token: { type: string }
         status: { $ref: '#/components/schemas/InviteStatus' }
-        expiresAt: { type: string, format: date-time }
-        createdAt: { type: string, format: date-time }
-        updatedAt: { type: string, format: date-time }
-
-    PasswordResetToken:
-      type: object
-      required: [id, userId, token, status, expiresAt, createdAt, updatedAt]
-      properties:
-        id: { type: string, format: uuid }
-        userId: { type: string, format: uuid }
-        token: { type: string }
-        status: { $ref: '#/components/schemas/PasswordResetTokenStatus' }
         expiresAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -795,10 +946,6 @@ components:
       type: string
       description: "Lifecycle state of a client Invite. Closed enum."
       enum: [pending, accepted, expired]
-    PasswordResetTokenStatus:
-      type: string
-      description: "Lifecycle state of a password-reset token. Closed enum."
-      enum: [pending, used, expired]
     PhotoContentType:
       type: string
       description: "Permitted MIME types for walk-update photos. Closed enum."
@@ -1102,6 +1249,16 @@ components:
         startAt: { type: string, format: date-time }
         requesterRole: { $ref: '#/components/schemas/Role' }
         notes: { type: string, nullable: true }
+        priceCents:
+          type: integer
+          minimum: 1
+          nullable: true
+          description: >
+            Recorded price in the rate card's currency, minor units.
+            Snapshotted from the matching rate-card entry when the
+            walk enters `scheduled`; null while `requested` or when
+            the walk left the lifecycle before being scheduled. Never
+            repriced by later rate-card changes.
         status: { $ref: '#/components/schemas/WalkStatus' }
         declinedReason: { type: string, nullable: true }
         cancelledByRole:
@@ -1137,23 +1294,31 @@ components:
 
     WalkUpdate:
       type: object
-      required: [id, walkId, createdAt, updatedAt]
+      required: [id, walkId, photos, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         walkId: { type: string, format: uuid }
         notes: { type: string, nullable: true }
         photos:
           type: array
+          description: Always present; empty for notes-only updates.
           items: { $ref: '#/components/schemas/Photo' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     WalkUpdateCreateRequest:
       type: object
+      description: >
+        At least one of `notes` or `photo` must be present (PRD
+        US-012); an update with neither returns `VALIDATION_ERROR`.
+      anyOf:
+        - required: [notes]
+        - required: [photo]
       properties:
-        notes: { type: string }
+        notes: { type: string, minLength: 1 }
         photo:
           type: array
           items: { type: string, format: binary }
+          minItems: 1
           maxItems: 5
 
     Photo:
@@ -1163,7 +1328,7 @@ components:
         id: { type: string, format: uuid }
         walkUpdateId: { type: string, format: uuid }
         contentType: { $ref: '#/components/schemas/PhotoContentType' }
-        sizeBytes: { type: integer, minimum: 0 }
+        sizeBytes: { type: integer, minimum: 0, maximum: 10485760, description: '10 MB ceiling per PRD US-012.' }
         capturedAt: { type: string, format: date-time, nullable: true }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -1193,18 +1358,26 @@ components:
         updatedAt: { type: string, format: date-time }
     RateCardPutRequest:
       type: object
-      required: [entries]
+      required: [currency, entries]
       properties:
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: >
+            Card-level ISO 4217 currency. Immutable once established —
+            a differing value returns `CURRENCY_IMMUTABLE` (Decision
+            Log: CURRENCY-CARD-LEVEL).
         entries:
           type: array
+          minItems: 1
           items:
             type: object
-            required: [walkType, durationMinutes, priceCents, currency]
+            required: [walkType, durationMinutes, priceCents]
             properties:
               walkType: { type: string }
               durationMinutes: { type: integer, minimum: 1 }
               priceCents: { type: integer, minimum: 1 }
-              currency: { type: string, minLength: 3, maxLength: 3 }
 
     Invoice:
       type: object
@@ -1242,12 +1415,19 @@ components:
         tipCents: { type: integer, minimum: 0, default: 0 }
     InvoiceList:
       type: object
-      required: [data, pagination]
+      required: [data, pagination, balanceOwedCents]
       properties:
         data:
           type: array
           items: { $ref: '#/components/schemas/Invoice' }
         pagination: { $ref: '#/components/schemas/Pagination' }
+        balanceOwedCents:
+          type: integer
+          minimum: 0
+          description: >
+            Sum of `totalCents` over invoices in status `issued`
+            across the whole filtered set (not just this page) — the
+            running balance owed (PRD US-015).
     InvoiceLineItem:
       type: object
       required: [id, invoiceId, walkId, walkType, durationMinutes, priceCents, createdAt, updatedAt]
