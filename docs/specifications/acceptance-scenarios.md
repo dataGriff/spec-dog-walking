@@ -19,6 +19,8 @@
 
 ## US-000: Register as a walker
 
+*Story: [US-000](prd.md#us-000-register-as-a-walker)*
+
 ### Scenario US-000-A: Walker self-registers
 
 ```gherkin
@@ -66,6 +68,8 @@ And the response body code equals "VALIDATION_ERROR"
 ---
 
 ## US-001: Add a new client
+
+*Story: [US-001](prd.md#us-001-add-a-new-client)*
 
 ### Scenario US-001-A: Walker invites a new client
 
@@ -116,6 +120,8 @@ And the response body data has length 2
 
 ## US-002: Accept invite and set password
 
+*Story: [US-002](prd.md#us-002-accept-invite-and-set-password)*
+
 ### Scenario US-002-A: Valid invite accepted
 
 ```gherkin
@@ -162,6 +168,8 @@ And the response body code equals "RESOURCE_NOT_FOUND"
 
 ## US-003: Log in
 
+*Story: [US-003](prd.md#us-003-log-in)*
+
 ### Scenario US-003-A: Successful login
 
 ```gherkin
@@ -195,6 +203,8 @@ And the response body code equals "INVALID_CREDENTIALS"
 ---
 
 ## US-004: Reset forgotten password
+
+*Story: [US-004](prd.md#us-004-reset-forgotten-password)*
 
 ### Scenario US-004-A: Reset request always returns 204
 
@@ -247,6 +257,8 @@ And the response body code equals "RESOURCE_NOT_FOUND"
 
 ## US-021: Stay logged in without re-entering credentials
 
+*Story: [US-021](prd.md#us-021-stay-logged-in-without-re-entering-credentials)*
+
 ### Scenario US-021-A: Refresh token exchanged and rotated
 
 ```gherkin
@@ -273,6 +285,8 @@ And the response body code equals "INVALID_REFRESH_TOKEN"
 
 ## US-022: Log out
 
+*Story: [US-022](prd.md#us-022-log-out)*
+
 ### Scenario US-022-A: Logout revokes the refresh token
 
 ```gherkin
@@ -287,6 +301,8 @@ And the response body code equals "INVALID_REFRESH_TOKEN"
 ---
 
 ## US-005: Add a dog
+
+*Story: [US-005](prd.md#us-005-add-a-dog)*
 
 ### Scenario US-005-A: Owner adds their own dog
 
@@ -344,6 +360,8 @@ And the response body data has length 2
 
 ## US-006: Update dog details
 
+*Story: [US-006](prd.md#us-006-update-dog-details)*
+
 ### Scenario US-006-A: Owner edits their own dog
 
 ```gherkin
@@ -368,6 +386,8 @@ And the response body code equals "RESOURCE_NOT_FOUND"
 ---
 
 ## US-020: View a single dog
+
+*Story: [US-020](prd.md#us-020-view-a-single-dog)*
 
 ### Scenario US-020-A: Owner views their own dog
 
@@ -402,6 +422,8 @@ And the response body code equals "RESOURCE_NOT_FOUND"
 ---
 
 ## US-007: Schedule a walk
+
+*Story: [US-007](prd.md#us-007-schedule-a-walk)*
 
 ### Scenario US-007-A: Owner requests a walk
 
@@ -453,9 +475,21 @@ Then the response status is 400
 And the response body code equals "VALIDATION_ERROR"
 ```
 
+### Scenario US-007-E: Booking against an invisible dog is not found
+
+```gherkin
+Given an owner is logged in
+And a dog "D9" exists owned by a different owner
+When I POST /v1/walks with dogId "D9" and otherwise valid fields
+Then the response status is 404
+And the response body code equals "RESOURCE_NOT_FOUND"
+```
+
 ---
 
 ## US-008: Decide on a walk request
+
+*Story: [US-008](prd.md#us-008-decide-on-a-walk-request)*
 
 ### Scenario US-008-A: Walker schedules a requested walk and the price is recorded
 
@@ -491,9 +525,21 @@ Then the response status is 409
 And the response body code equals "WALK_NOT_PENDING"
 ```
 
+### Scenario US-008-D: Decision on a walk that never existed is not found
+
+```gherkin
+Given a walker is logged in
+And no walk "W9" has ever existed
+When I PATCH /v1/walks/W9/decision with decision "scheduled"
+Then the response status is 404
+And the response body code equals "RESOURCE_NOT_FOUND"
+```
+
 ---
 
 ## US-009: Cancel a walk
+
+*Story: [US-009](prd.md#us-009-cancel-a-walk)*
 
 ### Scenario US-009-A: Owner cancels their own walk
 
@@ -552,6 +598,8 @@ And the response body code equals "FORBIDDEN"
 
 ## US-010: List walks
 
+*Story: [US-010](prd.md#us-010-list-walks)*
+
 ### Scenario US-010-A: Owner lists their own walks
 
 ```gherkin
@@ -589,6 +637,8 @@ And the response body code equals "VALIDATION_ERROR"
 
 ## US-011: Complete a walk
 
+*Story: [US-011](prd.md#us-011-complete-a-walk)*
+
 ### Scenario US-011-A: Walker completes a scheduled walk
 
 ```gherkin
@@ -621,9 +671,21 @@ Then the response status is 403
 And the response body code equals "FORBIDDEN"
 ```
 
+### Scenario US-011-D: Completing a walk that never existed is not found
+
+```gherkin
+Given a walker is logged in
+And no walk "W9" has ever existed
+When I POST /v1/walks/W9/complete
+Then the response status is 404
+And the response body code equals "RESOURCE_NOT_FOUND"
+```
+
 ---
 
 ## US-012: Post a walk update
+
+*Story: [US-012](prd.md#us-012-post-a-walk-update)*
 
 ### Scenario US-012-A: Notes-only update
 
@@ -707,9 +769,31 @@ Then the response status is 400
 And the response body code equals "INVALID_PHOTO"
 ```
 
+### Scenario US-012-I: Owner cannot post updates to their own walk
+
+```gherkin
+Given an owner is logged in
+And a walk "W1" exists in status "scheduled" for my dog
+When I POST /v1/walks/W1/updates as multipart with notes "hello"
+Then the response status is 403
+And the response body code equals "FORBIDDEN"
+```
+
+### Scenario US-012-J: Update on a walk that never existed is not found
+
+```gherkin
+Given a walker is logged in
+And no walk "W9" has ever existed
+When I POST /v1/walks/W9/updates as multipart with valid notes
+Then the response status is 404
+And the response body code equals "RESOURCE_NOT_FOUND"
+```
+
 ---
 
 ## US-013: View walk updates
+
+*Story: [US-013](prd.md#us-013-view-walk-updates)*
 
 ### Scenario US-013-A: Owner views updates for their own walk
 
@@ -744,6 +828,8 @@ And the response body code equals "RESOURCE_NOT_FOUND"
 ---
 
 ## US-014: Generate an invoice
+
+*Story: [US-014](prd.md#us-014-generate-an-invoice)*
 
 ### Scenario US-014-A: Walker generates an invoice for a billing period
 
@@ -794,6 +880,8 @@ And the line item for walk "W1" has priceCents 1500
 
 ## US-015: List invoices
 
+*Story: [US-015](prd.md#us-015-list-invoices)*
+
 ### Scenario US-015-A: Walker lists all their issued invoices
 
 ```gherkin
@@ -827,6 +915,8 @@ And the response body data has length 2
 ---
 
 ## US-016: Record an invoice as paid
+
+*Story: [US-016](prd.md#us-016-record-an-invoice-as-paid)*
 
 ### Scenario US-016-A: Walker marks an issued invoice paid
 
@@ -863,6 +953,8 @@ And the response body code equals "INVOICE_NOT_ISSUED"
 ---
 
 ## US-017: Set my rate card
+
+*Story: [US-017](prd.md#us-017-set-my-rate-card)*
 
 ### Scenario US-017-A: Walker sets a valid rate card
 
@@ -910,6 +1002,8 @@ And the response body code equals "CURRENCY_IMMUTABLE"
 
 ## US-018: View the rate card
 
+*Story: [US-018](prd.md#us-018-view-the-rate-card)*
+
 ### Scenario US-018-A: Walker views their own rate card
 
 ```gherkin
@@ -943,6 +1037,8 @@ And the response body code equals "RESOURCE_NOT_FOUND"
 ---
 
 ## US-019: Add a tip when marking an invoice paid
+
+*Story: [US-019](prd.md#us-019-add-a-tip-when-marking-an-invoice-paid)*
 
 ### Scenario US-019-A: Mark paid with a tip
 

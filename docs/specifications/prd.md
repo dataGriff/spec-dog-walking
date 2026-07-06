@@ -115,6 +115,8 @@ after each walk.
   8 characters
 - A `WalkerRegistered` event is published
 
+*Scenarios: [US-000](acceptance-scenarios.md#us-000-register-as-a-walker)*
+
 #### US-001: Add a new client
 
 **As a** solo dog walker,
@@ -130,6 +132,8 @@ after each walk.
   it (Decision Log: CLIENT-CREATED-AT-ACCEPTANCE)
 - The invite is associated with the authenticated walker
 - Returns 409 with `EMAIL_ALREADY_REGISTERED` if the email is already in use
+
+*Scenarios: [US-001](acceptance-scenarios.md#us-001-add-a-new-client)*
 
 #### US-002: Accept invite and set password
 
@@ -149,6 +153,8 @@ after each walk.
   `InviteAccepted` and `ClientRegistered` events are published (both
   carrying the invite id so the lineage is joinable from the stream)
 
+*Scenarios: [US-002](acceptance-scenarios.md#us-002-accept-invite-and-set-password)*
+
 #### US-003: Log in
 
 **As a** registered dog owner or solo dog walker,
@@ -159,6 +165,8 @@ after each walk.
 - POST /v1/auth/login returns 200 with tokens on valid credentials
 - Returns 401 with `INVALID_CREDENTIALS` on wrong email or password
   (indistinguishable, to avoid leaking which was wrong)
+
+*Scenarios: [US-003](acceptance-scenarios.md#us-003-log-in)*
 
 #### US-004: Reset forgotten password
 
@@ -179,6 +187,8 @@ after each walk.
   with a pre-reset refresh token returns 401 (forces re-login on other
   devices)
 
+*Scenarios: [US-004](acceptance-scenarios.md#us-004-reset-forgotten-password)*
+
 #### US-021: Stay logged in without re-entering credentials
 
 **As a** registered dog owner or solo dog walker,
@@ -195,6 +205,8 @@ phone mid-walk.
   revoked, already rotated, or never existed (indistinguishable, to
   avoid token probing)
 
+*Scenarios: [US-021](acceptance-scenarios.md#us-021-stay-logged-in-without-re-entering-credentials)*
+
 #### US-022: Log out
 
 **As a** registered dog owner or solo dog walker,
@@ -209,6 +221,8 @@ alive.
   with `INVALID_REFRESH_TOKEN`
 
 ### Dogs
+
+*Scenarios: [US-022](acceptance-scenarios.md#us-022-log-out)*
 
 #### US-005: Add a dog
 
@@ -230,6 +244,8 @@ free-text quirks/notes,
   change (Decision Log: BREED-UK-KENNEL-CLUB-OPEN-ENUM)
 - Returns 400 with `VALIDATION_ERROR` if `name` is missing
 
+*Scenarios: [US-005](acceptance-scenarios.md#us-005-add-a-dog)*
+
 #### US-006: Update dog details
 
 **As a** dog owner or the solo dog walker who manages this owner,
@@ -242,6 +258,8 @@ free-text quirks/notes,
   requester is neither the owner nor the walker assigned to the owner
   (not-yours is indistinguishable from not-there)
 - A `DogUpdated` event is published
+
+*Scenarios: [US-006](acceptance-scenarios.md#us-006-update-dog-details)*
 
 #### US-020: View a single dog
 
@@ -260,6 +278,8 @@ to verify she's updated her dog's details since last week.
   indistinguishable from not-there)
 
 ### Bookings
+
+*Scenarios: [US-020](acceptance-scenarios.md#us-020-view-a-single-dog)*
 
 #### US-007: Schedule a walk
 
@@ -286,6 +306,8 @@ walk-type, and optional notes,
 - A `WalkRequested` (owner path) or `WalkScheduled` (walker path) event
   is published
 
+*Scenarios: [US-007](acceptance-scenarios.md#us-007-schedule-a-walk)*
+
 #### US-008: Decide on a walk request
 
 **As a** solo dog walker,
@@ -303,6 +325,8 @@ find another option.
 - On `scheduled`: walk moves to `scheduled`, `WalkScheduled` event published
 - On `declined`: walk moves to `declined`, `WalkDeclined` event published
 
+*Scenarios: [US-008](acceptance-scenarios.md#us-008-decide-on-a-walk-request)*
+
 #### US-009: Cancel a walk
 
 **As a** dog owner or the solo dog walker,
@@ -319,6 +343,8 @@ find another option.
 - The walk moves to status `cancelled`; the cancelling party is recorded
 - A `WalkCancelled` event is published
 
+*Scenarios: [US-009](acceptance-scenarios.md#us-009-cancel-a-walk)*
+
 #### US-010: List walks
 
 **As a** dog owner or the solo dog walker,
@@ -332,6 +358,8 @@ find another option.
 - Page size is capped at 50
 
 ### Walks
+
+*Scenarios: [US-010](acceptance-scenarios.md#us-010-list-walks)*
 
 #### US-011: Complete a walk
 
@@ -349,6 +377,8 @@ find another option.
 - Returns 409 with `WALK_NOT_SCHEDULED` if not in status `scheduled`
 - Walk moves to `completed`; completion timestamp recorded
 - A `WalkCompleted` event is published
+
+*Scenarios: [US-011](acceptance-scenarios.md#us-011-complete-a-walk)*
 
 #### US-012: Post a walk update
 
@@ -373,6 +403,8 @@ and/or attached photos,
 - A `WalkUpdatePosted` event is published; payload includes the update id
   and photo count
 
+*Scenarios: [US-012](acceptance-scenarios.md#us-012-post-a-walk-update)*
+
 #### US-013: View walk updates
 
 **As a** dog owner or the assigned solo dog walker,
@@ -390,6 +422,8 @@ photos in chronological order,
   walker
 
 ### Invoicing
+
+*Scenarios: [US-013](acceptance-scenarios.md#us-013-view-walk-updates)*
 
 #### US-014: Generate an invoice
 
@@ -411,6 +445,8 @@ completed walks,
 - Invoice is created in status `issued`; an `InvoiceIssued` event is
   published
 
+*Scenarios: [US-014](acceptance-scenarios.md#us-014-generate-an-invoice)*
+
 #### US-015: List invoices
 
 **As a** dog owner or the solo dog walker,
@@ -421,6 +457,8 @@ completed walks,
 - GET /v1/invoices?status=&from=&to= returns a paginated list
 - Walkers see all of their issued invoices; owners see only invoices
   addressed to them
+
+*Scenarios: [US-015](acceptance-scenarios.md#us-015-list-invoices)*
 
 #### US-016: Record an invoice as paid
 
@@ -439,6 +477,8 @@ out of scope (see Non-Goals); this is bookkeeping only.
 - Invoice moves to `paid`; `InvoicePaid` event is published
 
 ### Pricing
+
+*Scenarios: [US-016](acceptance-scenarios.md#us-016-record-an-invoice-as-paid)*
 
 #### US-017: Set my rate card
 
@@ -463,6 +503,8 @@ duration (e.g. 30 / 45 / 60 min) as a structured table,
   their recorded price)
 - A `RateCardUpdated` event is published
 
+*Scenarios: [US-017](acceptance-scenarios.md#us-017-set-my-rate-card)*
+
 #### US-018: View the rate card
 
 **As a** solo dog walker or a dog owner who is one of their clients,
@@ -472,10 +514,12 @@ expect before booking.
 
 **Acceptance Criteria:**
 - GET /v1/rate-card returns the walker's current rate card
-- Returns 403 with `FORBIDDEN` if the requester is an owner who isn't
-  one of the walker's clients
+- Returns 404 with `RESOURCE_NOT_FOUND` if no rate card has ever been
+  set (empty state; see auth-matrix singleton rule)
 
 ### Tipping
+
+*Scenarios: [US-018](acceptance-scenarios.md#us-018-view-the-rate-card)*
 
 #### US-019: Add a tip when marking an invoice paid
 
@@ -491,6 +535,8 @@ expect before booking.
 - On success, the invoice record's `tipCents` field reflects the
   recorded tip (defaults to 0 when omitted)
 - The `InvoicePaid` event payload includes the recorded `tipCents`
+
+*Scenarios: [US-019](acceptance-scenarios.md#us-019-add-a-tip-when-marking-an-invoice-paid)*
 
 ## Constraints
 
