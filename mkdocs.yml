@@ -22,6 +22,7 @@ theme:
 
 nav:
   - Home: index.md
+  - Implementation Guide: implementation-guide.md
   - Specifications:
     - Product Requirements: specifications/prd.md
     - Domain Model: specifications/domain-model.md
