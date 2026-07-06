@@ -1,5 +1,5 @@
 phase: contracts
-signed_off_at: '2026-07-06T10:35:35Z'
+signed_off_at: '2026-07-06T13:01:50Z'
 gate_version: '1.4'
 checks_passed:
 - SPECTRAL-OPENAPI
@@ -98,13 +98,24 @@ decisions:
   affects:
   - docs/specifications/contracts/datacontract.yaml
   ts: '2026-07-06T11:00:00Z'
+- id: LIST-400-DECLARED
+  summary: All four paginated list operations (listClients, listDogs, listWalks, listInvoices)
+    now declare the 400 ValidationError response alongside their existing statuses.
+  rationale: "Found during the app-dog-walking implementation: scenario US-010-C asserts\
+    \ GET /v1/walks?pageSize=51 returns 400, and the pagination parameters (pageSize\
+    \ maximum 50, NFR PERF-006) make oversized page requests rejectable on every list\
+    \ \u2014 but the contract declared no 400 for any of them. Scenario and parameters\
+    \ were right; the response lists were incomplete."
+  affects:
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-06T13:01:50Z'
 files_signed:
 - path: docs/specifications/contracts/openapi.yaml
-  sha256: 03575f9092d1bb247e814210a1d6ba0f12e738a77c67be365ae93c893b9614bf
-  mtime: '2026-07-06T10:35:35Z'
+  sha256: 1f26d42981bbd1d2c0cba66b0a2cfabfaca4256f1b40a1ed741d8f778dcce4ad
+  mtime: '2026-07-06T13:01:50Z'
 - path: docs/specifications/contracts/asyncapi.yaml
   sha256: 0f56edc166979b12544a23a0d2e87dc546aae04ebfaf9c1d40e748a66304a6fd
-  mtime: '2026-07-06T10:35:35Z'
+  mtime: '2026-07-06T13:01:50Z'
 - path: docs/specifications/contracts/datacontract.yaml
   sha256: 9564ee7c136c874bdd1fc21c94e27889f2d133d06d763371ecf4f84da5982684
-  mtime: '2026-07-06T10:35:35Z'
+  mtime: '2026-07-06T13:01:50Z'
