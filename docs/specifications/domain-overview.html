@@ -227,7 +227,7 @@
 
 <header id="page-header">
   <h1>Dog Walking API — Domain Overview</h1>
-  <p class="subtitle">Deterministically generated from OpenAPI, AsyncAPI &amp; Data Contract · 2026-07-06 06:09 UTC</p>
+  <p class="subtitle">Deterministically generated from OpenAPI, AsyncAPI &amp; Data Contract · 2026-07-06 10:35 UTC</p>
 </header>
 
 <nav id="toc">
@@ -321,7 +321,7 @@
   <p>Each write operation publishes a corresponding domain event.</p>
   <table>
     <thead><tr><th>Event</th><th>Channel</th><th>Triggered By</th></tr></thead>
-    <tbody><tr><td><strong>User registered</strong></td><td><code>dogwalking.user.registered</code></td><td>—</td></tr><tr><td><strong>Walker registered</strong></td><td><code>dogwalking.walker.registered</code></td><td>—</td></tr><tr><td><strong>Invite created</strong></td><td><code>dogwalking.invite.created</code></td><td>—</td></tr><tr><td><strong>Invite accepted</strong></td><td><code>dogwalking.invite.accepted</code></td><td>—</td></tr><tr><td><strong>Invite expired</strong></td><td><code>dogwalking.invite.expired</code></td><td>—</td></tr><tr><td><strong>Client registered</strong></td><td><code>dogwalking.client.registered</code></td><td>—</td></tr><tr><td><strong>Dog added</strong></td><td><code>dogwalking.dog.added</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/dogs</code> — Add dog</td></tr><tr><td><strong>Dog updated</strong></td><td><code>dogwalking.dog.updated</code></td><td>—</td></tr><tr><td><strong>Walk requested</strong></td><td><code>dogwalking.walk.requested</code></td><td>—</td></tr><tr><td><strong>Walk scheduled</strong></td><td><code>dogwalking.walk.scheduled</code></td><td>—</td></tr><tr><td><strong>Walk declined</strong></td><td><code>dogwalking.walk.declined</code></td><td>—</td></tr><tr><td><strong>Walk cancelled</strong></td><td><code>dogwalking.walk.cancelled</code></td><td>—</td></tr><tr><td><strong>Walk completed</strong></td><td><code>dogwalking.walk.completed</code></td><td>—</td></tr><tr><td><strong>Walk update posted</strong></td><td><code>dogwalking.walkupdate.posted</code></td><td>—</td></tr><tr><td><strong>Rate card updated</strong></td><td><code>dogwalking.ratecard.updated</code></td><td>—</td></tr><tr><td><strong>Invoice issued</strong></td><td><code>dogwalking.invoice.issued</code></td><td>—</td></tr><tr><td><strong>Invoice paid</strong></td><td><code>dogwalking.invoice.paid</code></td><td>—</td></tr></tbody>
+    <tbody><tr><td><strong>User registered</strong></td><td><code>dogwalking.user.registered</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/auth/register</code> — Walker self-registers</td></tr><tr><td><strong>Walker registered</strong></td><td><code>dogwalking.walker.registered</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/auth/register</code> — Walker self-registers</td></tr><tr><td><strong>Invite created</strong></td><td><code>dogwalking.invite.created</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/clients</code> — Walker invites a new client</td></tr><tr><td><strong>Invite accepted</strong></td><td><code>dogwalking.invite.accepted</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/invites/{token}/accept</code> — Accept a client invite and set password</td></tr><tr><td><strong>Invite expired</strong></td><td><code>dogwalking.invite.expired</code></td><td>—</td></tr><tr><td><strong>Client registered</strong></td><td><code>dogwalking.client.registered</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/invites/{token}/accept</code> — Accept a client invite and set password</td></tr><tr><td><strong>Dog added</strong></td><td><code>dogwalking.dog.added</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/dogs</code> — Add dog</td></tr><tr><td><strong>Dog updated</strong></td><td><code>dogwalking.dog.updated</code></td><td><span class="badge method-badge" style="background:#fca130;color:#fff">PATCH</span> <code>/v1/dogs/{dogId}</code> — Edit dog</td></tr><tr><td><strong>Walk requested</strong></td><td><code>dogwalking.walk.requested</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/walks</code> — Schedule walk</td></tr><tr><td><strong>Walk scheduled</strong></td><td><code>dogwalking.walk.scheduled</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/walks</code> — Schedule walk</td></tr><tr><td><strong>Walk declined</strong></td><td><code>dogwalking.walk.declined</code></td><td><span class="badge method-badge" style="background:#fca130;color:#fff">PATCH</span> <code>/v1/walks/{id}/decision=declined</code></td></tr><tr><td><strong>Walk cancelled</strong></td><td><code>dogwalking.walk.cancelled</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/walks/{id}/cancel</code></td></tr><tr><td><strong>Walk completed</strong></td><td><code>dogwalking.walk.completed</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/walks/{id}/complete</code></td></tr><tr><td><strong>Walk update posted</strong></td><td><code>dogwalking.walkupdate.posted</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/walks/{id}/updates</code></td></tr><tr><td><strong>Rate card updated</strong></td><td><code>dogwalking.ratecard.updated</code></td><td><span class="badge method-badge" style="background:#fca130;color:#fff">PUT</span> <code>/v1/rate-card</code> — Set rate card</td></tr><tr><td><strong>Invoice issued</strong></td><td><code>dogwalking.invoice.issued</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/invoices</code> — Generate invoice</td></tr><tr><td><strong>Invoice paid</strong></td><td><code>dogwalking.invoice.paid</code></td><td><span class="badge method-badge" style="background:#49cc90;color:#fff">POST</span> <code>/v1/invoices/{id}/mark-paid</code></td></tr></tbody>
   </table>
 </section>
 
@@ -567,16 +567,16 @@ erDiagram
         date_time createdAt
         date_time updatedAt
     }
+    RateCard ||--o{ RateCardEntry : "contains"
+    Invoice ||--o{ InvoiceLineItem : "contains"
+    WalkUpdate ||--o{ Photo : "contains"
     User ||--o{ Client : "owns"
     Invite ||--o{ Client : "owns"
     Walker ||--o{ Invite : "owns"
     Walker ||--o{ Invoice : "owns"
     Client ||--o{ Invoice : "owns"
-    Invoice ||--o{ InvoiceLineItem : "owns"
     Walk ||--o{ InvoiceLineItem : "owns"
-    WalkUpdate ||--o{ Photo : "owns"
     Walker ||--o{ RateCard : "owns"
-    RateCard ||--o{ RateCardEntry : "owns"
     Dog ||--o{ Walk : "owns"
     Walker ||--o{ Walk : "owns"
     Walk ||--o{ WalkUpdate : "owns"
@@ -603,7 +603,7 @@ erDiagram
 </main>
 
 <footer id="footer">
-  <p>Generated by <code>scripts/generate_domain_overview.py</code> · 2026-07-06 06:09 UTC</p>
+  <p>Generated by <code>scripts/generate_domain_overview.py</code> · 2026-07-06 10:35 UTC</p>
 </footer>
 
 <script type="module">
