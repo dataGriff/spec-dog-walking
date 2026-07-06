@@ -51,6 +51,12 @@ schema:
       mint one. Resolves every userId reference in the stream.
       Secrets (password hash) are never published.
     physicalType: topic
+    quality:
+      - type: text
+        description: >
+          Primary-key values are unique per event id; every required
+          field is present on every record; enum-typed fields carry
+          only members of their referenced openapi schema.
     properties:
       - { name: userId, description: User identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: email, description: Login email., logicalType: string, required: true }
@@ -65,6 +71,12 @@ schema:
       walkerId reference in the stream (invite, walk, ratecard,
       invoice records).
     physicalType: topic
+    quality:
+      - type: text
+        description: >
+          Primary-key values are unique per event id; every required
+          field is present on every record; enum-typed fields carry
+          only members of their referenced openapi schema.
     properties:
       - { name: walkerId, description: Walker identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: userId, description: User record backing the walker., logicalType: string, physicalType: uuid, required: true }
@@ -82,6 +94,12 @@ schema:
       `token` field is intentionally excluded (marked `[secret]` in
       the domain model).
     physicalType: topic
+    quality:
+      - type: text
+        description: >
+          Primary-key values are unique per event id; every required
+          field is present on every record; enum-typed fields carry
+          only members of their referenced openapi schema.
     properties:
       - { name: inviteId, description: Invite identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: walkerId, description: Walker who issued the invite., logicalType: string, physicalType: uuid, required: true }
@@ -97,6 +115,12 @@ schema:
       channel. Represents the walker-managed client record at the
       point of registration.
     physicalType: topic
+    quality:
+      - type: text
+        description: >
+          Primary-key values are unique per event id; every required
+          field is present on every record; enum-typed fields carry
+          only members of their referenced openapi schema.
     properties:
       - { name: clientId, description: Client identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: inviteId, description: Invite whose acceptance created this client (lineage join key)., logicalType: string, physicalType: uuid, required: true }
@@ -112,6 +136,12 @@ schema:
       dogwalking.dog.updated channels. Each event carries the full
       Dog state at the moment of emission.
     physicalType: topic
+    quality:
+      - type: text
+        description: >
+          Primary-key values are unique per event id; every required
+          field is present on every record; enum-typed fields carry
+          only members of their referenced openapi schema.
     properties:
       - { name: dogId, description: Dog identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: ownerId, description: Client (owner) identifier., logicalType: string, physicalType: uuid, required: true }
@@ -143,6 +173,12 @@ schema:
       moment of emission; the `status` field distinguishes which
       lifecycle event was published.
     physicalType: topic
+    quality:
+      - type: text
+        description: >
+          Primary-key values are unique per event id; every required
+          field is present on every record; enum-typed fields carry
+          only members of their referenced openapi schema.
     properties:
       - { name: walkId, description: Walk identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: dogId, description: Dog being walked., logicalType: string, physicalType: uuid, required: true }
@@ -167,6 +203,12 @@ schema:
       root plus its contained Photo rows (per `## Aggregates` in
       domain-model.md).
     physicalType: topic
+    quality:
+      - type: text
+        description: >
+          Primary-key values are unique per event id; every required
+          field is present on every record; enum-typed fields carry
+          only members of their referenced openapi schema.
     properties:
       - { name: walkUpdateId, description: WalkUpdate identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: walkId, description: Parent walk identifier., logicalType: string, physicalType: uuid, required: true }
@@ -195,6 +237,12 @@ schema:
       root plus its contained RateCardEntry rows (per
       `## Aggregates` in domain-model.md).
     physicalType: topic
+    quality:
+      - type: text
+        description: >
+          Primary-key values are unique per event id; every required
+          field is present on every record; enum-typed fields carry
+          only members of their referenced openapi schema.
     properties:
       - { name: rateCardId, description: RateCard identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: walkerId, description: Walker whose rate card changed., logicalType: string, physicalType: uuid, required: true }
@@ -223,6 +271,12 @@ schema:
       root plus its contained InvoiceLineItem rows (per
       `## Aggregates` in domain-model.md).
     physicalType: topic
+    quality:
+      - type: text
+        description: >
+          Primary-key values are unique per event id; every required
+          field is present on every record; enum-typed fields carry
+          only members of their referenced openapi schema.
     properties:
       - { name: invoiceId, description: Invoice identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
       - { name: walkerId, description: Walker issuing the invoice., logicalType: string, physicalType: uuid, required: true }
@@ -262,3 +316,10 @@ slaProperties:
     value: 30
     unit: d
     description: Events are retained for 30 days for replay and historical access.
+  - property: latency
+    value: 60
+    unit: s
+    description: >
+      Freshness — an event is readable by consumers within 60 seconds of its
+      domain transition committing (transactional-outbox drain,
+      NFR-AVAIL-002 delivery semantics).

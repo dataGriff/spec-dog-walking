@@ -1,6 +1,6 @@
 phase: contracts
-signed_off_at: '2026-07-06T06:07:45Z'
-gate_version: '1.3'
+signed_off_at: '2026-07-06T10:35:35Z'
+gate_version: '1.4'
 checks_passed:
 - SPECTRAL-OPENAPI
 - SPECTRAL-ASYNCAPI
@@ -13,6 +13,7 @@ checks_passed:
 - EVENT-PAYLOAD-COVERS-ENTITY-STATE
 - EVENT-FK-RESOLVABLE
 - DATACONTRACT-REFS-RESOLVE
+- DATACONTRACT-SLA-COMPLETE
 - AUTH-MATRIX-OPENAPI-MATCH
 - ERROR-CODE-IN-CATALOGUE
 - ERROR-CODE-REPRESENTABLE
@@ -87,13 +88,23 @@ decisions:
   affects:
   - docs/specifications/contracts/openapi.yaml
   ts: '2026-07-06T06:07:45Z'
+- id: DATACONTRACT-SLA-ENRICHED
+  summary: "Added the latency (freshness) slaProperty \u2014 60s from transition commit\
+    \ to event readability \u2014 and record-level type:text quality expectations\
+    \ to every record."
+  rationale: 'Gate 1.4 DATACONTRACT-SLA-COMPLETE: consumers building on the historic
+    record need a freshness guarantee, not just availability and retention; 60s follows
+    from the transactional-outbox delivery semantics in NFR-AVAIL-002.'
+  affects:
+  - docs/specifications/contracts/datacontract.yaml
+  ts: '2026-07-06T11:00:00Z'
 files_signed:
 - path: docs/specifications/contracts/openapi.yaml
   sha256: 03575f9092d1bb247e814210a1d6ba0f12e738a77c67be365ae93c893b9614bf
-  mtime: '2026-07-06T06:07:45Z'
+  mtime: '2026-07-06T10:35:35Z'
 - path: docs/specifications/contracts/asyncapi.yaml
   sha256: 0f56edc166979b12544a23a0d2e87dc546aae04ebfaf9c1d40e748a66304a6fd
-  mtime: '2026-07-06T06:07:45Z'
+  mtime: '2026-07-06T10:35:35Z'
 - path: docs/specifications/contracts/datacontract.yaml
-  sha256: 481d096c44431f1468c6f78cd497a26cbd534d5cc8710e5b150a734714949bd4
-  mtime: '2026-07-06T06:07:45Z'
+  sha256: 9564ee7c136c874bdd1fc21c94e27889f2d133d06d763371ecf4f84da5982684
+  mtime: '2026-07-06T10:35:35Z'

@@ -1,16 +1,20 @@
-"""Generate a glossary.md skeleton from domain-model.md.
+"""Generate a glossary.md lexicon skeleton from domain-model.md.
 
-Walks `docs/specifications/domain-model.md`, extracts every entity
-and its attributes from the attribute tables, and writes a
-glossary.md skeleton with:
+The glossary is a lexicon (gate 1.4): one- or two-sentence entries
+for the domain's vocabulary — entities, roles, domain events,
+enumerations, other terms. Attribute detail lives in domain-model.md's
+entity tables and is deliberately NOT repeated here.
 
-- `### <Entity>` headings under `## Entities` with placeholder
-  one-line descriptions
-- `### <attribute>` headings under `## <Entity> attributes` with
-  placeholder descriptions
+Walks `docs/specifications/domain-model.md` and writes a glossary.md
+skeleton with:
 
-The agent then walks each entry and fills in the real prose. Saves
-the ~90-entry typing tax on any non-trivial domain.
+- `### <Entity>` stubs under `## Entities`
+- `### <Event>` stubs under `## Domain events` (from the
+  `## Domain Events` table, if present)
+- `### <Enum>` stubs under `## Enumerations` (from the model's
+  `## Enumerations` section, if present)
+- empty `## Roles` and `## Other terms` sections for the agent to
+  fill by hand (roles come from the auth matrix / PRD, not the model)
 
 Usage:
 
@@ -31,88 +35,137 @@ import sys
 ENTITY_BLOCK_RE = re.compile(
     r"(?m)^###\s+(?P<name>\S[^\n]*)\n(?P<body>.*?)(?=^###\s+|\Z)", re.DOTALL
 )
-ATTR_ROW_RE = re.compile(r"^\|\s*`(?P<name>[^`]+)`\s*\|", re.MULTILINE)
+EVENT_ROW_RE = re.compile(
+    r"^\|\s*`?(?P<event>[\w]+)`?\s*\|\s*(?P<trigger>[^|]+?)\s*\|\s*`?(?P<channel>[\w.-]+)`?\s*\|",
+    re.MULTILINE,
+)
 
 
-def parse_entities(domain_model_text: str) -> list[tuple[str, list[str]]]:
-    """Return [(entity_name, [attribute_name, ...]), ...] in source order."""
-    # Find the Entities section (between `## Entities` and the next `## ` heading)
-    entities_start = re.search(r"(?m)^##\s+Entities\s*$", domain_model_text)
-    if not entities_start:
-        return []
-    after = domain_model_text[entities_start.end():]
+def _section(text: str, heading_pattern: str) -> str:
+    start = re.search(heading_pattern, text, re.MULTILINE)
+    if not start:
+        return ""
+    after = text[start.end() :]
     next_section = re.search(r"(?m)^##\s+\S", after)
-    section = after[: next_section.start()] if next_section else after
+    return after[: next_section.start()] if next_section else after
 
-    out: list[tuple[str, list[str]]] = []
+
+def parse_entities(domain_model_text: str) -> list[str]:
+    """Return entity names in source order."""
+    section = _section(domain_model_text, r"(?m)^##\s+Entities\s*$")
+    out: list[str] = []
     for match in ENTITY_BLOCK_RE.finditer(section):
         raw_name = match.group("name").strip()
-        # Strip "Entity — qualifier" style suffix
         name = re.split(r"\s*—\s*", raw_name, maxsplit=1)[0].strip()
-        body = match.group("body")
-        attrs = [m.group("name") for m in ATTR_ROW_RE.finditer(body)]
-        # De-dupe preserving order (first occurrence wins)
-        seen: set[str] = set()
-        attrs = [a for a in attrs if not (a in seen or seen.add(a))]
         if name:
-            out.append((name, attrs))
+            out.append(name)
     return out
 
 
-def render_glossary(entities: list[tuple[str, list[str]]], domain_name: str) -> str:
+def parse_events(domain_model_text: str) -> list[tuple[str, str]]:
+    """Return [(event_name, channel), ...] from the Domain Events table."""
+    section = _section(domain_model_text, r"(?m)^##\s+Domain Events\s*$")
+    out: list[tuple[str, str]] = []
+    for row in EVENT_ROW_RE.finditer(section):
+        event = row.group("event").strip()
+        if event.lower() in {"event", "---"}:
+            continue
+        out.append((event, row.group("channel").strip()))
+    return out
+
+
+def parse_enums(domain_model_text: str) -> list[str]:
+    """Return enumeration names (with any (open) marker stripped)."""
+    section = _section(domain_model_text, r"(?m)^##\s+Enumerations\s*$")
+    out: list[str] = []
+    for match in re.finditer(r"(?m)^###\s+(\S[^\n]*)$", section):
+        raw = match.group(1).strip()
+        name = re.sub(r"\s*[\(\[]\s*open\s*[\)\]]\s*$", "", raw, flags=re.IGNORECASE).strip()
+        if name:
+            out.append(name)
+    return out
+
+
+def render_glossary(
+    entities: list[str],
+    events: list[tuple[str, str]],
+    enums: list[str],
+    domain_name: str,
+) -> str:
     lines: list[str] = []
     lines.append(f"# Glossary — {domain_name}")
     lines.append("")
-    lines.append(
-        f"> The ubiquitous language for the {domain_name} domain. Every entity"
-    )
-    lines.append(
-        "> name and every attribute name used in `domain-model.md` (and the"
-    )
-    lines.append(
-        "> later contracts files) appears here exactly as it is used. Code,"
-    )
-    lines.append("> docs, and conversation must use these terms.")
+    lines.append(f"> The ubiquitous language for the {domain_name} domain — a lexicon,")
+    lines.append("> not a reference manual. Every entity, role, domain event,")
+    lines.append("> enumeration, and key term has a one- or two-sentence entry here.")
+    lines.append("> Attribute-level detail lives in `domain-model.md`'s entity tables.")
+    lines.append("> Code, docs, and conversation must use these terms.")
     lines.append("")
     lines.append("---")
     lines.append("")
     lines.append("## Entities")
     lines.append("")
-
-    for name, _ in entities:
+    for name in entities:
         lines.append(f"### {name}")
         lines.append("")
         lines.append(
-            f"<!-- TODO: one or two sentence description of what a {name} is "
-            "in this domain. -->"
+            f"<!-- TODO: one or two sentence description of what a {name} is in this domain. -->"
         )
         lines.append("")
 
     lines.append("---")
     lines.append("")
+    lines.append("## Roles")
+    lines.append("")
+    lines.append(
+        "<!-- TODO: one `### <role>` entry per role — what it can do and "
+        "which PRD persona it maps to. -->"
+    )
+    lines.append("")
 
-    for name, attrs in entities:
-        if not attrs:
-            continue
-        lines.append(f"## {name} attributes")
-        lines.append("")
-        for attr in attrs:
-            lines.append(f"### {attr}")
-            lines.append("")
-            lines.append(
-                "<!-- TODO: type, constraints, business meaning that a "
-                "reader couldn't guess from the name alone. -->"
-            )
-            lines.append("")
+    if events:
         lines.append("---")
         lines.append("")
+        lines.append("## Domain events")
+        lines.append("")
+        for event, channel in events:
+            lines.append(f"### {event}")
+            lines.append("")
+            lines.append(
+                f"<!-- TODO: published on `{channel}` when… ; what the payload carries. -->"
+            )
+            lines.append("")
+
+    if enums:
+        lines.append("---")
+        lines.append("")
+        lines.append("## Enumerations")
+        lines.append("")
+        for enum_name in enums:
+            lines.append(f"### {enum_name}")
+            lines.append("")
+            lines.append(
+                "<!-- TODO: what this enumeration classifies; open or closed; "
+                "where the authoritative value list lives. -->"
+            )
+            lines.append("")
+
+    lines.append("---")
+    lines.append("")
+    lines.append("## Other terms")
+    lines.append("")
+    lines.append(
+        "<!-- TODO: define any other term that appears in code or specs and "
+        "wouldn't be obvious from name alone. -->"
+    )
+    lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Generate a glossary.md skeleton from domain-model.md."
+        description="Generate a glossary.md lexicon skeleton from domain-model.md."
     )
     parser.add_argument(
         "--domain-model",
@@ -149,7 +202,6 @@ def main(argv: list[str] | None = None) -> int:
 
     text = dm_path.read_text(encoding="utf-8")
 
-    # Derive domain name if not supplied
     domain_name = args.domain_name
     if domain_name is None:
         m = re.match(r"#\s+Domain Model\s*[—-]\s*(?P<name>.+)", text)
@@ -158,13 +210,14 @@ def main(argv: list[str] | None = None) -> int:
     entities = parse_entities(text)
     if not entities:
         print(
-            "glossary_skeleton: no entities found under `## Entities` in "
-            f"{dm_path}",
+            f"glossary_skeleton: no entities found under `## Entities` in {dm_path}",
             file=sys.stderr,
         )
         return 1
 
-    rendered = render_glossary(entities, domain_name)
+    events = parse_events(text)
+    enums = parse_enums(text)
+    rendered = render_glossary(entities, events, enums, domain_name)
 
     if args.stdout:
         sys.stdout.write(rendered)
@@ -173,11 +226,7 @@ def main(argv: list[str] | None = None) -> int:
     glossary_path = pathlib.Path(args.glossary).resolve()
     if glossary_path.is_file() and not args.force:
         existing = glossary_path.read_text(encoding="utf-8")
-        looks_template = (
-            len(existing) < 200
-            or "[Domain]" in existing
-            or "[Resource1]" in existing
-        )
+        looks_template = len(existing) < 200 or "[Domain]" in existing or "[Resource1]" in existing
         if not looks_template:
             print(
                 f"glossary_skeleton: {glossary_path} already exists and "
@@ -189,10 +238,9 @@ def main(argv: list[str] | None = None) -> int:
 
     glossary_path.parent.mkdir(parents=True, exist_ok=True)
     glossary_path.write_text(rendered, encoding="utf-8")
-    n_attrs = sum(len(a) for _, a in entities)
     print(
-        f"Wrote glossary skeleton to {glossary_path}: "
-        f"{len(entities)} entities, {n_attrs} attributes."
+        f"Wrote glossary lexicon skeleton to {glossary_path}: "
+        f"{len(entities)} entities, {len(events)} events, {len(enums)} enumerations."
     )
     return 0
 

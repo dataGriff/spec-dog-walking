@@ -5,6 +5,35 @@ requirements, rules, and contracts of the DogWalking domain.
 
 ---
 
+## Start here
+
+This spec set is written for two audiences: **humans** reviewing the
+domain's behaviour, and **AI coding agents** implementing it. Both
+should read in dependency order — each document assumes the ones
+before it:
+
+1. [Domain Overview](specifications/domain-overview.html) — generated
+   orientation: operations, events, entities, ER diagram
+2. [Product Requirements](specifications/prd.md) — why the domain exists
+3. [Domain Model](specifications/domain-model.md) — entities,
+   attributes, rules, lifecycles, events (the structural authority)
+4. [Auth Matrix](specifications/auth-matrix.md) and
+   [Error Catalogue](specifications/error-catalogue.md) — access and
+   failure semantics
+5. [Sequence Diagrams](specifications/sequence-diagrams.md) — how it
+   composes
+6. [Acceptance Scenarios](specifications/acceptance-scenarios.md) and
+   [NFRs](specifications/nfr.md) — the testable definition of done
+7. [Contracts](specifications/contracts/openapi.yaml) — the exact
+   REST/event/data surfaces
+
+Implementing this domain? Follow the
+[implementation guide](https://github.com/dataGriff/spec-dog-walking/blob/main/.github/instructions/api-implementation.instructions.md)
+(`.github/instructions/api-implementation.instructions.md`) — reading
+order, authority hierarchy, build workflow, verification loop.
+
+---
+
 ## Specifications
 
 All authoritative business requirements live in `docs/specifications/`.
@@ -21,9 +50,10 @@ All authoritative business requirements live in `docs/specifications/`.
 | [Non-Functional Requirements](specifications/nfr.md) | Measurable thresholds: performance, availability, security, observability |
 | [Acceptance Scenarios](specifications/acceptance-scenarios.md) | Given/When/Then scenarios mapped to user stories at contract level |
 | [**Domain Overview →**](specifications/domain-overview.html) | Auto-generated: operations, events, entities, ER diagram and data contract in one page |
+| [**Traceability Matrix →**](specifications/traceability.html) | Auto-generated: user story → scenarios → operations → events → error codes, with coverage flags |
 | [**Interactive API Reference →**](specifications/api-reference.html) | OpenAPI 3.0.3 contract — live try-it-out |
 | [**AsyncAPI Event Reference →**](specifications/asyncapi-reference.html) | Domain event catalogue — CloudEvents schemas |
-| [**Data Contract Reference →**](specifications/datacontract-reference.html) | ODCS 3.1 data contract — interactive HTML view of the historic event payload schema |
+| [**Data Contract Reference →**](specifications/datacontract-reference.html) | ODCS 3.1 data contract — historical event payload schema + SLAs |
 
 Raw contract files: [`specifications/contracts/openapi.yaml`](specifications/contracts/openapi.yaml) · [`specifications/contracts/asyncapi.yaml`](specifications/contracts/asyncapi.yaml) · [`specifications/contracts/datacontract.yaml`](specifications/contracts/datacontract.yaml)
 
@@ -71,5 +101,5 @@ cross-reference can be verified.
 
 To continue or update this spec set, invoke the
 `domain-orchestrator` skill from the suite — it reads
-`docs/specifications/_progress.yaml` and routes you to the right
+`.spec-suite/progress.yaml` and routes you to the right
 phase.

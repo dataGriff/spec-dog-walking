@@ -35,14 +35,15 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: spec-dog-walking
+        working-directory: domain-repo
     steps:
       - uses: actions/checkout@v4
         with:
-          path: spec-dog-walking
+          path: domain-repo
 
       # docs:generate delegates to the suite-side overview renderer,
       # resolved as the sibling ../domain-spec-suite.
+      # Bootstrap: point `repository` at wherever your suite fork lives.
       - uses: actions/checkout@v4
         with:
           repository: dataGriff/domain-spec-suite
@@ -71,7 +72,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: spec-dog-walking/site
+          path: domain-repo/site
 
   deploy:
     name: Deploy to GitHub Pages

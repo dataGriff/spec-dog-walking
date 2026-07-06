@@ -1,6 +1,6 @@
 phase: access-control
-signed_off_at: '2026-07-06T06:08:32Z'
-gate_version: '1.3'
+signed_off_at: '2026-07-06T10:35:33Z'
+gate_version: '1.4'
 checks_passed:
 - AUTH-ROLE-HAS-DESCRIPTION
 - AUTH-MATRIX-COMPLETE
@@ -58,7 +58,7 @@ decisions:
 files_signed:
 - path: docs/specifications/auth-matrix.md
   sha256: e408504fffa6f65764124006294bb102f52329a7377ac8102abae4abe8de8e61
-  mtime: '2026-07-06T06:08:32Z'
+  mtime: '2026-07-06T10:35:33Z'
 - path: docs/specifications/error-catalogue.md
   sha256: 6200c3c3732c4b5808fac29dfd0d7026ac983535d0ba33f0d9c927233cf01dab
-  mtime: '2026-07-06T06:08:32Z'
+  mtime: '2026-07-06T10:35:33Z'

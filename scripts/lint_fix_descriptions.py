@@ -54,9 +54,7 @@ def fix_file(path: pathlib.Path) -> int:
             # `description:`, no insertion. If it's `summary:`, prefer
             # the summary text; check the line after that for description.
             next_line = lines[i + 1].rstrip("\n") if i + 1 < len(lines) else ""
-            summary_match = re.match(
-                SUMMARY_RE_FMT.format(indent=re.escape(indent)), next_line
-            )
+            summary_match = re.match(SUMMARY_RE_FMT.format(indent=re.escape(indent)), next_line)
 
             if summary_match:
                 # Check the line after the summary for description
@@ -97,9 +95,7 @@ def fix_asyncapi_tags(path: pathlib.Path) -> int:
     text = path.read_text(encoding="utf-8")
     # Match a top-level `tags:` block (no indent) followed by `- name:` items.
     # Insert `description: <Name> domain events.` for any item that lacks one.
-    pattern = re.compile(
-        r"(?m)^(?P<line>  - name: (?P<name>\S+))\n(?!    description:)"
-    )
+    pattern = re.compile(r"(?m)^(?P<line>  - name: (?P<name>\S+))\n(?!    description:)")
 
     def insert(m: re.Match[str]) -> str:
         return f"{m.group('line')}\n    description: {m.group('name')} domain events.\n"

@@ -1,6 +1,6 @@
 phase: discovery
-signed_off_at: '2026-07-06T06:08:10Z'
-gate_version: '1.3'
+signed_off_at: '2026-07-06T10:35:33Z'
+gate_version: '1.4'
 checks_passed:
 - PRD-PROBLEM-USER-PAIN
 - PRD-PERSONA-EXISTS
@@ -139,7 +139,27 @@ decisions:
   affects:
   - docs/specifications/prd.md
   ts: '2026-07-06T05:30:01Z'
+- id: US-018-DEAD-403-REMOVED
+  summary: Removed US-018's 403 FORBIDDEN acceptance criterion (owner who isn't a
+    client) and replaced it with the real empty-state 404.
+  rationale: "In this invite-only single-walker domain every owner is by construction\
+    \ a client of the walker, so the 403 case is unreachable \u2014 the dead-403 sweep\
+    \ already removed it from the contract; the traceability matrix flagged the leftover\
+    \ AC."
+  affects:
+  - docs/specifications/prd.md
+  ts: '2026-07-06T11:00:00Z'
+- id: PRD-SCENARIO-CROSS-LINKS
+  summary: Every user story carries a Scenarios link to its acceptance-scenarios section,
+    and every scenario section links back to its story.
+  rationale: 'Gate 1.4 cross-linking convention: the two documents operate at different
+    altitudes deliberately; the links plus the generated traceability matrix make
+    the correspondence navigable.'
+  affects:
+  - docs/specifications/prd.md
+  - docs/specifications/acceptance-scenarios.md
+  ts: '2026-07-06T11:00:00Z'
 files_signed:
 - path: docs/specifications/prd.md
-  sha256: e09abc73203f43026913ff2fc57624e7715314769baa539dd9e970c4f7873e1e
-  mtime: '2026-07-06T06:08:10Z'
+  sha256: 89d5e6097cb219da5d3a956d1574eb73dc7614091c6bcedadd89a9452e1e2510
+  mtime: '2026-07-06T10:35:33Z'

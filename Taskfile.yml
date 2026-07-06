@@ -39,17 +39,17 @@ tasks:
       - python3 scripts/glossary_skeleton.py
 
   openapi:skeleton:
-    desc: 'Generate contracts/openapi.yaml skeleton from auth-matrix.md + domain-model.md + error-catalogue.md. Wires Idempotency-Key on every POST. Idempotent on template; --force to overwrite a real one.'
+    desc: 'Generate contracts/openapi.yaml skeleton from auth-matrix.md + domain-model.md + error-catalogue.md. Wires Idempotency-Key on every POST, declares entity + enum schemas, and emits TODO-marked descriptions for the agent to fill. Idempotent on template; --force to overwrite a real one.'
     cmds:
       - python3 scripts/openapi_skeleton.py {{.CLI_ARGS}}
 
   asyncapi:skeleton:
-    desc: 'Generate contracts/asyncapi.yaml skeleton from domain-model.md events + entities + aggregates. Idempotent on template; --force to overwrite a real one.'
+    desc: 'Generate contracts/asyncapi.yaml skeleton from domain-model.md events + entities + aggregates. Wires the CloudEvents envelope, full-state payloads, and aggregate-child collections. Idempotent on template; --force to overwrite a real one.'
     cmds:
       - python3 scripts/asyncapi_skeleton.py {{.CLI_ARGS}}
 
   datacontract:skeleton:
-    desc: 'Generate contracts/datacontract.yaml skeleton from asyncapi.yaml + nfr.md. Run AFTER asyncapi:skeleton. Idempotent on template; --force to overwrite a real one.'
+    desc: 'Generate contracts/datacontract.yaml skeleton from asyncapi.yaml + nfr.md. Mirrors event payloads into ODCS records with nested aggregate fields. Run AFTER asyncapi:skeleton. Idempotent on template; --force to overwrite a real one.'
     cmds:
       - python3 scripts/datacontract_skeleton.py {{.CLI_ARGS}}
 
@@ -59,7 +59,7 @@ tasks:
       - datacontract export html docs/specifications/contracts/datacontract.yaml --output docs/specifications/datacontract-reference.html
 
   docs:generate:
-    desc: 'Generate the domain overview HTML page and the data contract HTML reference. Delegates to the suite-side overview renderer (resolves the suite via DOMAIN_SPEC_SUITE_ROOT or sibling ../domain-spec-suite/).'
+    desc: 'Generate the domain overview + traceability HTML pages and the data contract HTML reference. Generators live in the suite (DOMAIN_SPEC_SUITE_ROOT or ../domain-spec-suite/), not in this repo — same resolution as task audit.'
     vars:
       SUITE: '{{.DOMAIN_SPEC_SUITE_ROOT | default "../domain-spec-suite"}}'
     cmds:
@@ -67,11 +67,11 @@ tasks:
         if [ ! -f "{{.SUITE}}/scripts/generate_domain_overview.py" ]; then
           echo "docs:generate: suite not found at '{{.SUITE}}'." >&2
           echo "               set DOMAIN_SPEC_SUITE_ROOT to its location, or clone the" >&2
-          echo "               domain-spec-suite as a sibling directory:" >&2
-          echo "                 git clone https://github.com/dataGriff/domain-spec-suite ../domain-spec-suite" >&2
+          echo "               domain-spec-suite as a sibling directory." >&2
           exit 1
         fi
         mise exec -- python3 "{{.SUITE}}/scripts/generate_domain_overview.py" --repo .
+      - mise exec -- python3 "{{.SUITE}}/scripts/generate_traceability.py" --repo .
       - task: docs:render-datacontract
 
   docs:serve:
@@ -92,43 +92,18 @@ tasks:
       - mkdocs gh-deploy --force
 
   domain:init:
-    desc: Copy blank spec templates into docs/specifications/ (safe — does not overwrite unless FORCE=true)
+    desc: 'Copy blank spec templates into docs/specifications/ for every authoring phase. Templates live in the suite (DOMAIN_SPEC_SUITE_ROOT or ../domain-spec-suite/), not in this repo. Safe — never overwrites existing files.'
     vars:
-      FORCE: '{{.FORCE | default "false"}}'
+      SUITE: '{{.DOMAIN_SPEC_SUITE_ROOT | default "../domain-spec-suite"}}'
     cmds:
       - |
-        TEMPLATE_DIR="docs/specifications/_template"
-        TARGET_DIR="docs/specifications"
-        FORCE="{{.FORCE}}"
-
-        if [ ! -d "$TEMPLATE_DIR" ]; then
-          echo "ERROR: Template directory '$TEMPLATE_DIR' not found."
+        if [ ! -f "{{.SUITE}}/scripts/init_phase.py" ]; then
+          echo "domain:init: suite not found at '{{.SUITE}}'." >&2
+          echo "             set DOMAIN_SPEC_SUITE_ROOT or sibling-clone the suite:" >&2
+          echo "               git clone https://github.com/dataGriff/domain-spec-suite ../domain-spec-suite" >&2
           exit 1
         fi
-
-        echo "Copying spec templates from $TEMPLATE_DIR → $TARGET_DIR"
-
-        copy_file() {
-          local src="$1"
-          local dst="$2"
-          mkdir -p "$(dirname "$dst")"
-          if [ -f "$dst" ] && [ "$FORCE" != "true" ]; then
-            echo "  SKIP (exists): $dst  (use FORCE=true to overwrite)"
-          else
-            cp "$src" "$dst"
-            echo "  COPIED: $dst"
-          fi
-        }
-
-        find "$TEMPLATE_DIR" -type f | while read -r src; do
-          rel="${src#$TEMPLATE_DIR/}"
-          dst="$TARGET_DIR/$rel"
-          copy_file "$src" "$dst"
-        done
-
-        echo ""
-        echo "Done. Edit the files in $TARGET_DIR to describe your domain."
-        echo "Then run: task domain:check"
+        mise exec -- python3 "{{.SUITE}}/scripts/init_phase.py" all --repo .
 
   setup:
     desc: Install all tooling and dependencies (run once after cloning — requires mise)

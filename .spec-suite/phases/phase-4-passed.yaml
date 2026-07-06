@@ -1,6 +1,6 @@
 phase: flows
-signed_off_at: '2026-07-06T06:08:33Z'
-gate_version: '1.3'
+signed_off_at: '2026-07-06T10:35:33Z'
+gate_version: '1.4'
 checks_passed:
 - FLOW-DIAGRAM-HAS-TITLE-PARTICIPANTS
 - FLOW-PARTICIPANT-IS-ROLE-OR-SYSTEM
@@ -20,4 +20,4 @@ decisions:
 files_signed:
 - path: docs/specifications/sequence-diagrams.md
   sha256: 4b90472427546570022658c46341b34e1776e67d5d4ebb843fa97cadeedbc48a
-  mtime: '2026-07-06T06:08:33Z'
+  mtime: '2026-07-06T10:35:33Z'
