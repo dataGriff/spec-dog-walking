@@ -1,6 +1,6 @@
 phase: discovery
-signed_off_at: '2026-05-31T13:20:52Z'
-gate_version: '1.0'
+signed_off_at: '2026-07-06T05:30:01Z'
+gate_version: '1.2'
 checks_passed:
 - PRD-PROBLEM-USER-PAIN
 - PRD-PERSONA-EXISTS
@@ -11,39 +11,135 @@ checks_passed:
 - PRD-STORY-PERSONA-LINK
 - PRD-METRICS-MEASURABLE
 warnings_responded: []
-rubric_findings:
-- id: RUBRIC-PROBLEM-USER-PAIN
-  verdict: pass
-  detail: no change to Problem Statement.
-  response: resolved
-  reason: agent verdict accepted
-  ts: '2026-05-31T13:20:52Z'
-- id: RUBRIC-METRICS-MEASURABLE
-  verdict: pass
-  detail: no change to Success Metrics.
-  response: resolved
-  reason: agent verdict accepted
-  ts: '2026-05-31T13:20:52Z'
+rubric_findings: []
 decisions:
-- id: US-020-VIEW-DOG-ADDED-POST-REVIEW
-  summary: Added US-020 'View a single dog' to formally justify GET /v1/dogs/{dogId}
-    which already existed in the contract.
-  rationale: Independent review found the operation had no user story behind it. The
-    endpoint is genuinely needed (mid-walk medication lookup, pre-booking detail check)
-    and was implicitly assumed; making it explicit closes the coverage gap.
+- id: REMINDERS-DESCOPED-TO-NON-GOAL
+  summary: Daily walk reminders removed from the domain scope statement and Goal 1;
+    added as explicit Non-Goal 5.
+  rationale: "Critique H3 \u2014 the PRD promised reminders with zero story, endpoint,\
+    \ or event coverage. Building them means a notification subsystem (schedules,\
+    \ delivery channels, ReminderSent events) that would roughly double the scope.\
+    \ v1's single authoritative schedule replaces the fridge board; proactive delivery\
+    \ is deferred."
   affects:
   - docs/specifications/prd.md
-  ts: '2026-05-31T13:20:52Z'
-- id: PRD-NONGOAL-PROSE-CORRECTION
-  summary: "Non-Goals \xA72 rephrased from 'walk-completion updates' to 'walk updates\
-    \ posted during or after the walk' to match the actual update semantics."
-  rationale: Updates can be posted while status=scheduled (live, during) or status=completed
-    (post-hoc) per the modeling phase decision WALK-UPDATE-IN-SCHEDULED-AND-COMPLETED.
-    The original 'completion' framing was inaccurate.
+  ts: '2026-07-06T05:30:01Z'
+- id: CLIENT-CREATED-AT-ACCEPTANCE
+  summary: The Client record is created when the invite is accepted, not when it is
+    issued. POST /v1/clients creates an Invite only.
+  rationale: "Critique H6 \u2014 the spec contradicted itself three ways and the at-invite\
+    \ version was schema-impossible (required userId cannot exist before acceptance).\
+    \ At-acceptance keeps every Client row fully formed; the tradeoff (walker can't\
+    \ attach dogs/walks pre-acceptance) is accepted."
   affects:
   - docs/specifications/prd.md
-  ts: '2026-05-31T13:20:52Z'
+  - docs/specifications/domain-model.md
+  - docs/specifications/glossary.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-06T05:30:01Z'
+- id: WALKER-SELF-REGISTRATION-BACKFILLED
+  summary: "US-000 added \u2014 walker self-registration via POST /v1/auth/register\
+    \ with {email, password, displayName}, publishing WalkerRegistered. Registration\
+    \ is walker-only; owners join by invite."
+  rationale: "Critique H4 \u2014 the endpoint was invented at contract time with no\
+    \ story, no scenarios, and a Flow 1 body that didn't match the schema. The endpoint\
+    \ is genuinely needed (walkers must be able to start an instance); the story is\
+    \ back-filled and the role field never existed."
+  affects:
+  - docs/specifications/prd.md
+  ts: '2026-07-06T05:30:01Z'
+- id: REFRESH-AND-LOGOUT-IN-SCOPE
+  summary: US-021 (POST /v1/auth/refresh, rotating) and US-022 (POST /v1/auth/logout)
+    added, making the issued refreshToken usable and US-004's revocation observable.
+  rationale: "Critique H8/H10 \u2014 AuthResponse returned a refreshToken with a 30-day\
+    \ NFR lifetime but no endpoint could consume it, and US-004-B asserted unobservable\
+    \ revocation. Completing the surface matches the mobile-client reality the spec\
+    \ already assumes."
+  affects:
+  - docs/specifications/prd.md
+  ts: '2026-07-06T05:30:01Z'
+- id: WALK-PRICE-SNAPSHOT-AT-SCHEDULING
+  summary: "A walk records its rate-card price when it enters `scheduled`; invoices\
+    \ sum walk snapshots. Rescheduling keeps the recorded price (re-snapshot only\
+    \ on a new requested\u2192scheduled transition)."
+  rationale: "Critique H7 \u2014 the model pinned invoice prices to the rate at scheduling\
+    \ but nothing recorded it and PUT /v1/rate-card destroys history. Snapshot-on-Walk\
+    \ makes the invariant mechanically testable and keeps invoicing a pure read."
+  affects:
+  - docs/specifications/prd.md
+  - docs/specifications/domain-model.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-06T05:30:01Z'
+- id: CURRENCY-CARD-LEVEL
+  summary: Rate-card currency is card-level and immutable once set (409 CURRENCY_IMMUTABLE
+    on change attempts); the per-entry currency field is removed from the PUT request.
+  rationale: "Critique M1 \u2014 request shape allowed per-entry currency the entity/event/datacontract\
+    \ could not represent, silently dropping mixed-currency input. A solo UK walker\
+    \ has no mixed-currency use case."
+  affects:
+  - docs/specifications/prd.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-06T05:30:01Z'
+- id: TENANCY-404-FOR-BOTH
+  summary: Cross-tenant access to id-addressed resources returns 404 RESOURCE_NOT_FOUND,
+    indistinguishable from nonexistent. 403 FORBIDDEN is reserved for role denials
+    on resources the requester can see (e.g. an owner completing their own walk).
+    Nonexistent body-referenced ids (ownerId, dogId, clientId) also 404.
+  rationale: "Critique M16/M15 \u2014 the previous 403/404 split was a resource- existence\
+    \ oracle (UUID probing distinguishes \"exists but not yours\" from \"doesn't exist\"\
+    ) and body-referenced-id misses were unspecified."
+  affects:
+  - docs/specifications/prd.md
+  - docs/specifications/auth-matrix.md
+  - docs/specifications/error-catalogue.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-06T05:30:01Z'
+- id: BREED-UK-KENNEL-CLUB-OPEN-ENUM
+  summary: Dog breed is a UK Kennel Club open enumeration, escalated into the PRD
+    (US-005). AsyncAPI $refs the OpenAPI enum instead of downgrading to bare string;
+    the datacontract references the OpenAPI schema instead of duplicating a pinned
+    copy.
+  rationale: "Critique M3 \u2014 the contract invented a ~211-value vocabulary from\
+    \ a plain PRD string and the three contracts disagreed on strategy; an open-enum\
+    \ addition would have violated the pinned datacontract copy."
+  affects:
+  - docs/specifications/prd.md
+  - docs/specifications/contracts/openapi.yaml
+  - docs/specifications/contracts/asyncapi.yaml
+  - docs/specifications/contracts/datacontract.yaml
+  ts: '2026-07-06T05:30:01Z'
+- id: INVITE-LIFECYCLE-EVENTS
+  summary: InviteAccepted and InviteExpired events added so all three invite.status
+    values are reachable from the stream; InviteAccepted and ClientRegistered both
+    carry the invite id.
+  rationale: "Critique H9/M5 \u2014 only invite.created existed, so accepted and expired\
+    \ states could never appear in the historic record, and invite\u2192client lineage\
+    \ was unjoinable without a fuzzy email match."
+  affects:
+  - docs/specifications/prd.md
+  - docs/specifications/domain-model.md
+  - docs/specifications/contracts/asyncapi.yaml
+  - docs/specifications/contracts/datacontract.yaml
+  ts: '2026-07-06T05:30:01Z'
+- id: PRD-CONSTRAINTS-BACKFILLED
+  summary: Constraints section replaced its TODO with the UK solo-walker baseline
+    (UK-only/UK GDPR/GBP/English; one walker per instance; invite-only client onboarding;
+    no payment processing; API-first, no offline mode).
+  rationale: "Critique L4 \u2014 the section was literally \"1. TODO\" and slipped\
+    \ through the old placeholder check. All five constraints restate assumptions\
+    \ the spec already hard-codes."
+  affects:
+  - docs/specifications/prd.md
+  ts: '2026-07-06T05:30:01Z'
+- id: PRD-EVENT-BACKFILL
+  summary: Story acceptance criteria now name the events they publish (WalkerRegistered,
+    InviteCreated, InviteAccepted, InviteExpired, ClientRegistered, DogAdded, RateCardUpdated).
+  rationale: "Critique M11 \u2014 four events traced to nothing in the PRD; contract-time\
+    \ inventions must be escalated upstream, not left implicit."
+  affects:
+  - docs/specifications/prd.md
+  ts: '2026-07-06T05:30:01Z'
 files_signed:
 - path: docs/specifications/prd.md
-  sha256: e687df16ecdd5bba4c35ae0bd0bef7a4671666637aba318088c7cb207a0c5431
-  mtime: '2026-05-31T13:20:52Z'
+  sha256: 36f50e1c66c44f790f85d300d5064ecdeb8d278c7b1b93b374db5793b43447cd
+  mtime: '2026-07-06T05:30:01Z'
