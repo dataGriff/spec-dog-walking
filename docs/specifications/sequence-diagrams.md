@@ -27,7 +27,7 @@ sequenceDiagram
     walker->>API: POST /v1/auth/login<br/>{ email, password }
     API-->>walker: 200 { accessToken, refreshToken }
 
-    Note over walker: Access token expires after 1 hour (NFR-SEC-001)
+    Note over walker: Access token expires after 15 minutes (NFR-SEC-001)
     walker->>API: POST /v1/auth/refresh<br/>{ refreshToken }
     API-->>walker: 200 { accessToken, refreshToken }
     Note over API: Presented refresh token is rotated — reuse returns 401 INVALID_REFRESH_TOKEN

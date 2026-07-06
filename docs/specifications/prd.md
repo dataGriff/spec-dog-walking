@@ -183,8 +183,9 @@ after each walk.
 
 **As a** registered dog owner or solo dog walker,
 **I want to** exchange my refresh token for a fresh access token,
-**So that** my session continues across the 1-hour access-token expiry
-without logging in again on my phone mid-walk.
+**So that** my session continues across the short access-token
+lifetime (15 minutes, NFR-SEC-001) without logging in again on my
+phone mid-walk.
 
 **Acceptance Criteria:**
 - POST /v1/auth/refresh accepts `{refreshToken}` and returns a fresh

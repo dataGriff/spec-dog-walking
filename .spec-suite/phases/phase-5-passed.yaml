@@ -1,44 +1,75 @@
 phase: nfrs
-signed_off_at: '2026-06-01T17:59:24Z'
-gate_version: '1.0'
+signed_off_at: '2026-07-06T05:49:06Z'
+gate_version: '1.2'
 checks_passed:
 - NFR-THRESHOLD-MEASURABLE
 - ACCEPTANCE-SCENARIO-GWT
 warnings_responded:
 - id: NFR-THRESHOLD-MEASURABLE
   response: n-a
-  reason: Same behavioural-NFR n-a as prior sign-offs. No NFR file change in this
-    update.
-  ts: '2026-06-01T17:59:24Z'
-rubric_findings:
-- id: RUBRIC-NFR-REALISTIC
-  verdict: pass
-  detail: no NFR file change
-  response: resolved
-  reason: agent verdict accepted
-  ts: '2026-06-01T17:59:24Z'
+  reason: Behavioural-guarantee NFRs (observability field lists, compatibility rules)
+    as in every prior sign-off. The five flagged entries define what is recorded/preserved,
+    not a level to measure against; the measurable NFRs all carry thresholds.
+  ts: '2026-07-06T05:49:06Z'
+rubric_findings: []
 decisions:
-- id: US-009-C-CROSS-OWNER-CANCEL-SCENARIO
-  summary: 'Added US-009-C: cross-owner walk cancellation rejected (403 FORBIDDEN).'
-  rationale: Domain-review skill (FIND-001) noticed US-009 enforces the boundary in
-    auth-matrix and acceptance criteria but tested only owner-own and walker-completed
-    paths. Adding the missing cross-owner case closes the ownership-boundary test
-    gap.
+- id: EVENT-DELIVERY-AT-LEAST-ONCE
+  summary: NFR-AVAIL-002 rewritten from best-effort publication to a transactional-outbox
+    at-least-once guarantee; NFR-PERF-002's budget covers the synchronous outbox write,
+    broker relay off the request path.
+  rationale: "Critique M19 \u2014 best-effort delivery contradicted the asyncapi's\
+    \ reconstruct-the-history completeness claim and the datacontract tables consumers\
+    \ were told to trust."
+  affects:
+  - docs/specifications/nfr.md
+  ts: '2026-07-06T05:49:06Z'
+- id: STORAGE-QUOTA-CODE
+  summary: NFR-DATA-003 quota exhaustion now returns 409 STORAGE_QUOTA_EXCEEDED (new
+    catalogue entry) instead of repurposing VALIDATION_ERROR.
+  rationale: "Critique L14 \u2014 quota exhaustion is a state condition of the instance,\
+    \ not a defect in the request; a byte-identical upload succeeds after space is\
+    \ freed."
+  affects:
+  - docs/specifications/nfr.md
+  - docs/specifications/error-catalogue.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-06T05:49:06Z'
+- id: PRIVACY-NFR-DEFAULTS
+  summary: NFR-PRIV-001/002/003 added per the suite template with UK GDPR defaults
+    - 24-month post-closure retention ceiling (invoices anonymised at the ceiling,
+    kept to the 84-month accounting floor), 30-day manual DSR process, explicit PII
+    inventory. All numbers provisional pending real policy input.
+  rationale: "Critique M18 \u2014 substantial UK PII with retention floors but no\
+    \ ceilings and deletion deferred wholesale."
+  affects:
+  - docs/specifications/nfr.md
+  ts: '2026-07-06T05:49:06Z'
+- id: WALK-UPDATES-UNPAGINATED
+  summary: GET /v1/walks/{walkId}/updates stays unpaginated by design; GET /v1/clients
+    added to the NFR-PERF-006 pagination list.
+  rationale: "Critique L14 \u2014 updates are bounded per walk and the timeline is\
+    \ only meaningful whole; clients list was an accidental omission from the pagination\
+    \ ceiling."
+  affects:
+  - docs/specifications/nfr.md
+  ts: '2026-07-06T05:49:06Z'
+- id: SCENARIO-CONVENTIONS-ADOPTED
+  summary: Scenarios rewritten to the suite's authoring rules - actor + state Givens
+    everywhere, contract-legal literals, bare schema property paths, an explicit Idempotency-Key
+    convention with replay/conflict/missing-key scenarios, and coverage for every
+    operation including refresh, logout, register, listClients, listDogs, pagination,
+    rate limiting, auth failures, and the rate-change invoicing invariant.
+  rationale: "Critique M7/M8/M9/M12/L12 \u2014 scenario literals violated the contracts\
+    \ they test, response paths asserted wrapped keys the contracts never return,\
+    \ no POST scenario supplied the required Idempotency-Key, and whole operations/error\
+    \ paths had no scenario."
   affects:
   - docs/specifications/acceptance-scenarios.md
-  ts: '2026-06-01T17:59:24Z'
-- id: ACCEPTANCE-SCENARIO-INVITE-CREATED-RENAME
-  summary: Updated US-001-A scenario to publish `dogwalking.invite.created` (was `dogwalking.client.invited`)
-    per the modeling-phase channel rename.
-  rationale: Channel renamed in suite v1.0.6 cleanup; scenarios must reference the
-    new channel name to be testable.
-  affects:
-  - docs/specifications/acceptance-scenarios.md
-  ts: '2026-06-01T17:59:24Z'
+  ts: '2026-07-06T05:49:06Z'
 files_signed:
 - path: docs/specifications/nfr.md
-  sha256: 5f855de6f43e4f3ee05c5bcd014588a16a01179a4279fb667f5437ce3763d5ae
-  mtime: '2026-06-01T17:59:24Z'
+  sha256: cc4f7bc0d1cbe64223ba26bdffa8cf60d84f5eb0641d85e870387522173f889e
+  mtime: '2026-07-06T05:49:06Z'
 - path: docs/specifications/acceptance-scenarios.md
-  sha256: 637ef16e51aafb1d07a22d061eca3ae6bef167efe12acc25ec09117b00568eef
-  mtime: '2026-06-01T17:59:24Z'
+  sha256: aa2eac5d6fcffe32de6db2abf90bfcc6da3fe1181cf76e052e8169cb635284a4
+  mtime: '2026-07-06T05:49:06Z'

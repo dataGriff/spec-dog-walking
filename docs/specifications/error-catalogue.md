@@ -228,6 +228,24 @@ doesn't accept updates.
 
 **Response shape:** `Error` (`code`, `message`).
 
+### `STORAGE_QUOTA_EXCEEDED`
+
+**HTTP status:** 409 Conflict
+
+**Meaning:** The walker's 10 GB photo-storage cap (NFR-DATA-003) is
+exhausted. A state condition of the instance, not a defect in the
+request — a byte-identical upload would succeed after space is
+freed, which is why this is not a `VALIDATION_ERROR`.
+
+**Triggered by:**
+- `POST /v1/walks/{walkId}/updates` with photo parts when total
+  stored photo bytes already exceed the cap.
+
+**Resolution path:** Free space (future deletion tooling) or contact
+support; the cap is per NFR-DATA-003.
+
+**Response shape:** `Error` (`code`, `message`).
+
 ### `CURRENCY_IMMUTABLE`
 
 **HTTP status:** 409 Conflict

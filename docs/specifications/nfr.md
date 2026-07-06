@@ -28,16 +28,20 @@ and 100 invoices.
 `POST /v1/invoices`, `POST /v1/invoices/{invoiceId}/mark-paid`,
 `POST /v1/dogs`, `PATCH /v1/dogs/{dogId}` complete with
 **p95 ≤ 300 ms** and **p99 ≤ 600 ms** under the same load profile
-as NFR-PERF-001. The budget includes synchronous event publication.
+as NFR-PERF-001. The budget includes the synchronous outbox write
+(NFR-AVAIL-002); broker relay happens off the request path.
 
 ### NFR-PERF-003: Auth latency
 
 `POST /v1/auth/register`, `POST /v1/auth/login`,
-`POST /v1/invites/{token}/accept`, and
-`POST /v1/auth/password-reset/confirm` complete with
-**p95 ≤ 500 ms**. The password-hashing cost mandated by NFR-SEC-002
-is the dominant contributor; the budget accommodates a hash that
-consumes ≥ 250 ms of CPU per request.
+`POST /v1/invites/{token}/accept`,
+`POST /v1/auth/password-reset/confirm`, `POST /v1/auth/refresh`, and
+`POST /v1/auth/logout` complete with **p95 ≤ 500 ms**. The
+password-hashing cost mandated by NFR-SEC-002 is the dominant
+contributor on the three password-taking endpoints; the budget
+accommodates a hash that consumes ≥ 250 ms of CPU per request.
+Refresh and logout do no hashing and are expected to sit well inside
+the budget.
 
 ### NFR-PERF-004: Photo upload latency
 
@@ -54,10 +58,13 @@ byte with **p95 ≤ 250 ms** and completes streaming with
 
 ### NFR-PERF-006: List pagination ceiling
 
-`GET /v1/walks`, `GET /v1/invoices`, `GET /v1/dogs` return at most
-**50 items per page** (enforced by `PageSize.maximum: 50` in
-`contracts/openapi.yaml`). A request with `pageSize` above 50 is
-rejected with `VALIDATION_ERROR`.
+`GET /v1/walks`, `GET /v1/invoices`, `GET /v1/dogs`, and
+`GET /v1/clients` return at most **50 items per page** (enforced by
+`PageSize.maximum: 50` in `contracts/openapi.yaml`). A request with
+`pageSize` above 50 is rejected with `VALIDATION_ERROR`.
+`GET /v1/walks/{walkId}/updates` is deliberately unpaginated: updates
+are bounded per walk (a handful of live/post-hoc posts), and the
+timeline is only meaningful whole.
 
 ---
 
@@ -72,11 +79,15 @@ The HTTP API is available **≥ 99.5 %** of the time, measured monthly
 
 ### NFR-AVAIL-002: Event delivery
 
-Domain events are delivered to the broker **≥ 99.5 %** of the time
-(matches `datacontract.yaml` `slaProperties.availability`). Event
-publication is best-effort within the API request — failed
-publication does not block the API response, but is logged and
-retried via an out-of-band consumer (out of scope for this spec).
+Domain events are delivered **at least once** — publication is
+recorded durably in the same transaction as the state change
+(transactional outbox) and relayed to the broker asynchronously, so
+a failed broker publish delays delivery but never drops it. The
+broker itself is available **≥ 99.5 %** of the time (matches
+`datacontract.yaml` `slaProperties.availability`); during broker
+unavailability events queue in the outbox and delivery lag may
+exceed normal bounds, but the historic record stays complete —
+matching the completeness claim in `contracts/asyncapi.yaml`.
 
 ---
 
@@ -123,13 +134,18 @@ The API is served only over **TLS 1.2 or later**. Plaintext HTTP
 requests are rejected at the edge (308 Permanent Redirect to HTTPS
 is acceptable; opaque rejection is not).
 
-### NFR-SEC-004: Rate limiting on auth endpoints
+### NFR-SEC-004: Rate limiting on public auth endpoints
 
-The four auth endpoints (`register`, `login`, `password-reset/
-request`, `password-reset/confirm`) are rate-limited per source IP
-at **5 requests per minute**, returning `429 Too Many Requests` on
-the 6th request within the window. Limits per email (rather than IP)
-are out of scope for v1.
+The six public auth endpoints (`register`, `login`,
+`password-reset/request`, `password-reset/confirm`, `auth/refresh`,
+and `invites/{token}/accept`) are rate-limited per source IP at
+**5 requests per minute**, returning `429 Too Many Requests` with
+code `RATE_LIMITED` and a `Retry-After` header on the 6th request
+within the window. The token-taking endpoints (invite accept,
+reset confirm, refresh) are included because single-use opaque
+tokens are brute-forceable (Decision Log:
+INVITE-ACCEPT-RATE-LIMITED). Limits per email (rather than IP) are
+out of scope for v1.
 
 ---
 
@@ -161,9 +177,8 @@ uploads (size or MIME violation) record the failure reason.
 ### NFR-DATA-001: Walk-update retention
 
 Walk updates (notes and photos) are retained for **at least 24
-months** from the walk's `completedAt`. Earlier deletion is
-out-of-scope behaviour (clients may eventually request deletion;
-that lives in a future GDPR-handling phase).
+months** from the walk's `completedAt`. The matching retention
+ceiling and deletion rights live in NFR-PRIV-001/002.
 
 ### NFR-DATA-002: Invoice retention
 
@@ -176,7 +191,43 @@ period for small businesses in the UK / EU / US contexts.
 A single walker's total stored photo bytes are capped at **10 GB**
 across all their clients. Approaching the cap (≥ 9 GB) triggers an
 observability log; exceeding it rejects new photo uploads with
-`VALIDATION_ERROR` and a `details[]` entry naming the cap.
+`409 STORAGE_QUOTA_EXCEEDED` (a state condition of the instance, not
+a defect in the request — distinct from `VALIDATION_ERROR`).
+
+---
+
+## Privacy & data rights
+
+UK GDPR applies (PRD Constraint 1). Personal data held: owner names,
+emails, and payment-channel notes; dog medication and vet contact
+details (identifying in combination).
+
+### NFR-PRIV-001: Retention ceilings
+
+Personal data is retained **no longer than 24 months after account
+closure** (walker-initiated client removal or a data-subject deletion
+request), except invoices, which are retained per NFR-DATA-002's
+84-month accounting floor with personal fields anonymised at the
+24-month ceiling (name/email replaced by the opaque clientId). Every
+NFR-DATA retention floor has this ceiling as its maximum.
+
+### NFR-PRIV-002: Data-subject rights
+
+Access/export and deletion requests are satisfied **within 30
+calendar days** (UK GDPR Art. 12(3)). v1 handles both via a
+documented manual process operated by the walker (no self-serve
+endpoint). Deletion is tombstone-based: the event stream is
+immutable, so REST-visible records are erased or anonymised while
+historic events have personal fields redacted in place at the
+storage layer; `id` values survive as opaque tombstones.
+
+### NFR-PRIV-003: PII inventory
+
+Attributes carrying personal data, giving NFR-PRIV-001/002 their
+definite scope: `User.email`, `Walker.displayName`,
+`Client.displayName`, `Invite.email`, `Dog.name`, `Dog.medication`,
+`Dog.vetName`, `Dog.vetPhone`, `Dog.notes`, `Walk.notes`,
+`WalkUpdate.notes`, `Photo` content bytes, `Invoice.paidVia`.
 
 ---
 
