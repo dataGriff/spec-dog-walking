@@ -266,6 +266,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ClientList' }
+        '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
@@ -313,6 +314,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/DogList' }
+        '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
   /v1/dogs/{dogId}:
     parameters:
@@ -403,6 +405,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/WalkList' }
+        '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
   /v1/walks/{walkId}/decision:
     parameters:
@@ -597,6 +600,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/InvoiceList' }
+        '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
   /v1/invoices/{invoiceId}/mark-paid:
     parameters:
