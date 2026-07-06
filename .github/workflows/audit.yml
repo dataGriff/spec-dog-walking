@@ -6,6 +6,11 @@ name: Audit
 #
 # Tier 1 (pre-commit) and Tier 2 (pre-push) catch the cheap and medium
 # checks locally. This workflow is the heavy authoritative gate.
+#
+# CI mirrors the local developer layout exactly: the suite is cloned
+# as a sibling of the spec repo, tools come from .mise.toml, and every
+# step goes through the same Taskfile targets the hooks and agents use
+# (no CI-only command paths).
 
 on:
   push:
@@ -26,45 +31,45 @@ jobs:
   audit:
     name: Phase 7 conformance audit
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: spec-dog-walking
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: spec-dog-walking
+
+      # The Taskfile resolves the suite via DOMAIN_SPEC_SUITE_ROOT or
+      # the sibling ../domain-spec-suite — same as a local checkout.
+      - uses: actions/checkout@v4
+        with:
+          repository: dataGriff/domain-spec-suite
+          path: domain-spec-suite
 
       - name: Install Task
+        working-directory: .
         run: sh -c "$(curl -L https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+      - name: Install mise
+        working-directory: .
+        run: |
+          curl https://mise.run | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      - name: Install Spectral
-        run: npm install -g @stoplight/spectral-cli
+      - name: Install pinned toolchain (.mise.toml)
+        run: mise install
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install Python tooling
-        run: pip install datacontract-cli pyyaml
+      - name: Install suite runner dependency (pyyaml)
+        run: mise exec -- python -m pip install pyyaml
 
       - name: Lint contracts
-        run: task lint
+        run: mise exec -- task lint
 
       - name: Run full audit
-        # Implemented by the suite-installed `task audit` target (authored
-        # by the audit skill in domain-spec-suite M2.3). Until the suite
-        # has produced this target in a bootstrapped repo, fall back to
-        # `task domain:check` which exercises the contract linting and
-        # the docs generator.
-        run: |
-          if task --list-all 2>/dev/null | grep -qE '^\* audit:'; then
-            task audit
-          else
-            echo "audit: 'task audit' target not present yet — falling back to 'task domain:check'."
-            task domain:check
-          fi
+        run: mise exec -- task audit
 
       - name: Regenerate domain overview
-        run: task docs:generate
+        run: mise exec -- task docs:generate
 
       - name: Verify generator output is clean
         # Per SUITE-DESIGN.md §8 Phase 7, "clean" means: exit 0 (already

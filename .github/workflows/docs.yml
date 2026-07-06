@@ -6,6 +6,10 @@ name: Deploy Docs to GitHub Pages
 # is broken — by the time main moves, the contracts have passed
 # the audit, so this workflow just builds and publishes.
 #
+# CI mirrors the local developer layout: suite cloned as a sibling,
+# tools from .mise.toml, the same `task docs:build` target developers
+# and agents run.
+#
 # Repo setup needed once:
 #   Settings → Pages → Source: "GitHub Actions"
 
@@ -29,30 +33,45 @@ jobs:
   build:
     name: Build MkDocs site
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: spec-dog-walking
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: spec-dog-walking
+
+      # docs:generate delegates to the suite-side overview renderer,
+      # resolved as the sibling ../domain-spec-suite.
+      - uses: actions/checkout@v4
+        with:
+          repository: dataGriff/domain-spec-suite
+          path: domain-spec-suite
 
       - uses: actions/configure-pages@v5
 
       - name: Install Task
+        working-directory: .
         run: sh -c "$(curl -L https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Install mise
+        working-directory: .
+        run: |
+          curl https://mise.run | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      - name: Install Python tooling
-        run: python -m pip install --upgrade pip mkdocs-material pyyaml
+      - name: Install pinned toolchain (.mise.toml)
+        run: mise install
 
-      - name: Install datacontract-cli (used by docs:render-datacontract)
-        run: pipx install datacontract-cli
+      - name: Install suite renderer dependency (pyyaml)
+        run: mise exec -- python -m pip install pyyaml
 
       - name: Build docs (regenerates domain overview + datacontract HTML first)
-        run: task docs:build
+        run: mise exec -- task docs:build
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: spec-dog-walking/site
 
   deploy:
     name: Deploy to GitHub Pages
