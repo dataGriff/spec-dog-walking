@@ -579,7 +579,7 @@ And 5 walks exist for my clients' dogs
 When I GET /v1/walks?page=1&pageSize=2
 Then the response status is 200
 And the response body data has length 2
-And the response body pagination.totalItems equals 5
+And the response body pagination.total equals 5
 When I GET /v1/walks?pageSize=51
 Then the response status is 400
 And the response body code equals "VALIDATION_ERROR"

@@ -37,6 +37,10 @@ servers:
 defaultContentType: application/json
 
 tags:
+  - name: Users
+    description: User-registration events.
+  - name: Walkers
+    description: Walker-lifecycle events.
   - name: Invites
     description: Invite-lifecycle events.
   - name: Clients
@@ -53,12 +57,44 @@ tags:
     description: Invoice-lifecycle events.
 
 channels:
+  dogwalking.user.registered:
+    description: >
+      Published whenever a User record is minted — walker
+      self-registration (POST /v1/auth/register) or invite acceptance
+      (POST /v1/invites/{token}/accept).
+    publish:
+      operationId: onUserRegistered
+      description: On user registered consumer.
+      message: { $ref: '#/components/messages/UserRegistered' }
+  dogwalking.walker.registered:
+    description: Published when the instance's walker self-registers.
+    publish:
+      operationId: onWalkerRegistered
+      description: On walker registered consumer.
+      message: { $ref: '#/components/messages/WalkerRegistered' }
   dogwalking.invite.created:
     description: Published whenever the walker creates an invite for a prospective client.
     publish:
       operationId: onInviteCreated
       description: On invite created consumer.
       message: { $ref: '#/components/messages/InviteCreated' }
+  dogwalking.invite.accepted:
+    description: >
+      Published when a prospective client accepts their invite.
+      Carries the inviteId so invite→client lineage is joinable from
+      the stream (alongside ClientRegistered on the same transition).
+    publish:
+      operationId: onInviteAccepted
+      description: On invite accepted consumer.
+      message: { $ref: '#/components/messages/InviteAccepted' }
+  dogwalking.invite.expired:
+    description: >
+      Published when an invite lazily transitions to expired (first
+      accept attempt after expiresAt).
+    publish:
+      operationId: onInviteExpired
+      description: On invite expired consumer.
+      message: { $ref: '#/components/messages/InviteExpired' }
   dogwalking.client.registered:
     description: Published whenever a prospective client accepts their invite and the Client record is created.
     publish:
@@ -134,6 +170,26 @@ channels:
 
 components:
   messages:
+    UserRegistered:
+      name: UserRegistered
+      title: User registered
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/UserRegisteredEnvelope' }
+    WalkerRegistered:
+      name: WalkerRegistered
+      title: Walker registered
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/WalkerRegisteredEnvelope' }
+    InviteAccepted:
+      name: InviteAccepted
+      title: Invite accepted
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/InviteAcceptedEnvelope' }
+    InviteExpired:
+      name: InviteExpired
+      title: Invite expired
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/InviteExpiredEnvelope' }
     InviteCreated:
       name: InviteCreated
       title: Invite created
@@ -212,40 +268,287 @@ components:
         time: { type: string, format: date-time }
         datacontenttype: { type: string, enum: [application/json] }
 
-    # `Breed` is an open enum (per the `### Breed (open)` marker in
-    # domain-model.md and the ~220-value list in openapi.yaml). We
-    # don't mirror the full list here — events only carry values
-    # that have already been validated by the API at write time.
-    # Payload fields use `{ type: string }` for `breed`.
+    # `Breed` mirrors openapi.yaml's authoritative open-enum list
+    # exactly (Decision Log: BREED-UK-KENNEL-CLUB-OPEN-ENUM). The
+    # values below are generated from openapi.yaml — keep the two
+    # lists identical; additions land in both as one minor bump.
+    Breed:
+      type: string
+      description: "UK Kennel Club open enum (mirrors openapi)."
+      enum:
+        - afghan-hound
+        - azawakh
+        - basenji
+        - basset-bleu-de-gascogne
+        - basset-fauve-de-bretagne
+        - basset-griffon-vendeen-grand
+        - basset-griffon-vendeen-petit
+        - basset-hound
+        - bavarian-mountain-hound
+        - beagle
+        - bloodhound
+        - borzoi
+        - cirneco-dell-etna
+        - dachshund-long-haired
+        - dachshund-miniature-long-haired
+        - dachshund-miniature-smooth-haired
+        - dachshund-miniature-wire-haired
+        - dachshund-smooth-haired
+        - dachshund-wire-haired
+        - deerhound
+        - finnish-spitz
+        - foxhound
+        - grand-bleu-de-gascogne
+        - greyhound
+        - hamiltonstovare
+        - ibizan-hound
+        - irish-wolfhound
+        - norwegian-elkhound
+        - otterhound
+        - pharaoh-hound
+        - portuguese-podengo
+        - rhodesian-ridgeback
+        - saluki
+        - segugio-italiano
+        - sloughi
+        - whippet
+        - alaskan-malamute
+        - bernese-mountain-dog
+        - bouvier-des-flandres
+        - boxer
+        - bullmastiff
+        - canadian-eskimo-dog
+        - dobermann
+        - dogue-de-bordeaux
+        - entlebucher-mountain-dog
+        - german-pinscher
+        - giant-schnauzer
+        - great-dane
+        - greenland-dog
+        - hovawart
+        - kangal-shepherd-dog
+        - leonberger
+        - mastiff
+        - neapolitan-mastiff
+        - newfoundland
+        - portuguese-water-dog
+        - pyrenean-mastiff
+        - pyrenean-mountain-dog
+        - rottweiler
+        - russian-black-terrier
+        - st-bernard
+        - siberian-husky
+        - tibetan-mastiff
+        - airedale-terrier
+        - australian-terrier
+        - bedlington-terrier
+        - border-terrier
+        - bull-terrier
+        - bull-terrier-miniature
+        - cairn-terrier
+        - cesky-terrier
+        - dandie-dinmont-terrier
+        - fox-terrier-smooth
+        - fox-terrier-wire
+        - glen-of-imaal-terrier
+        - irish-terrier
+        - jack-russell-terrier
+        - kerry-blue-terrier
+        - lakeland-terrier
+        - manchester-terrier
+        - norfolk-terrier
+        - norwich-terrier
+        - parson-russell-terrier
+        - scottish-terrier
+        - sealyham-terrier
+        - skye-terrier
+        - soft-coated-wheaten-terrier
+        - staffordshire-bull-terrier
+        - welsh-terrier
+        - west-highland-white-terrier
+        - affenpinscher
+        - australian-silky-terrier
+        - bichon-frise
+        - bolognese
+        - cavalier-king-charles-spaniel
+        - chihuahua-long-coat
+        - chihuahua-smooth-coat
+        - chinese-crested
+        - coton-de-tulear
+        - english-toy-terrier
+        - griffon-bruxellois
+        - havanese
+        - italian-greyhound
+        - japanese-chin
+        - king-charles-spaniel
+        - lowchen
+        - maltese
+        - miniature-pinscher
+        - papillon
+        - pekingese
+        - pomeranian
+        - pug
+        - russian-toy
+        - yorkshire-terrier
+        - akita
+        - boston-terrier
+        - bulldog
+        - canaan-dog
+        - chow-chow
+        - dalmatian
+        - eurasier
+        - french-bulldog
+        - german-spitz-klein
+        - german-spitz-mittel
+        - japanese-shiba-inu
+        - japanese-spitz
+        - keeshond
+        - kooikerhondje
+        - lhasa-apso
+        - mexican-hairless
+        - miniature-schnauzer
+        - poodle-miniature
+        - poodle-standard
+        - poodle-toy
+        - schipperke
+        - schnauzer
+        - shar-pei
+        - shih-tzu
+        - tibetan-spaniel
+        - tibetan-terrier
+        - xoloitzcuintle
+        - bracco-italiano
+        - brittany
+        - chesapeake-bay-retriever
+        - clumber-spaniel
+        - cocker-spaniel
+        - cocker-spaniel-american
+        - curly-coated-retriever
+        - english-setter
+        - english-springer-spaniel
+        - field-spaniel
+        - flat-coated-retriever
+        - german-longhaired-pointer
+        - german-shorthaired-pointer
+        - german-wirehaired-pointer
+        - golden-retriever
+        - gordon-setter
+        - hungarian-vizsla
+        - hungarian-wirehaired-vizsla
+        - irish-red-and-white-setter
+        - irish-setter
+        - irish-water-spaniel
+        - italian-spinone
+        - korthals-griffon
+        - labrador-retriever
+        - lagotto-romagnolo
+        - large-munsterlander
+        - nova-scotia-duck-tolling-retriever
+        - pointer
+        - small-munsterlander
+        - spanish-water-dog
+        - sussex-spaniel
+        - weimaraner
+        - welsh-springer-spaniel
+        - anatolian-shepherd-dog
+        - australian-cattle-dog
+        - australian-shepherd
+        - bearded-collie
+        - beauceron
+        - belgian-shepherd-dog-groenendael
+        - belgian-shepherd-dog-laekenois
+        - belgian-shepherd-dog-malinois
+        - belgian-shepherd-dog-tervueren
+        - bergamasco
+        - border-collie
+        - briard
+        - catalan-sheepdog
+        - collie-rough
+        - collie-smooth
+        - estrela-mountain-dog
+        - finnish-lapphund
+        - german-shepherd
+        - hungarian-kuvasz
+        - hungarian-puli
+        - hungarian-pumi
+        - icelandic-sheepdog
+        - komondor
+        - lancashire-heeler
+        - maremma-sheepdog
+        - mudi
+        - norwegian-buhund
+        - old-english-sheepdog
+        - polish-lowland-sheepdog
+        - samoyed
+        - shetland-sheepdog
+        - swedish-lapphund
+        - swedish-vallhund
+        - welsh-corgi-cardigan
+        - welsh-corgi-pembroke
+        - mixed
+        - unknown
 
     Role:
       type: string
       description: "Closed enum (mirrors openapi)."
       enum: [walker, owner]
-    WalkStatus:
-      type: string
-      description: "Lifecycle state of a Walk (mirrors openapi)."
-      enum: [requested, scheduled, declined, cancelled, completed]
-    InvoiceStatus:
-      type: string
-      description: "Lifecycle state of an Invoice (mirrors openapi)."
-      enum: [issued, paid]
-    InviteStatus:
-      type: string
-      description: "Lifecycle state of an Invite (mirrors openapi)."
-      enum: [pending, accepted, expired]
-    # PasswordResetTokenStatus is openapi-only — no event publishes
-    # the reset token, so no asyncapi declaration is needed.
+    # WalkStatus / InvoiceStatus / InviteStatus are not declared here:
+    # each lifecycle channel pins its payload's `status` to the single
+    # legal value for that transition (single-value enum), so a
+    # walk.requested event can never claim `status: completed`.
 
     PhotoContentType:
       type: string
       description: "Permitted MIME types for walk-update photos (mirrors openapi)."
       enum: [image/jpeg, image/png, image/heic]
 
-    InviteCreatedEnvelope:
+    UserRegisteredEnvelope:
+      description: |
+        Full User state minus [secret] fields (no password hash).
+        Published on walker self-registration and on invite
+        acceptance — every userId in the stream resolves to one of
+        these.
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
+          properties:
+            data:
+              type: object
+              required: [userId, email, role, createdAt, updatedAt]
+              properties:
+                userId: { type: string, format: uuid }
+                email: { type: string, format: email }
+                role: { $ref: '#/components/schemas/Role' }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
+    WalkerRegisteredEnvelope:
+      description: |
+        Full Walker state. Published once per instance (single-walker
+        constraint) — resolves every walkerId FK in the stream.
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: object
+              required: [walkerId, userId, displayName, createdAt, updatedAt]
+              properties:
+                walkerId: { type: string, format: uuid }
+                userId: { type: string, format: uuid }
+                displayName: { type: string }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
+    InviteAcceptedEnvelope:
+      description: |
+        Full Invite state at acceptance (minus the [secret] token).
+        Emitted alongside ClientRegistered and UserRegistered on the
+        same transition; the shared inviteId joins the three.
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          required: [data]
           properties:
             data:
               type: object
@@ -254,7 +557,41 @@ components:
                 inviteId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
                 email: { type: string, format: email }
-                status: { $ref: '#/components/schemas/InviteStatus' }
+                status: { type: string, enum: [accepted] }
+                expiresAt: { type: string, format: date-time }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
+    InviteExpiredEnvelope:
+      description: |
+        Minimal removal-shaped payload (the invite is dead surface
+        after expiry; no PII carried).
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: object
+              required: [inviteId, status, expiresAt, updatedAt]
+              properties:
+                inviteId: { type: string, format: uuid }
+                status: { type: string, enum: [expired] }
+                expiresAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
+    InviteCreatedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: object
+              required: [inviteId, walkerId, email, status, expiresAt, createdAt, updatedAt]
+              properties:
+                inviteId: { type: string, format: uuid }
+                walkerId: { type: string, format: uuid }
+                email: { type: string, format: email }
+                status: { type: string, enum: [pending] }
                 expiresAt: { type: string, format: date-time }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
@@ -262,12 +599,14 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
-              required: [clientId, userId, invitedByWalkerId, displayName, createdAt, updatedAt]
+              required: [clientId, inviteId, userId, invitedByWalkerId, displayName, createdAt, updatedAt]
               properties:
                 clientId: { type: string, format: uuid }
+                inviteId: { type: string, format: uuid, description: 'Lineage join key to the invite that created this client.' }
                 userId: { type: string, format: uuid }
                 invitedByWalkerId: { type: string, format: uuid }
                 displayName: { type: string }
@@ -277,6 +616,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
@@ -285,7 +625,10 @@ components:
                 dogId: { type: string, format: uuid }
                 ownerId: { type: string, format: uuid }
                 name: { type: string }
-                breed: { type: string, nullable: true }
+                breed:
+                  allOf:
+                    - $ref: '#/components/schemas/Breed'
+                  nullable: true
                 ageYears: { type: integer, nullable: true, minimum: 0 }
                 medication: { type: string, nullable: true }
                 vetName: { type: string, nullable: true }
@@ -297,6 +640,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
@@ -305,7 +649,10 @@ components:
                 dogId: { type: string, format: uuid }
                 ownerId: { type: string, format: uuid }
                 name: { type: string }
-                breed: { type: string, nullable: true }
+                breed:
+                  allOf:
+                    - $ref: '#/components/schemas/Breed'
+                  nullable: true
                 ageYears: { type: integer, nullable: true, minimum: 0 }
                 medication: { type: string, nullable: true }
                 vetName: { type: string, nullable: true }
@@ -317,6 +664,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
@@ -326,11 +674,12 @@ components:
                 dogId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
                 walkType: { type: string }
-                durationMinutes: { type: integer }
+                durationMinutes: { type: integer, minimum: 1 }
                 startAt: { type: string, format: date-time }
                 requesterRole: { $ref: '#/components/schemas/Role' }
                 notes: { type: string, nullable: true }
-                status: { $ref: '#/components/schemas/WalkStatus' }
+                priceCents: { type: integer, minimum: 1, nullable: true }
+                status: { type: string, enum: [requested] }
                 declinedReason: { type: string, nullable: true }
                 cancelledByRole:
                   allOf:
@@ -343,20 +692,22 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
-              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, status, createdAt, updatedAt]
+              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, priceCents, status, createdAt, updatedAt]
               properties:
                 walkId: { type: string, format: uuid }
                 dogId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
                 walkType: { type: string }
-                durationMinutes: { type: integer }
+                durationMinutes: { type: integer, minimum: 1 }
                 startAt: { type: string, format: date-time }
                 requesterRole: { $ref: '#/components/schemas/Role' }
                 notes: { type: string, nullable: true }
-                status: { $ref: '#/components/schemas/WalkStatus' }
+                priceCents: { type: integer, minimum: 1 }
+                status: { type: string, enum: [scheduled] }
                 declinedReason: { type: string, nullable: true }
                 cancelledByRole:
                   allOf:
@@ -369,21 +720,23 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
-              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, status, declinedReason, createdAt, updatedAt]
+              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, status, createdAt, updatedAt]
               properties:
                 walkId: { type: string, format: uuid }
                 dogId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
                 walkType: { type: string }
-                durationMinutes: { type: integer }
+                durationMinutes: { type: integer, minimum: 1 }
                 startAt: { type: string, format: date-time }
                 requesterRole: { $ref: '#/components/schemas/Role' }
                 notes: { type: string, nullable: true }
-                status: { $ref: '#/components/schemas/WalkStatus' }
-                declinedReason: { type: string }
+                priceCents: { type: integer, minimum: 1, nullable: true }
+                status: { type: string, enum: [declined] }
+                declinedReason: { type: string, nullable: true }
                 cancelledByRole:
                   allOf:
                     - $ref: '#/components/schemas/Role'
@@ -395,6 +748,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
@@ -404,11 +758,12 @@ components:
                 dogId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
                 walkType: { type: string }
-                durationMinutes: { type: integer }
+                durationMinutes: { type: integer, minimum: 1 }
                 startAt: { type: string, format: date-time }
                 requesterRole: { $ref: '#/components/schemas/Role' }
                 notes: { type: string, nullable: true }
-                status: { $ref: '#/components/schemas/WalkStatus' }
+                priceCents: { type: integer, minimum: 1, nullable: true }
+                status: { type: string, enum: [cancelled] }
                 declinedReason: { type: string, nullable: true }
                 cancelledByRole: { $ref: '#/components/schemas/Role' }
                 completedAt: { type: string, format: date-time, nullable: true }
@@ -418,20 +773,22 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
-              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, status, completedAt, createdAt, updatedAt]
+              required: [walkId, dogId, walkerId, walkType, durationMinutes, startAt, requesterRole, priceCents, status, completedAt, createdAt, updatedAt]
               properties:
                 walkId: { type: string, format: uuid }
                 dogId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
                 walkType: { type: string }
-                durationMinutes: { type: integer }
+                durationMinutes: { type: integer, minimum: 1 }
                 startAt: { type: string, format: date-time }
                 requesterRole: { $ref: '#/components/schemas/Role' }
                 notes: { type: string, nullable: true }
-                status: { $ref: '#/components/schemas/WalkStatus' }
+                priceCents: { type: integer, minimum: 1 }
+                status: { type: string, enum: [completed] }
                 declinedReason: { type: string, nullable: true }
                 cancelledByRole:
                   allOf:
@@ -459,6 +816,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
@@ -503,6 +861,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
@@ -524,6 +883,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
@@ -536,7 +896,7 @@ components:
                 periodEnd: { type: string, format: date }
                 currency: { type: string, minLength: 3, maxLength: 3 }
                 totalCents: { type: integer, minimum: 0 }
-                status: { $ref: '#/components/schemas/InvoiceStatus' }
+                status: { type: string, enum: [issued] }
                 paidAt: { type: string, format: date-time, nullable: true }
                 paidVia: { type: string, nullable: true }
                 tipCents: { type: integer, minimum: 0, default: 0 }
@@ -554,6 +914,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
         - type: object
+          required: [data]
           properties:
             data:
               type: object
@@ -566,7 +927,7 @@ components:
                 periodEnd: { type: string, format: date }
                 currency: { type: string, minLength: 3, maxLength: 3 }
                 totalCents: { type: integer, minimum: 0 }
-                status: { $ref: '#/components/schemas/InvoiceStatus' }
+                status: { type: string, enum: [paid] }
                 paidAt: { type: string, format: date-time }
                 paidVia: { type: string }
                 tipCents: { type: integer, minimum: 0 }

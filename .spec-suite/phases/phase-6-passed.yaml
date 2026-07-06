@@ -1,6 +1,6 @@
 phase: contracts
-signed_off_at: '2026-06-01T17:59:47Z'
-gate_version: '1.0'
+signed_off_at: '2026-07-06T06:07:45Z'
+gate_version: '1.3'
 checks_passed:
 - SPECTRAL-OPENAPI
 - SPECTRAL-ASYNCAPI
@@ -11,194 +11,89 @@ checks_passed:
 - WRITE-OP-HAS-ASYNCAPI-CHANNEL
 - EVENT-IN-DATACONTRACT
 - EVENT-PAYLOAD-COVERS-ENTITY-STATE
+- EVENT-FK-RESOLVABLE
+- DATACONTRACT-REFS-RESOLVE
 - AUTH-MATRIX-OPENAPI-MATCH
 - ERROR-CODE-IN-CATALOGUE
+- ERROR-CODE-REPRESENTABLE
+- OPERATION-HAS-SCENARIO
+- SCENARIO-REFS-VALID
 - IDEMPOTENCY-KEY-ON-POST-OPS
 warnings_responded: []
 rubric_findings: []
 decisions:
-- id: INVOICELINEITEM-PRICECENTS-MIN-1
-  summary: 'Tightened InvoiceLineItem.priceCents from minimum: 0 to minimum: 1 to
-    match RateCardEntry.priceCents (strictly positive) and the domain-model contract.'
-  rationale: 'InvoiceLineItem always copies from a RateCardEntry which is already
-    minimum: 1, so a 0-price line item is unreachable in practice; the original 0-permissive
-    minimum was wrong. Added a description to make the relationship explicit.'
+- id: VALIDATION-ENVELOPE-CARRIES-DOMAIN-400S
+  summary: The ValidationError schema's code enum now admits the domain-specific 400
+    codes (INVALID_WALK_TYPE, INVALID_PHOTO, NO_BILLABLE_WALKS) alongside VALIDATION_ERROR;
+    the Error schema gains INVALID_REFRESH_TOKEN, IDEMPOTENCY_KEY_CONFLICT, CURRENCY_IMMUTABLE,
+    STORAGE_QUOTA_EXCEEDED, and RATE_LIMITED, and every keyed POST declares a 409
+    for idempotency reuse.
+  rationale: "Critique H1 \u2014 the catalogue promised codes no compliant server\
+    \ could emit (400 bindings admitted only VALIDATION_ERROR; IDEMPOTENCY_KEY_CONFLICT\
+    \ had no binding anywhere). Verified by the new ERROR-CODE-REPRESENTABLE gate."
   affects:
   - docs/specifications/contracts/openapi.yaml
-  ts: '2026-06-01T17:59:47Z'
-- id: OPENAPI-BREED-SCHEMA
-  summary: Added Breed schema component; Dog.breed (and DogCreateRequest / DogPatchRequest
-    variants) reference it via $ref. Adds enum constraint enforced by ENUM-VALUES-CONSISTENT.
-  rationale: Removes the free-text string in favour of a constrained closed set so
-    client code generators (and impl-side validation) refuse unknown values at the
-    API boundary.
+  ts: '2026-07-06T06:07:45Z'
+- id: INVITE-RESPONSE-REPLACES-CLIENTCREATERESPONSE
+  summary: addClient 201 returns the Invite schema (token excluded); ClientCreateResponse
+    (clientId + inviteId) deleted. The openapi Invite/User schemas no longer carry
+    [secret] fields at all.
+  rationale: "Critique H6/L5 \u2014 the old response asserted a Client that cannot\
+    \ exist before acceptance, and the dead schemas advertised secrets. Depends on\
+    \ suite gate 1.3 (FIELD-MATCH secret exemption, domain-spec-suite PR"
   affects:
   - docs/specifications/contracts/openapi.yaml
-  ts: '2026-06-01T17:59:47Z'
-- id: EVENTS-CARRY-FULL-ENTITY-STATE
-  summary: Fattened every asyncapi event payload + matching datacontract record to
-    carry the full state of its affected entity at the moment of the event (minus
-    [secret]-marked fields).
-  rationale: "Per SUITE-DESIGN \xA74.5 the data contract must be the audit-grade historic\
-    \ record \u2014 downstream consumers (analytics, audit log, time-travel reconstruction)\
-    \ need to recover what happened from the event stream alone. Previously DogAdded\
-    \ carried `{dogId, ownerId, name}` and DogUpdated carried field *names* without\
-    \ values; consumers had to re-query the API for any other field. Now every entity\
-    \ event carries its complete state. Single-entity coverage; aggregate-child collections\
-    \ (RateCard entries, Invoice line items) deferred to v1.0.7."
+  ts: '2026-07-06T06:07:45Z'
+- id: ASYNCAPI-BREED-MIRROR-DATACONTRACT-REF
+  summary: asyncapi declares Breed as an exact mirror of openapi's open enum (generated
+    from it) and Dog envelopes $ref it; the datacontract drops its pinned 211-value
+    copy for a qualified openapi.yaml#/components/schemas/Breed ref. Additions are
+    one minor bump in one place.
+  rationale: "Critique M3 \u2014 three contracts, three strategies; an open addition\
+    \ would have passed API and event but violated the pinned datacontract copy."
   affects:
   - docs/specifications/contracts/asyncapi.yaml
   - docs/specifications/contracts/datacontract.yaml
-  ts: '2026-06-01T17:59:47Z'
-- id: ASYNCAPI-BREED-SCHEMA-MIRROR
-  summary: 'Added Breed schema to asyncapi.yaml mirroring the openapi declaration
-    so DogAdded/DogUpdated payloads can `$ref` it instead of inlining `type: string`.'
-  rationale: "Without the schema reference, payload validation would accept any string\
-    \ for breed \u2014 defeating the enum. ENUM-VALUES-CONSISTENT now verifies all\
-    \ three contracts agree on Breed values."
-  affects:
-  - docs/specifications/contracts/asyncapi.yaml
-  ts: '2026-06-01T17:59:47Z'
-- id: WALKUPDATE-ID-RENAMED-FROM-UPDATEID
-  summary: "Renamed asyncapi + datacontract field `updateId` \u2192 `walkUpdateId`\
-    \ to match the `<entity>Id` convention recognized by EVENT-PAYLOAD-COVERS-ENTITY-STATE."
-  rationale: The check accepts model `id` mapping to payload `<entity>Id`. For `WalkUpdate.id`
-    that's `walkUpdateId`. The previous `updateId` shorthand was ambiguous and caught
-    by the new check.
+  ts: '2026-07-06T06:07:45Z'
+- id: PER-CHANNEL-STATUS-PINNING
+  summary: Every lifecycle channel pins its payload status to the single legal value
+    (walk.requested can never claim completed); the full WalkStatus/InvoiceStatus/InviteStatus
+    enums are no longer declared in asyncapi. CloudEvents overlays now require data;
+    walk envelopes regain durationMinutes minimum 1 and gain priceCents (required
+    on scheduled/completed, nullable elsewhere); WalkDeclined's declinedReason is
+    nullable per the PRD's optional reason.
+  rationale: Critique L9/L8/L7/M2 plus H7's snapshot propagation.
   affects:
   - docs/specifications/contracts/asyncapi.yaml
   - docs/specifications/contracts/datacontract.yaml
-  ts: '2026-06-01T17:59:47Z'
-- id: DATACONTRACT-HTML-EXPORT-CONVENTION
-  summary: Datacontract is published as a standalone HTML reference at docs/specifications/datacontract-reference.html
-    via `datacontract export html`, joining api-reference.html and asyncapi-reference.html
-    as the third peer contract reference on the spec site.
-  rationale: Per suite v1.0.7 the datacontract CLI's HTML exporter is the official
-    rendering path for ODCS contracts. Wired into `task docs:render-datacontract`,
-    invoked by `docs:generate` so the page is regenerated on every docs build and
-    gh-deploy. Rendering is a site-build concern; DATACONTRACT-LINT already proves
-    the YAML is exportable so no Phase 6 check is added. Inline data-contract tables
-    in domain-overview.html were trimmed in favour of a link-out to the new reference.
+  ts: '2026-07-06T06:07:45Z'
+- id: EVENT-PK-NAMING-RETAINED
+  summary: Events keep <entity>Id at payload root (walkId, dogId) with id for nested
+    aggregate children, while REST entities use bare id; channel names stay unversioned
+    flat-concatenated (dogwalking.walkupdate.posted). Both asymmetries are deliberate
+    and now recorded rather than accidental.
+  rationale: "Critique L10/L11 \u2014 renaming channels or payload keys is a breaking\
+    \ change to every consumer for purely cosmetic symmetry; the suite's own convention\
+    \ (asyncapi SKILL) endorses <entity>Id at root."
   affects:
-  - Taskfile.yml
-  - scripts/generate_domain_overview.py
-  - docs/index.md
-  - .github/workflows/docs.yml
-  ts: '2026-06-01T19:17:00Z'
-- id: DATACONTRACT-PHYSICALTYPE-ENUM-RENDER-HINT
-  summary: |
-    Added `physicalType: enum` to the 7 datacontract fields with enum
-    constraints so the datacontract-cli HTML renderer surfaces a visible
-    "enum" signal under each field's `logicalType: string`.
-  rationale: |
-    The datacontract-cli ODCS template (`templates/datacontract_odcs.html`
-    lines 32-35) renders `physicalType` in smaller text below `logicalType`
-    whenever they differ. The template doesn't have an enum-rendering
-    branch — only its sibling native-format template does — so the
-    cleanest signal-without-upstream-patch is to use the freeform
-    `physicalType` field as a rendering hint. `physicalType: enum`
-    passes datacontract-cli lint (physicalType is freeform) and surfaces
-    "string / enum" visually on every constrained field.
-    The actual values still come from the openapi Scalar reference
-    (which renders enum schemas natively). Future work to surface the
-    values inline on the datacontract page would require either a
-    bootstrap-installed template patch or an upstream PR — neither is
-    in scope for this increment.
-  affects:
-  - docs/specifications/contracts/datacontract.yaml
-  ts: '2026-06-03T11:00:00Z'
-- id: DATACONTRACT-ENUMS-FOR-DATA-QUALITY
-  summary: Every datacontract field that maps to a named enum (Role, WalkStatus,
-    InvoiceStatus, InviteStatus, PhotoContentType, and the open Breed) now
-    declares the enum values inline plus a `ref` to the matching
-    `components.schemas.<Name>` so downstream data pipelines can validate
-    received values against a constrained set.
-  rationale: |
-    Without enum constraints on the datacontract fields, a downstream pipeline
-    consuming the event stream had no way to assert "the breed field is one of
-    these 211 values" or "the status field is one of these 2 values" — only the
-    description. A typo in an event payload (e.g. mixed-case `Labrador`,
-    misspelt status `paud`) would land in the warehouse and break aggregate
-    queries silently. Declaring `enum: [...]` at the datacontract level gives
-    the data platform a first-class validation hook, and ENUM-VALUES-CONSISTENT
-    now cross-checks all three contracts (openapi, asyncapi, datacontract) for
-    the 6 closed + 1 open enum. The `ref` field keys the cross-check to the
-    model's named enum without altering the wire schema. Breed's full
-    211-value list is mirrored here (matching openapi); drift between openapi
-    and datacontract would fail the cross-check.
-  affects:
-  - docs/specifications/contracts/datacontract.yaml
-  ts: '2026-06-03T10:30:00Z'
-- id: ENUMS-NAMED-AND-BREED-OPENED
-  summary: 6 implicit enums (Role, WalkStatus, InvoiceStatus, InviteStatus,
-    PasswordResetTokenStatus, PhotoContentType) promoted to named
-    `components.schemas` entries and `$ref`-ed throughout openapi + asyncapi;
-    Breed expanded to the UK Kennel Club ~190-value list and marked open.
-  rationale: |
-    Per suite v1.0.12 the `### Breed (open)` marker means the openapi schema
-    is the authoritative full list; ENUM-VALUES-CONSISTENT verifies the
-    model's representative subset is contained within. Adding a breed is now
-    a minor-version bump on the openapi schema alone — no model change
-    required unless the new breed deserves the canonical-examples table.
-    AsyncAPI Breed schema dropped: events only carry values the API has
-    already validated; the asyncapi `breed` field is `{ type: string }`.
-    AsyncAPI PasswordResetTokenStatus also dropped: no event publishes
-    reset tokens. The other 5 enums are mirrored in asyncapi for
-    payload-validation symmetry.
+  - docs/specifications/contracts/asyncapi.yaml
+  ts: '2026-07-06T06:07:45Z'
+- id: INVOICE-LIST-BALANCE-OWED
+  summary: listInvoices gains from/to issue-date filters and the list response carries
+    balanceOwedCents (sum of totalCents over issued invoices across the whole filtered
+    set).
+  rationale: "Critique M4 \u2014 US-015 required both and the contract dropped them;\
+    \ owners had no running view of money owed."
   affects:
   - docs/specifications/contracts/openapi.yaml
-  - docs/specifications/contracts/asyncapi.yaml
-  ts: '2026-06-03T10:00:00Z'
-- id: IDEMPOTENCY-KEY-CONVENTION
-  summary: Every POST operation declares a required `Idempotency-Key` header
-    parameter via `$ref` to `components.parameters.IdempotencyKey` (UUID per
-    intent), per suite v1.0.9.
-  rationale: |
-    Mobile / agentic / chat clients retry mutating calls on timeout or ambiguous
-    response. Without an idempotency key the server can't distinguish "do this
-    twice" from "the response was lost; retry" — and POST creates new state from
-    scratch, so the wrong choice produces duplicates (two walks scheduled, two
-    invoices marked paid). Stripe / IETF
-    `draft-ietf-httpapi-idempotency-key-header` is the standard convention; the
-    server stores `{key → response}` for ~24h and replays the stored response on
-    retry. PUT/PATCH/DELETE are verb-idempotent so the header is optional there;
-    not enforced on those verbs. The reusable parameter lives under
-    `components.parameters.IdempotencyKey` and is referenced from all 13 POST
-    operations. Phase 6 + audit check `IDEMPOTENCY-KEY-ON-POST-OPS` enforces
-    presence on every POST.
-  affects:
-  - docs/specifications/contracts/openapi.yaml
-  ts: '2026-06-02T10:00:00Z'
-- id: AGGREGATE-CHILD-COVERAGE
-  summary: RateCardUpdated, InvoiceIssued, InvoicePaid, and WalkUpdatePosted now
-    carry their child collections in both asyncapi (`entries`, `lineItems`,
-    `photos`) and datacontract (nested ODCS array fields), per suite v1.0.8.
-  rationale: |
-    Per suite v1.0.8 the `## Aggregates` section in domain-model.md declares three
-    aggregate roots: RateCard → RateCardEntry → entries, Invoice → InvoiceLineItem
-    → lineItems, and WalkUpdate → Photo → photos.
-    EVENT-PAYLOAD-COVERS-ENTITY-STATE enforces that every event on an aggregate
-    root carries its full child collection — both in the asyncapi payload (new
-    `RateCardEntryPayload`, `InvoiceLineItemPayload`, and `PhotoPayload` schemas
-    referenced via array items in the four envelopes) and in the datacontract
-    record (nested array fields on `ratecard`, `invoice`, and `walkupdate`,
-    ODCS `logicalType` array). The v1.0.6/v1.0.7 docstrings claiming the children
-    were "intentionally NOT" in the payloads were removed. InvoicePaid is also
-    an event on the Invoice aggregate root so it carries `lineItems` too.
-    WalkUpdate is itself a first-class entity (with its own WalkUpdatePosted
-    event) and also an aggregate root over Photo — Photo has no separate event
-    or write API, so it qualifies.
-  affects:
-  - docs/specifications/contracts/asyncapi.yaml
-  - docs/specifications/contracts/datacontract.yaml
-  ts: '2026-06-02T09:00:00Z'
+  ts: '2026-07-06T06:07:45Z'
 files_signed:
 - path: docs/specifications/contracts/openapi.yaml
-  sha256: 1ef49668564c180f804ce1e2408c94a7c348011e8544320a61659297b3536178
-  mtime: '2026-06-03T10:00:00Z'
+  sha256: 03575f9092d1bb247e814210a1d6ba0f12e738a77c67be365ae93c893b9614bf
+  mtime: '2026-07-06T06:07:45Z'
 - path: docs/specifications/contracts/asyncapi.yaml
-  sha256: d751591bca71879875c39f7b8b6a9f3a1c93dccd4a70a2562c92fea1272d9172
-  mtime: '2026-06-03T10:00:00Z'
+  sha256: 0f56edc166979b12544a23a0d2e87dc546aae04ebfaf9c1d40e748a66304a6fd
+  mtime: '2026-07-06T06:07:45Z'
 - path: docs/specifications/contracts/datacontract.yaml
-  sha256: 35537e97b0dddce2a941f287f091bf94e425f68b239994ad355dc8194673cf16
-  mtime: '2026-06-03T11:00:00Z'
+  sha256: 481d096c44431f1468c6f78cd497a26cbd534d5cc8710e5b150a734714949bd4
+  mtime: '2026-07-06T06:07:45Z'
