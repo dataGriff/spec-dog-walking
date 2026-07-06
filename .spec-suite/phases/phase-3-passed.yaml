@@ -1,6 +1,6 @@
 phase: access-control
-signed_off_at: '2026-05-31T10:46:34Z'
-gate_version: '1.0'
+signed_off_at: '2026-07-06T05:39:45Z'
+gate_version: '1.2'
 checks_passed:
 - AUTH-ROLE-HAS-DESCRIPTION
 - AUTH-MATRIX-COMPLETE
@@ -8,60 +8,64 @@ checks_passed:
 - ERROR-CODE-IN-CATALOGUE
 - AUTH-ROLE-TRACES-TO-PERSONA
 - AUTH-MATRIX-OPENAPI-MATCH
-warnings_responded: []
+warnings_responded:
+- id: AUTH-MATRIX-OPENAPI-MATCH
+  response: deferred
+  required_by: contracts
+  reason: POST /v1/auth/refresh and POST /v1/auth/logout are new operations decided
+    in this update pass (US-021/US-022, critique H8); they are added to openapi.yaml
+    in the contracts phase, where this check re-runs at error severity.
+  ts: '2026-07-06T05:39:45Z'
 rubric_findings: []
 decisions:
-- id: OWNERSHIP-VIA-FK-TRAVERSAL
-  summary: Ownership rule traverses Client.invitedByWalkerId (and similar) rather
-    than embedding walkerId on every owned resource.
-  rationale: "Single source of truth \u2014 if a Client ever moves walkers (out of\
-    \ scope for v1 but possible later) the change is one row, not N."
+- id: REFRESH-LOGOUT-AUTH-SEMANTICS
+  summary: POST /v1/auth/refresh is public (the refresh token in the body is the credential,
+    like invite accept); POST /v1/auth/logout requires a bearer token. Both are rate-limited
+    per NFR-SEC-004.
+  rationale: "Critique H8 \u2014 the auth matrix declared refresh out of scope while\
+    \ the contract issued refresh tokens. Refresh must work when the access token\
+    \ has already expired, so it cannot demand a live bearer."
   affects:
   - docs/specifications/auth-matrix.md
-  ts: '2026-05-31T10:46:34Z'
-- id: FORBIDDEN-FOR-BOTH-ROLE-AND-OWNERSHIP
-  summary: FORBIDDEN (403) returned for both wrong-role and not-the-owner failures;
-    the response does not distinguish.
-  rationale: "Defence in depth \u2014 distinguishing leaks resource existence to a\
-    \ caller with the wrong role. Same approach as the Items reference fixture."
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-06T05:39:45Z'
+- id: INVITE-ACCEPT-RATE-LIMITED
+  summary: POST /v1/invites/{token}/accept and POST /v1/auth/refresh join the NFR-SEC-004
+    rate-limited set, returning 429 RATE_LIMITED with Retry-After beyond the threshold.
+  rationale: "Critique M17/H2 \u2014 invite acceptance was a public, token-authenticated,\
+    \ format-unconstrained brute-force surface excluded from rate limiting, while\
+    \ the NFR-mandated 429 existed nowhere downstream."
   affects:
   - docs/specifications/auth-matrix.md
   - docs/specifications/error-catalogue.md
-  ts: '2026-05-31T10:46:34Z'
-- id: INVITE-AND-RESET-PUBLIC-WITH-TOKEN-AUTH
-  summary: "POST /v1/invites/{token}/accept and POST /v1/auth/password-reset/confirm\
-    \ are public (no BearerAuth) \u2014 the token in the URL IS the auth."
-  rationale: Bearer auth on these endpoints would defeat their purpose (unauthenticated
-    users follow email links). The token's single-use + TTL semantics handle authorization.
-  affects:
-  - docs/specifications/auth-matrix.md
-  ts: '2026-05-31T10:46:34Z'
-- id: AC-REQUIRES-PHASE-2-MODELING
-  summary: Access Control prerequisite includes modeling (Phase 2), not just discovery.
-  rationale: Ownership rules reference real entity field names (e.g. Client.invitedByWalkerId).
-    Discovery alone doesn't define entities, so the AUTH-OWNERSHIP-RULE-FIELD-EXISTS
-    check (planned for audit) would have nothing to validate against. SUITE-DESIGN
-    didn't mandate this; chosen during build.
-  affects:
-  - skills/domain-access-control/gate.yaml
-  ts: '2026-05-31T10:46:34Z'
-- id: IDEMPOTENCY-KEY-CONFLICT-ADDED
-  summary: Added `IDEMPOTENCY_KEY_CONFLICT` (409) to the error catalogue, paired
-    with the suite v1.0.9 `Idempotency-Key` convention on POST ops.
-  rationale: |
-    When a client retries a POST with the same `Idempotency-Key` but a changed
-    request body, the server must refuse the second call rather than honour the
-    cached response (which is for a different intent) or process the new body
-    (which destroys the safety guarantee). 409 is the right HTTP status for the
-    semantic-mismatch case. Lives under "Conflict errors (409)" alongside the
-    existing 409 codes.
+  - docs/specifications/nfr.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-06T05:39:45Z'
+- id: JWT-INVALID-SIGNATURE-MAPPED
+  summary: Invalid-signature / tampered bearer tokens map to AUTHENTICATION_REQUIRED
+    (401); TOKEN_EXPIRED stays reserved for valid-signature-expired so clients know
+    a silent refresh fixes it.
+  rationale: "Critique M14 \u2014 the most common real-world 401 had no catalogue\
+    \ entry."
   affects:
   - docs/specifications/error-catalogue.md
-  ts: '2026-06-02T10:00:00Z'
+  - docs/specifications/auth-matrix.md
+  ts: '2026-07-06T05:39:45Z'
+- id: NEVER-EXISTED-TOKENS-404
+  summary: Invite / password-reset tokens that never existed return 404 RESOURCE_NOT_FOUND;
+    410 Gone stays reserved for tokens that verifiably existed (expired / already
+    used).
+  rationale: "Critique M13 \u2014 the unknown-token case had no defined response;\
+    \ implementers could not choose between 400/404/410."
+  affects:
+  - docs/specifications/error-catalogue.md
+  - docs/specifications/prd.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-06T05:39:45Z'
 files_signed:
 - path: docs/specifications/auth-matrix.md
-  sha256: a2f67dfc385c558003f11ccf5d6b4b40351317f8435a9cdc04171399bf24025f
-  mtime: '2026-05-31T10:46:34Z'
+  sha256: e408504fffa6f65764124006294bb102f52329a7377ac8102abae4abe8de8e61
+  mtime: '2026-07-06T05:39:45Z'
 - path: docs/specifications/error-catalogue.md
-  sha256: 4c5fc45f6426edf2a378a2dee9f49b9c0bffd7ecb80ed8aeecfe58560501c866
-  mtime: '2026-06-02T10:00:00Z'
+  sha256: bd8b5787dcbb251ad2a23b0a5db46421e8c9305190ffb5ea0e0e0ccc6263b700
+  mtime: '2026-07-06T05:39:45Z'

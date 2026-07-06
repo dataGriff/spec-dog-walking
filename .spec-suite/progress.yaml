@@ -2,7 +2,7 @@ suite_version: 1.0.0-alpha
 gate_version: '1.0'
 domain_name: DogWalking
 started_at: '2026-05-31T12:24:42Z'
-last_updated: '2026-07-06T05:36:01Z'
+last_updated: '2026-07-06T05:39:45Z'
 phases:
   bootstrap:
     status: passed
@@ -18,8 +18,8 @@ phases:
     gate_version: '1.2'
   access-control:
     status: passed
-    signed_off_at: '2026-05-31T10:46:34Z'
-    gate_version: '1.0'
+    signed_off_at: '2026-07-06T05:39:45Z'
+    gate_version: '1.2'
   flows:
     status: passed
     signed_off_at: '2026-06-01T17:59:12Z'
@@ -94,3 +94,6 @@ session_log:
 - timestamp: '2026-07-06T05:36:01Z'
   event: phase-passed
   phase: modeling
+- timestamp: '2026-07-06T05:39:45Z'
+  event: phase-passed
+  phase: access-control
