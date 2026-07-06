@@ -1,9 +1,11 @@
 # Glossary — Dog Walking
 
-> The ubiquitous language for the Dog Walking domain. Every entity
-> name and every attribute name used in `domain-model.md` (and the
-> later contracts files) appears here exactly as it is used. Code,
-> docs, and conversation must use these terms.
+> The ubiquitous language for the Dog Walking domain — a lexicon, not
+> a reference manual. Every entity, role, domain event, enumeration,
+> and key term has a one- or two-sentence entry here under the exact
+> name the other documents use. Attribute-level detail lives in
+> `domain-model.md`'s entity tables (the single attribute authority).
+> Code, docs, and conversation must use these terms.
 
 ---
 
@@ -23,19 +25,14 @@ invites, books and completes walks, marks invoices paid.
 
 ### Client
 
-A dog owner from the walker's perspective. Created when the walker
-invites someone; linked 1:1 to the User with role=`owner` and to the
-Walker who invited them.
+A dog owner from the walker's perspective. Created when the invite is
+accepted; linked 1:1 to the User with role=`owner` and to the Walker
+who invited them.
 
 ### Invite
 
 A single-use registration token issued by the walker via the add-
 client flow. Carries the prospective client's email and a 1-day TTL.
-
-### PasswordResetToken
-
-A single-use token used to reset a forgotten password. 1-hour TTL.
-Confirming a reset revokes all of the User's existing refresh tokens.
 
 ### Dog
 
@@ -46,7 +43,8 @@ needs mid-walk: name, breed, age, medication, vet, free-text notes.
 
 A booked walk for a Dog. Status state machine: `requested → scheduled
 → completed`, with `declined` and `cancelled` as terminal paths.
-Carries the walk type, duration, and scheduled start time.
+Carries the walk type, duration, scheduled start time, and the
+price snapshot taken at scheduling.
 
 ### WalkUpdate
 
@@ -86,485 +84,191 @@ the rate card in force at the Walk's `scheduled` transition.
 
 ---
 
-## User attributes
+## Roles
 
-### id
+### walker
 
-UUID. Unique identifier.
+The single Walker who runs the business (Alison in the PRD). Full
+control over their client roster, bookings, rate card, and invoices.
+Maps to the "Alison the walker" persona.
 
-### email
+### owner
 
-String (email format). Login email; unique and case-folded across
-all users.
-
-### passwordHash
-
-String. Adaptive password-hash output. Never returned in API
-responses, never logged.
-
-### role
-
-Enum. One of `walker` or `owner`. Set at registration; immutable
-afterwards.
-
-### createdAt
-
-ISO 8601 timestamp. Registration time.
-
-### updatedAt
-
-ISO 8601 timestamp. Last update time.
+A dog owner (client of the walker; Clancy in the PRD). Manages their
+own dogs, requests and cancels walks, views updates, rate card, and
+invoices — always scoped to their own records. Maps to the "Clancy
+the owner" persona.
 
 ---
 
-## Walker attributes
+## Domain events
 
-### id
+### UserRegistered
 
-UUID. Unique identifier.
+Published on `dogwalking.user.registered` whenever a User record is
+created — walker self-registration or client invite acceptance.
+Payload is the full published User state.
 
-### userId
+### WalkerRegistered
 
-UUID. FK to the User with role=`walker`. Immutable.
+Published on `dogwalking.walker.registered` when the solo walker
+self-registers. Payload is the full Walker profile.
 
-### displayName
+### InviteCreated
 
-String. Name shown on invoices and client invites.
+Published on `dogwalking.invite.created` when the walker adds a
+client and an invite is queued. Payload is the full published Invite
+state (token excluded as `[secret]`).
 
-### createdAt
+### InviteAccepted
 
-ISO 8601 timestamp.
+Published on `dogwalking.invite.accepted` when a recipient accepts in
+time; the invite transitions `pending → accepted`.
 
-### updatedAt
+### InviteExpired
 
-ISO 8601 timestamp.
+Published on `dogwalking.invite.expired` when an accept attempt lands
+after `expiresAt` and the invite lazily transitions `pending →
+expired`. Removal-shaped payload (id + timestamps).
 
----
+### ClientRegistered
 
-## Client attributes
+Published on `dogwalking.client.registered` when invite acceptance
+creates the Client record. Carries `inviteId` for lineage back to
+the invite.
 
-### id
+### DogAdded
 
-UUID. Unique identifier.
+Published on `dogwalking.dog.added` when an owner adds a dog.
+Payload is the full Dog state.
 
-### userId
+### DogUpdated
 
-UUID. FK to the User with role=`owner`. Immutable.
+Published on `dogwalking.dog.updated` when a dog's details change.
+Payload is the full Dog state post-change.
 
-### invitedByWalkerId
+### WalkRequested
 
-UUID. FK to the Walker who issued the invite. Immutable; clients
-never move between walkers.
+Published on `dogwalking.walk.requested` when an owner requests a
+walk (`priceCents` still null).
 
-### displayName
+### WalkScheduled
 
-String. Name the walker uses to refer to this client.
+Published on `dogwalking.walk.scheduled` when a walk enters
+`scheduled` — walker-created directly or via the decision endpoint.
+Carries the freshly snapshotted `priceCents`.
 
-### createdAt
+### WalkDeclined
 
-ISO 8601 timestamp.
+Published on `dogwalking.walk.declined` when the walker declines a
+requested walk; carries `declinedReason`.
 
-### updatedAt
+### WalkCancelled
 
-ISO 8601 timestamp.
+Published on `dogwalking.walk.cancelled` when a walk is cancelled —
+owner withdrawal from `requested`, or either party from `scheduled`.
 
----
+### WalkCompleted
 
-## Invite attributes
+Published on `dogwalking.walk.completed` when the walker completes a
+scheduled walk; carries `completedAt`.
 
-### id
+### WalkUpdatePosted
 
-UUID. Unique identifier.
+Published on `dogwalking.walkupdate.posted` when the walker posts a
+note/photos against a walk. Aggregate payload includes the `photos`
+collection.
 
-### walkerId
+### RateCardUpdated
 
-UUID. FK to the Walker issuing the invite.
+Published on `dogwalking.ratecard.updated` on every rate-card PUT.
+Aggregate payload includes the full `entries` collection.
 
-### email
+### InvoiceIssued
 
-String (email format). The prospective client's email.
+Published on `dogwalking.invoice.issued` when an invoice is
+generated. Aggregate payload includes the full `lineItems`
+collection.
 
-### token
+### InvoicePaid
 
-String (opaque URL-safe). Single-use registration token.
-
-### status
-
-Enum. One of `pending` / `accepted` / `expired`.
-
-### expiresAt
-
-ISO 8601 timestamp. 24 hours after `createdAt`.
-
-### createdAt
-
-ISO 8601 timestamp.
-
-### updatedAt
-
-ISO 8601 timestamp.
-
----
-
-## PasswordResetToken attributes
-
-### id
-
-UUID. Unique identifier.
-
-### userId
-
-UUID. FK to the User being reset.
-
-### token
-
-String (opaque URL-safe). Single-use reset token.
-
-### status
-
-Enum. One of `pending` / `used` / `expired`.
-
-### expiresAt
-
-ISO 8601 timestamp. 1 hour after `createdAt`.
-
-### createdAt
-
-ISO 8601 timestamp.
-
-### updatedAt
-
-ISO 8601 timestamp.
+Published on `dogwalking.invoice.paid` when the walker marks an
+invoice paid; carries `paidAt`, `paidVia`, and `tipCents`.
 
 ---
 
-## Dog attributes
+## Enumerations
 
-### id
+### Role
 
-UUID. Unique identifier.
+Classifies a User as `walker` or `owner`. Closed — a third role is a
+domain redesign, not a version bump. Authoritative values in the
+domain model's Enumerations section.
 
-### ownerId
+### WalkStatus
 
-UUID. FK to the Client who owns this dog. Immutable.
+The Walk lifecycle states (`requested` / `scheduled` / `declined` /
+`cancelled` / `completed`). Closed; transitions governed by the Walk
+Status Lifecycle table in the domain model.
 
-### name
+### InvoiceStatus
 
-String. Dog's name.
+The Invoice lifecycle states (`issued` / `paid`). Closed.
 
-### breed
+### InviteStatus
 
-Enum (`Breed`, open) or `null`. The dog's breed, from the UK Kennel
-Club recognised-breeds list plus `mixed` and `unknown` fallbacks.
-Open enumeration: additions to the openapi list are a minor version
+The Invite lifecycle states (`pending` / `accepted` / `expired`).
+Closed.
+
+### PhotoContentType
+
+The permitted photo MIME types (`image/jpeg` / `image/png` /
+`image/heic`). Closed — other media is a domain redesign.
+
+### Breed
+
+The dog-breed classification. **Open** enumeration: the openapi
+schema carries the authoritative full list (UK Kennel Club
+recognised breeds plus `mixed` and `unknown` fallbacks); the domain
+model lists a representative subset. Additions are a minor version
 bump.
 
-### ageYears
+---
 
-Integer or `null`. Age in whole years.
+## Supporting auth records
 
-### medication
+### PasswordResetToken
 
-String or `null`. Free-text medication notes.
+A single-use token used to reset a forgotten password. 1-hour TTL.
+Confirming a reset revokes all of the User's refresh tokens. Not a
+domain entity — excluded from events and the data contract by design.
 
-### vetName
+### RefreshToken
 
-String or `null`. Vet practice name.
-
-### vetPhone
-
-String or `null`. Vet contact number.
-
-### notes
-
-String or `null`. Free-text quirks / handling notes.
-
-### createdAt
-
-ISO 8601 timestamp.
-
-### updatedAt
-
-ISO 8601 timestamp.
+The long-lived (30-day) session credential issued alongside every
+access token; rotated on every refresh, revoked by logout and
+password reset. Not a domain entity — excluded from events and the
+data contract by design.
 
 ---
 
-## Walk attributes
+## Other terms
 
-### id
+### price snapshot
 
-UUID. Unique identifier.
+The rule that a Walk records `priceCents` from the matching
+rate-card entry at the moment it enters `scheduled`, and is never
+repriced by later rate-card changes. Invoice line items copy this
+snapshotted value.
 
-### dogId
+### billing period
 
-UUID. FK to the Dog being walked.
+The inclusive `periodStart`–`periodEnd` date range an Invoice
+covers. Each completed walk in the period becomes one line item; a
+walk appears on at most one issued invoice.
 
-### walkerId
+### access token
 
-UUID. FK to the Walker assigned to the walk.
-
-### walkType
-
-String. Matches a `walkType` on the walker's current rate card.
-
-### durationMinutes
-
-Integer. Matches a `durationMinutes` on the matching rate-card entry.
-
-### startAt
-
-ISO 8601 timestamp. Scheduled start time; must be in the future at
-creation.
-
-### requesterRole
-
-Enum. One of `walker` or `owner` — who created the walk.
-
-### notes
-
-String or `null`. Free-text booking notes.
-
-### priceCents
-
-Integer or `null`. The walk's recorded price in the rate card's
-currency, minor units — snapshotted from the matching rate-card entry
-when the walk enters `scheduled`, and never repriced by later
-rate-card changes. `null` while `requested`, or when the walk left
-the lifecycle before ever being scheduled.
-
-### status
-
-Enum. One of `requested` / `scheduled` / `declined` / `cancelled` /
-`completed`. See domain-model Walk Status lifecycle.
-
-### declinedReason
-
-String or `null`. Walker's reason when status=`declined`.
-
-### cancelledByRole
-
-Enum or `null`. One of `walker` or `owner` — set when
-status=`cancelled`.
-
-### completedAt
-
-ISO 8601 timestamp or `null`. Set when status=`completed`.
-
-### createdAt
-
-ISO 8601 timestamp.
-
-### updatedAt
-
-ISO 8601 timestamp.
-
----
-
-## WalkUpdate attributes
-
-### id
-
-UUID. Unique identifier.
-
-### walkId
-
-UUID. FK to the Walk this update belongs to.
-
-### notes
-
-String or `null`. Free-text note. At least one of `notes` or an
-attached Photo must be present.
-
-### createdAt
-
-ISO 8601 timestamp.
-
-### updatedAt
-
-ISO 8601 timestamp.
-
----
-
-## Photo attributes
-
-### id
-
-UUID. Unique identifier.
-
-### walkUpdateId
-
-UUID. FK to the WalkUpdate this photo belongs to.
-
-### contentType
-
-String. MIME type — one of `image/jpeg` / `image/png` / `image/heic`.
-
-### sizeBytes
-
-Integer. Stored size in bytes. Maximum 10 MB.
-
-### capturedAt
-
-ISO 8601 timestamp or `null`. Capture time from EXIF, if present.
-
-### createdAt
-
-ISO 8601 timestamp.
-
-### updatedAt
-
-ISO 8601 timestamp.
-
----
-
-## RateCard attributes
-
-### id
-
-UUID. Unique identifier.
-
-### walkerId
-
-UUID. FK to the Walker who owns this rate card.
-
-### currency
-
-String (ISO 4217). e.g. `GBP`, `USD`. Set at creation; immutable.
-
-### createdAt
-
-ISO 8601 timestamp.
-
-### updatedAt
-
-ISO 8601 timestamp.
-
----
-
-## RateCardEntry attributes
-
-### id
-
-UUID. Unique identifier.
-
-### rateCardId
-
-UUID. FK to parent RateCard.
-
-### walkType
-
-String. e.g. `solo`, `group`.
-
-### durationMinutes
-
-Integer. e.g. 30, 45, 60.
-
-### priceCents
-
-Integer. Positive; price in the rate card's currency, minor units.
-
-### createdAt
-
-ISO 8601 timestamp.
-
-### updatedAt
-
-ISO 8601 timestamp.
-
----
-
-## Invoice attributes
-
-### id
-
-UUID. Unique identifier.
-
-### walkerId
-
-UUID. FK to the Walker issuing the invoice.
-
-### clientId
-
-UUID. FK to the Client being billed.
-
-### periodStart
-
-ISO 8601 date (no time). Inclusive start of billing period.
-
-### periodEnd
-
-ISO 8601 date (no time). Inclusive end of billing period.
-
-### currency
-
-String (ISO 4217). Copied from the RateCard at issue.
-
-### totalCents
-
-Integer. Sum of line-item `priceCents`. Computed at issue; never
-recomputed.
-
-### status
-
-Enum. One of `issued` / `paid`.
-
-### paidAt
-
-ISO 8601 timestamp or `null`. Set when status=`paid`.
-
-### paidVia
-
-String or `null`. Free-text payment channel (e.g. "bank transfer",
-"cash"). Set with status=`paid`.
-
-### tipCents
-
-Integer, non-negative. Tip amount in the invoice's currency, minor
-units. Defaults to `0` at issue; can be set to a non-negative integer
-at mark-paid (US-019). Recorded on the InvoicePaid event payload.
-
-### createdAt
-
-ISO 8601 timestamp. Issue time.
-
-### updatedAt
-
-ISO 8601 timestamp.
-
----
-
-## InvoiceLineItem attributes
-
-### id
-
-UUID. Unique identifier.
-
-### invoiceId
-
-UUID. FK to parent Invoice.
-
-### walkId
-
-UUID. FK to the completed Walk this line bills. A walk appears on at
-most one issued invoice (uniqueness on `walkId`).
-
-### walkType
-
-String. Copied from the Walk at issue.
-
-### durationMinutes
-
-Integer. Copied from the Walk at issue.
-
-### priceCents
-
-Integer. Price from the rate-card entry in force at the Walk's
-`scheduled` transition.
-
-### createdAt
-
-ISO 8601 timestamp.
-
-### updatedAt
-
-ISO 8601 timestamp.
+A short-lived JWT (15 minutes, NFR-SEC-001) carried in the
+`Authorization: Bearer <token>` header on every authenticated
+request.
