@@ -220,9 +220,59 @@ alive.
 - Subsequent POST /v1/auth/refresh with the revoked token returns 401
   with `INVALID_REFRESH_TOKEN`
 
-### Dogs
-
 *Scenarios: [US-022](acceptance-scenarios.md#us-022-log-out)*
+
+#### US-023: See whether this instance already has its walker
+
+**As a** solo dog walker (or anyone landing on the sign-in screen),
+**I want** the app to know whether this instance's walker is already
+registered,
+**So that** first-run walker setup is only offered on a genuinely fresh
+instance and clients can see whose business they are signing in to.
+
+**Acceptance Criteria:**
+- GET /v1/instance is public (no authentication) and returns
+  `{walkerRegistered, walkerDisplayName}`
+- Before any walker registers it returns
+  `{walkerRegistered: false, walkerDisplayName: null}`
+- After registration it returns
+  `{walkerRegistered: true, walkerDisplayName}` with the walker's
+  display name
+- Deliberately public: the walker's display name is the instance's
+  storefront and already reaches invitees out of band; no other data
+  is exposed
+- Rate-limited per source IP, looser than the credential endpoints
+  (see the Security NFRs); read-only — no domain event
+
+*Scenarios: [US-023](acceptance-scenarios.md#us-023-see-whether-this-instance-already-has-its-walker)*
+
+### Clients
+
+#### US-024: View a client and their dogs
+
+**As a** solo dog walker,
+**I want to** open one client and see their contact email and their dogs,
+**So that** Alison can reach Clancy and see which dogs she walks for him
+without digging through walk history.
+
+**Acceptance Criteria:**
+- GET /v1/clients/{clientId} returns the client, including `email` —
+  the login email the walker originally invited, projected from the
+  linked user account (not stored on the Client record and absent from
+  Client events; consumers join on `userId`)
+- GET /v1/clients list entries carry the same projected `email`
+- Returns 404 with `RESOURCE_NOT_FOUND` if the id doesn't exist or the
+  client belongs to a different instance (not-yours indistinguishable
+  from not-there)
+- Owner callers receive 403 with `FORBIDDEN` (the client book belongs
+  to the walker)
+- GET /v1/dogs?ownerId={clientId} filters the dog list to that client's
+  dogs; an unknown or cross-instance `ownerId` returns 404 with
+  `RESOURCE_NOT_FOUND` (same tenancy rule as US-005)
+
+*Scenarios: [US-024](acceptance-scenarios.md#us-024-view-a-client-and-their-dogs)*
+
+### Dogs
 
 #### US-005: Add a dog
 
@@ -277,9 +327,36 @@ to verify she's updated her dog's details since last week.
   owner (same ownership rule as US-006; not-yours is
   indistinguishable from not-there)
 
-### Bookings
-
 *Scenarios: [US-020](acceptance-scenarios.md#us-020-view-a-single-dog)*
+
+#### US-025: Keep a photo gallery on a dog's profile
+
+**As a** dog owner or the solo dog walker who manages this owner,
+**I want to** add and remove photos on the dog's profile,
+**So that** the dog is recognisable at a glance — for Alison meeting a
+new dog, and for Clancy keeping the profile current.
+
+**Acceptance Criteria:**
+- POST /v1/dogs/{dogId}/photos adds one photo per request
+  (`multipart/form-data`); the response carries the photo's metadata
+  and a `DogPhotoAdded` event is published
+- A dog's gallery holds at most 5 photos; adding a sixth returns 409
+  with `PHOTO_LIMIT_EXCEEDED` (delete one to free a slot)
+- Photos are JPEG/PNG/HEIC, max 10MB each; anything else returns 400
+  with `INVALID_PHOTO`; stored bytes count toward the instance photo
+  storage cap (see the Data NFRs) and the quota is reclaimed on delete
+- Photo bytes are served only via the authenticated
+  GET /v1/dogs/{dogId}/photos/{photoId} — never a public URL
+- DELETE /v1/dogs/{dogId}/photos/{photoId} removes the photo and
+  publishes a `DogPhotoRemoved` event
+- Ownership follows US-006: the dog's owner and their walker may add,
+  view, and delete; anyone else gets 404 with `RESOURCE_NOT_FOUND`
+  (not-yours indistinguishable from not-there)
+- Dog responses carry the gallery's metadata as `photos`
+
+*Scenarios: [US-025](acceptance-scenarios.md#us-025-keep-a-photo-gallery-on-a-dogs-profile)*
+
+### Bookings
 
 #### US-007: Schedule a walk
 
@@ -517,26 +594,13 @@ expect before booking.
 - Returns 404 with `RESOURCE_NOT_FOUND` if no rate card has ever been
   set (empty state; see auth-matrix singleton rule)
 
-### Tipping
-
 *Scenarios: [US-018](acceptance-scenarios.md#us-018-view-the-rate-card)*
 
-#### US-019: Add a tip when marking an invoice paid
-
-**As a** solo dog walker,
-**I want to** record an optional tip when marking an invoice paid,
-**So that** the catalogue reflects the actual amount the client paid
-(invoice total plus tip) and Alison has a record of which clients tip.
-
-**Acceptance Criteria:**
-- POST /v1/invoices/{invoiceId}/mark-paid accepts an optional
-  `tipCents` integer alongside the existing `paidAt` and `paidVia`
-- Returns 400 with `VALIDATION_ERROR` if `tipCents` is negative
-- On success, the invoice record's `tipCents` field reflects the
-  recorded tip (defaults to 0 when omitted)
-- The `InvoicePaid` event payload includes the recorded `tipCents`
-
-*Scenarios: [US-019](acceptance-scenarios.md#us-019-add-a-tip-when-marking-an-invoice-paid)*
+> **Removed — US-019 (tip at mark-paid).** A tip is the client's
+> declaration, not the walker's data entry, and v1 has no owner-side
+> payment surface, so the walker recording a tip put one party's money
+> in the other party's hands. Invoices are total-only in v1. The story
+> number is retired, not reused.
 
 ## Constraints
 

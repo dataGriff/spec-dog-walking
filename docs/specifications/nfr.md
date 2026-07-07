@@ -147,6 +147,12 @@ tokens are brute-forceable (Decision Log:
 INVITE-ACCEPT-RATE-LIMITED). Limits per email (rather than IP) are
 out of scope for v1.
 
+The public instance-status read (`GET /v1/instance`, US-023) is also
+rate-limited per source IP, but at **60 requests per minute** — it
+takes no credential and guards no secret, and sign-in screens fetch
+it on every load, so the 5/min credential threshold would break
+normal use.
+
 ---
 
 ## Observability
@@ -188,11 +194,13 @@ period for small businesses in the UK / EU / US contexts.
 
 ### NFR-DATA-003: Photo storage size cap
 
-A single walker's total stored photo bytes are capped at **10 GB**
+A single walker's total stored photo bytes — walk-update photos and
+dog profile photos (US-025) together — are capped at **10 GB**
 across all their clients. Approaching the cap (≥ 9 GB) triggers an
 observability log; exceeding it rejects new photo uploads with
 `409 STORAGE_QUOTA_EXCEEDED` (a state condition of the instance, not
 a defect in the request — distinct from `VALIDATION_ERROR`).
+Deleting a dog photo reclaims its bytes from the quota.
 
 ---
 

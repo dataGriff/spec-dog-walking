@@ -1036,44 +1036,159 @@ And the response body code equals "RESOURCE_NOT_FOUND"
 
 ---
 
-## US-019: Add a tip when marking an invoice paid
+## US-023: See whether this instance already has its walker
 
-*Story: [US-019](prd.md#us-019-add-a-tip-when-marking-an-invoice-paid)*
+*Story: [US-023](prd.md#us-023-see-whether-this-instance-already-has-its-walker)*
 
-### Scenario US-019-A: Mark paid with a tip
+### Scenario US-023-A: Fresh instance reports no walker
 
 ```gherkin
-Given a walker is logged in
-And invoice "I1" exists in status "issued" issued by me with totalCents 4500
-When I POST /v1/invoices/I1/mark-paid with
-  | paidAt   | 2026-04-05T10:00:00Z |
-  | paidVia  | bank transfer        |
-  | tipCents | 500                  |
+Given no walker is registered on this instance
+When I GET /v1/instance (getInstanceStatus) with no Authorization header
 Then the response status is 200
-And the response body status equals "paid"
-And the response body tipCents equals 500
-And an event with type "dogwalking.invoice.paid" is published
-And the event payload data.tipCents equals 500
+And the response body walkerRegistered equals false
+And the response body walkerDisplayName is null
 ```
 
-### Scenario US-019-B: Mark paid without a tip defaults to 0
+### Scenario US-023-B: Registered instance reports the walker's display name
 
 ```gherkin
-Given a walker is logged in
-And invoice "I1" exists in status "issued" issued by me
-When I POST /v1/invoices/I1/mark-paid with paidAt, paidVia, and no tipCents
+Given a walker is registered with displayName "Alison"
+When I GET /v1/instance with no Authorization header
 Then the response status is 200
-And the response body tipCents equals 0
+And the response body walkerRegistered equals true
+And the response body walkerDisplayName equals "Alison"
 ```
 
-### Scenario US-019-C: Negative tip rejected
+### Scenario US-023-C: Instance status requires no authentication
+
+```gherkin
+Given a walker is registered on this instance
+When I GET /v1/instance with an invalid bearer token
+Then the response status is 200
+```
+
+---
+
+## US-024: View a client and their dogs
+
+*Story: [US-024](prd.md#us-024-view-a-client-and-their-dogs)*
+
+### Scenario US-024-A: Walker views a client's detail including email
 
 ```gherkin
 Given a walker is logged in
-And invoice "I1" exists in status "issued" issued by me
-When I POST /v1/invoices/I1/mark-paid with tipCents -100 and otherwise valid fields
+And client "C1" accepted my invite sent to "clancy@example.com"
+When I GET /v1/clients/C1 (viewClient)
+Then the response status is 200
+And the response body displayName equals "Clancy"
+And the response body email equals "clancy@example.com"
+```
+
+### Scenario US-024-B: Walker lists a client's dogs with the ownerId filter
+
+```gherkin
+Given a walker is logged in
+And client "C1" is mine with dogs "Bramble" and "Pickle"
+And another client "C2" is mine with dog "Rufus"
+When I GET /v1/dogs?ownerId=C1 (listDogs)
+Then the response status is 200
+And the response body data has length 2
+And every response body data entry ownerId equals "C1"
+```
+
+### Scenario US-024-C: Client outside the walker's instance is not found
+
+```gherkin
+Given a walker is logged in
+And client "CX" belongs to a different instance
+When I GET /v1/clients/CX
+Then the response status is 404
+And the response body code equals "RESOURCE_NOT_FOUND"
+And when I GET /v1/dogs?ownerId=CX the response status is 404
+```
+
+### Scenario US-024-D: Owner cannot view client records
+
+```gherkin
+Given an owner is logged in
+And client "C1" exists (the owner's own client record)
+When I GET /v1/clients/C1
+Then the response status is 403
+And the response body code equals "FORBIDDEN"
+```
+
+---
+
+## US-025: Keep a photo gallery on a dog's profile
+
+*Story: [US-025](prd.md#us-025-keep-a-photo-gallery-on-a-dogs-profile)*
+
+### Scenario US-025-A: Owner adds a profile photo
+
+```gherkin
+Given an owner is logged in
+And dog "D1" is mine with an empty gallery
+When I POST /v1/dogs/D1/photos (addDogPhoto) with multipart/form-data
+  containing one JPEG photo part
+Then the response status is 201
+And the response body dogId equals "D1"
+And the response body contentType equals "image/jpeg"
+And an event with type "dogwalking.dogphoto.added" is published
+And when I GET /v1/dogs/D1 the response body photos has length 1
+```
+
+### Scenario US-025-B: Sixth photo rejected
+
+```gherkin
+Given an owner is logged in
+And dog "D1" is mine with 5 photos in its gallery
+When I POST /v1/dogs/D1/photos with one JPEG photo part
+Then the response status is 409
+And the response body code equals "PHOTO_LIMIT_EXCEEDED"
+```
+
+### Scenario US-025-C: Wrong content type rejected
+
+```gherkin
+Given an owner is logged in
+And dog "D1" is mine
+When I POST /v1/dogs/D1/photos with a part of content type "application/pdf"
 Then the response status is 400
-And the response body code equals "VALIDATION_ERROR"
+And the response body code equals "INVALID_PHOTO"
+```
+
+### Scenario US-025-D: Walker deletes a client dog's photo
+
+```gherkin
+Given a walker is logged in
+And dog "D1" belongs to my client with photo "P1" in its gallery
+When I DELETE /v1/dogs/D1/photos/P1 (deleteDogPhoto)
+Then the response status is 204
+And an event with type "dogwalking.dogphoto.removed" is published
+And when I GET /v1/dogs/D1 the response body photos has length 0
+```
+
+### Scenario US-025-E: Photo on another owner's dog is not found
+
+```gherkin
+Given an owner is logged in
+And dog "DX" belongs to a different owner with photo "PX"
+When I GET /v1/dogs/DX/photos/PX (getDogPhoto)
+Then the response status is 404
+And the response body code equals "RESOURCE_NOT_FOUND"
+And when I POST /v1/dogs/DX/photos with one JPEG photo part the response status is 404
+```
+
+### Scenario US-025-F: Owner retrieves the photo bytes
+
+```gherkin
+Given an owner is logged in
+And dog "D1" is mine with photo "P1" of content type "image/jpeg"
+When I GET /v1/dogs/D1/photos/P1
+Then the response status is 200
+And the response content type is "image/jpeg"
+And the response body is the photo's bytes
 ```
 
 ---

@@ -27,7 +27,9 @@ invites, books and completes walks, marks invoices paid.
 
 A dog owner from the walker's perspective. Created when the invite is
 accepted; linked 1:1 to the User with role=`owner` and to the Walker
-who invited them.
+who invited them. API responses project the linked User's `email`
+for walker contact (US-024); the email is not stored on the Client
+record.
 
 ### Invite
 
@@ -38,6 +40,14 @@ client flow. Carries the prospective client's email and a 1-day TTL.
 
 A dog owned by a Client. Carries the operational details the walker
 needs mid-walk: name, breed, age, medication, vet, free-text notes.
+Aggregate root of its profile photo gallery (`photos`).
+
+### DogPhoto
+
+A single image in a Dog's profile gallery. Stored by the domain;
+served via authenticated endpoints, not public URLs. Max 5 per Dog,
+max 10 MB, JPEG/PNG/HEIC. Deletable; deletion reclaims storage
+quota.
 
 ### Walk
 
@@ -145,7 +155,18 @@ Payload is the full Dog state.
 ### DogUpdated
 
 Published on `dogwalking.dog.updated` when a dog's details change.
-Payload is the full Dog state post-change.
+Payload is the full Dog state post-change, including the `photos`
+gallery metadata.
+
+### DogPhotoAdded
+
+Published on `dogwalking.dogphoto.added` when a photo is added to a
+dog's profile gallery. Carries the photo's full metadata.
+
+### DogPhotoRemoved
+
+Published on `dogwalking.dogphoto.removed` when a profile photo is
+deleted. Removal payload: `dogPhotoId`, `dogId`, `removedAt`.
 
 ### WalkRequested
 
@@ -193,7 +214,7 @@ collection.
 ### InvoicePaid
 
 Published on `dogwalking.invoice.paid` when the walker marks an
-invoice paid; carries `paidAt`, `paidVia`, and `tipCents`.
+invoice paid; carries `paidAt` and `paidVia`.
 
 ---
 

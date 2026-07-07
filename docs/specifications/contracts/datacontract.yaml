@@ -164,6 +164,40 @@ schema:
       - { name: notes, description: Free-text quirks / handling notes., logicalType: string, required: false }
       - { name: createdAt, description: Creation timestamp., logicalType: timestamp, required: true }
       - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
+      - name: photos
+        description: Profile-gallery photo metadata on this dog at the moment of the event (max 5, per `## Aggregates` in domain-model.md).
+        logicalType: array
+        required: true
+        items:
+          logicalType: object
+          properties:
+            - { name: id, description: DogPhoto identifier., logicalType: string, physicalType: uuid, required: true }
+            - { name: dogId, description: FK to parent Dog., logicalType: string, physicalType: uuid, required: true }
+            - { name: contentType, description: MIME type of the stored bytes., logicalType: string, required: true, physicalType: enum, enum: [image/jpeg, image/png, image/heic], ref: 'openapi.yaml#/components/schemas/PhotoContentType' }
+            - { name: sizeBytes, description: Stored size in bytes., logicalType: integer, required: true }
+            - { name: createdAt, description: When the photo was uploaded., logicalType: timestamp, required: true }
+            - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
+
+  - name: dogphoto
+    description: >
+      DogPhoto records published via the dogwalking.dogphoto.added
+      channel. The dogwalking.dogphoto.removed channel is a removal
+      event with the conventional minimal payload (dogPhotoId, dogId,
+      removedAt) and is not separately recorded — join on dogPhotoId.
+    physicalType: topic
+    quality:
+      - type: text
+        description: >
+          Primary-key values are unique per event id; every required
+          field is present on every record; enum-typed fields carry
+          only members of their referenced openapi schema.
+    properties:
+      - { name: dogPhotoId, description: DogPhoto identifier., logicalType: string, physicalType: uuid, required: true, unique: true, primaryKey: true, primaryKeyPosition: 1 }
+      - { name: dogId, description: Dog whose gallery changed., logicalType: string, physicalType: uuid, required: true }
+      - { name: contentType, description: MIME type of the stored bytes., logicalType: string, required: true, physicalType: enum, enum: [image/jpeg, image/png, image/heic], ref: 'openapi.yaml#/components/schemas/PhotoContentType' }
+      - { name: sizeBytes, description: Stored size in bytes., logicalType: integer, required: true }
+      - { name: createdAt, description: When the photo was uploaded., logicalType: timestamp, required: true }
+      - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
 
   - name: walk
     description: >
@@ -288,7 +322,6 @@ schema:
       - { name: status, description: Invoice status at emission., logicalType: string, required: true, physicalType: enum, enum: [issued, paid], ref: 'openapi.yaml#/components/schemas/InvoiceStatus' }
       - { name: paidAt, description: Payment timestamp (when status=paid)., logicalType: timestamp, required: false }
       - { name: paidVia, description: Payment channel description (when status=paid)., logicalType: string, required: false }
-      - { name: tipCents, description: Tip amount in minor units (defaults to 0 at issue)., logicalType: integer, required: true }
       - { name: createdAt, description: Issue timestamp., logicalType: timestamp, required: true }
       - { name: updatedAt, description: Last update timestamp., logicalType: timestamp, required: true }
       - name: lineItems

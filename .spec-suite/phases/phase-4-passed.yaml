@@ -19,5 +19,5 @@ decisions:
   ts: '2026-07-06T05:42:37Z'
 files_signed:
 - path: docs/specifications/sequence-diagrams.md
-  sha256: 4b90472427546570022658c46341b34e1776e67d5d4ebb843fa97cadeedbc48a
+  sha256: b72c58325a41e60e8eb091b848c15682e7c88dcaa1149bb0785df6af2503d437
   mtime: '2026-07-06T10:35:33Z'

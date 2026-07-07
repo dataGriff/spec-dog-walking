@@ -240,9 +240,28 @@ freed, which is why this is not a `VALIDATION_ERROR`.
 **Triggered by:**
 - `POST /v1/walks/{walkId}/updates` with photo parts when total
   stored photo bytes already exceed the cap.
+- `POST /v1/dogs/{dogId}/photos` under the same condition.
 
-**Resolution path:** Free space (future deletion tooling) or contact
-support; the cap is per NFR-DATA-003.
+**Resolution path:** Free space (dog-photo deletion reclaims quota,
+US-025) or contact support; the cap is per NFR-DATA-003.
+
+**Response shape:** `Error` (`code`, `message`).
+
+### `PHOTO_LIMIT_EXCEEDED`
+
+**HTTP status:** 409 Conflict
+
+**Meaning:** The dog's profile gallery already holds the maximum of
+5 photos (US-025). A state condition of the dog, not a defect in the
+request — the same upload succeeds after a photo is deleted, which is
+why this is not a `VALIDATION_ERROR` (same rationale as
+`STORAGE_QUOTA_EXCEEDED`).
+
+**Triggered by:**
+- `POST /v1/dogs/{dogId}/photos` when the dog already has 5 photos.
+
+**Resolution path:** `DELETE /v1/dogs/{dogId}/photos/{photoId}` to
+free a slot, then retry.
 
 **Response shape:** `Error` (`code`, `message`).
 
@@ -301,6 +320,8 @@ rate-limited endpoint (NFR-SEC-004). The response includes a
   called beyond the per-IP / per-account threshold. The token-taking
   endpoints are included because single-use opaque tokens are
   brute-forceable.
+- `GET /v1/instance` beyond its own (looser) per-IP threshold
+  (US-023, NFR-SEC-004).
 
 **Resolution path:** Wait for the `Retry-After` interval and retry.
 
@@ -420,6 +441,8 @@ constraints.
   `image/png`, `image/heic`.
 - A `photo` part larger than 10 MB.
 - More than 5 `photo` parts in a single update.
+- The same content-type / size violations on
+  `POST /v1/dogs/{dogId}/photos` (US-025).
 
 **Response shape:** `Error` (`code`, `message`).
 

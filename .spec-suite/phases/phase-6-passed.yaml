@@ -29,9 +29,9 @@ decisions:
     the Error schema gains INVALID_REFRESH_TOKEN, IDEMPOTENCY_KEY_CONFLICT, CURRENCY_IMMUTABLE,
     STORAGE_QUOTA_EXCEEDED, and RATE_LIMITED, and every keyed POST declares a 409
     for idempotency reuse.
-  rationale: "Critique H1 \u2014 the catalogue promised codes no compliant server\
-    \ could emit (400 bindings admitted only VALIDATION_ERROR; IDEMPOTENCY_KEY_CONFLICT\
-    \ had no binding anywhere). Verified by the new ERROR-CODE-REPRESENTABLE gate."
+  rationale: Critique H1 — the catalogue promised codes no compliant server could
+    emit (400 bindings admitted only VALIDATION_ERROR; IDEMPOTENCY_KEY_CONFLICT had
+    no binding anywhere). Verified by the new ERROR-CODE-REPRESENTABLE gate.
   affects:
   - docs/specifications/contracts/openapi.yaml
   ts: '2026-07-06T06:07:45Z'
@@ -39,9 +39,9 @@ decisions:
   summary: addClient 201 returns the Invite schema (token excluded); ClientCreateResponse
     (clientId + inviteId) deleted. The openapi Invite/User schemas no longer carry
     [secret] fields at all.
-  rationale: "Critique H6/L5 \u2014 the old response asserted a Client that cannot\
-    \ exist before acceptance, and the dead schemas advertised secrets. Depends on\
-    \ suite gate 1.3 (FIELD-MATCH secret exemption, domain-spec-suite PR"
+  rationale: Critique H6/L5 — the old response asserted a Client that cannot exist
+    before acceptance, and the dead schemas advertised secrets. Depends on suite gate
+    1.3 (FIELD-MATCH secret exemption, domain-spec-suite PR
   affects:
   - docs/specifications/contracts/openapi.yaml
   ts: '2026-07-06T06:07:45Z'
@@ -50,8 +50,8 @@ decisions:
     from it) and Dog envelopes $ref it; the datacontract drops its pinned 211-value
     copy for a qualified openapi.yaml#/components/schemas/Breed ref. Additions are
     one minor bump in one place.
-  rationale: "Critique M3 \u2014 three contracts, three strategies; an open addition\
-    \ would have passed API and event but violated the pinned datacontract copy."
+  rationale: Critique M3 — three contracts, three strategies; an open addition would
+    have passed API and event but violated the pinned datacontract copy.
   affects:
   - docs/specifications/contracts/asyncapi.yaml
   - docs/specifications/contracts/datacontract.yaml
@@ -73,9 +73,9 @@ decisions:
     aggregate children, while REST entities use bare id; channel names stay unversioned
     flat-concatenated (dogwalking.walkupdate.posted). Both asymmetries are deliberate
     and now recorded rather than accidental.
-  rationale: "Critique L10/L11 \u2014 renaming channels or payload keys is a breaking\
-    \ change to every consumer for purely cosmetic symmetry; the suite's own convention\
-    \ (asyncapi SKILL) endorses <entity>Id at root."
+  rationale: Critique L10/L11 — renaming channels or payload keys is a breaking change
+    to every consumer for purely cosmetic symmetry; the suite's own convention (asyncapi
+    SKILL) endorses <entity>Id at root.
   affects:
   - docs/specifications/contracts/asyncapi.yaml
   ts: '2026-07-06T06:07:45Z'
@@ -83,15 +83,15 @@ decisions:
   summary: listInvoices gains from/to issue-date filters and the list response carries
     balanceOwedCents (sum of totalCents over issued invoices across the whole filtered
     set).
-  rationale: "Critique M4 \u2014 US-015 required both and the contract dropped them;\
-    \ owners had no running view of money owed."
+  rationale: Critique M4 — US-015 required both and the contract dropped them; owners
+    had no running view of money owed.
   affects:
   - docs/specifications/contracts/openapi.yaml
   ts: '2026-07-06T06:07:45Z'
 - id: DATACONTRACT-SLA-ENRICHED
-  summary: "Added the latency (freshness) slaProperty \u2014 60s from transition commit\
-    \ to event readability \u2014 and record-level type:text quality expectations\
-    \ to every record."
+  summary: Added the latency (freshness) slaProperty — 60s from transition commit
+    to event readability — and record-level type:text quality expectations to every
+    record.
   rationale: 'Gate 1.4 DATACONTRACT-SLA-COMPLETE: consumers building on the historic
     record need a freshness guarantee, not just availability and retention; 60s follows
     from the transactional-outbox delivery semantics in NFR-AVAIL-002.'
@@ -101,21 +101,21 @@ decisions:
 - id: LIST-400-DECLARED
   summary: All four paginated list operations (listClients, listDogs, listWalks, listInvoices)
     now declare the 400 ValidationError response alongside their existing statuses.
-  rationale: "Found during the app-dog-walking implementation: scenario US-010-C asserts\
-    \ GET /v1/walks?pageSize=51 returns 400, and the pagination parameters (pageSize\
-    \ maximum 50, NFR PERF-006) make oversized page requests rejectable on every list\
-    \ \u2014 but the contract declared no 400 for any of them. Scenario and parameters\
-    \ were right; the response lists were incomplete."
+  rationale: 'Found during the app-dog-walking implementation: scenario US-010-C asserts
+    GET /v1/walks?pageSize=51 returns 400, and the pagination parameters (pageSize
+    maximum 50, NFR PERF-006) make oversized page requests rejectable on every list
+    — but the contract declared no 400 for any of them. Scenario and parameters were
+    right; the response lists were incomplete.'
   affects:
   - docs/specifications/contracts/openapi.yaml
   ts: '2026-07-06T13:01:50Z'
 files_signed:
 - path: docs/specifications/contracts/openapi.yaml
-  sha256: 1f26d42981bbd1d2c0cba66b0a2cfabfaca4256f1b40a1ed741d8f778dcce4ad
+  sha256: 1b8def07a101680857073af55c6dc81a6d2480a5f5f45304a46b4ab51b7c0a1a
   mtime: '2026-07-06T13:01:50Z'
 - path: docs/specifications/contracts/asyncapi.yaml
-  sha256: 0f56edc166979b12544a23a0d2e87dc546aae04ebfaf9c1d40e748a66304a6fd
+  sha256: 34a51e5320e6a668b13b4695157f56d7f8175baae5f2706b7d1dbad153d64848
   mtime: '2026-07-06T13:01:50Z'
 - path: docs/specifications/contracts/datacontract.yaml
-  sha256: 9564ee7c136c874bdd1fc21c94e27889f2d133d06d763371ecf4f84da5982684
+  sha256: 0ed10b763a6f079d446e106707983c9074867adb7e1a4b4a610cd30c8d659421
   mtime: '2026-07-06T13:01:50Z'

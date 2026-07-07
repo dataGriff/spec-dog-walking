@@ -113,6 +113,18 @@ channels:
       operationId: onDogUpdated
       description: On dog updated consumer.
       message: { $ref: '#/components/messages/DogUpdated' }
+  dogwalking.dogphoto.added:
+    description: Published when a photo is added to a dog's profile gallery.
+    publish:
+      operationId: onDogPhotoAdded
+      description: On dog photo added consumer.
+      message: { $ref: '#/components/messages/DogPhotoAdded' }
+  dogwalking.dogphoto.removed:
+    description: Published when a photo is removed from a dog's profile gallery.
+    publish:
+      operationId: onDogPhotoRemoved
+      description: On dog photo removed consumer.
+      message: { $ref: '#/components/messages/DogPhotoRemoved' }
   dogwalking.walk.requested:
     description: Published when an owner requests a walk.
     publish:
@@ -210,6 +222,16 @@ components:
       title: Dog updated
       contentType: application/json
       payload: { $ref: '#/components/schemas/DogUpdatedEnvelope' }
+    DogPhotoAdded:
+      name: DogPhotoAdded
+      title: Dog photo added
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/DogPhotoAddedEnvelope' }
+    DogPhotoRemoved:
+      name: DogPhotoRemoved
+      title: Dog photo removed
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/DogPhotoRemovedEnvelope' }
     WalkRequested:
       name: WalkRequested
       title: Walk requested
@@ -620,7 +642,7 @@ components:
           properties:
             data:
               type: object
-              required: [dogId, ownerId, name, createdAt, updatedAt]
+              required: [dogId, ownerId, name, photos, createdAt, updatedAt]
               properties:
                 dogId: { type: string, format: uuid }
                 ownerId: { type: string, format: uuid }
@@ -634,6 +656,10 @@ components:
                 vetName: { type: string, nullable: true }
                 vetPhone: { type: string, nullable: true }
                 notes: { type: string, nullable: true }
+                photos:
+                  type: array
+                  maxItems: 5
+                  items: { $ref: '#/components/schemas/DogPhotoPayload' }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
     DogUpdatedEnvelope:
@@ -644,7 +670,7 @@ components:
           properties:
             data:
               type: object
-              required: [dogId, ownerId, name, createdAt, updatedAt]
+              required: [dogId, ownerId, name, photos, createdAt, updatedAt]
               properties:
                 dogId: { type: string, format: uuid }
                 ownerId: { type: string, format: uuid }
@@ -658,8 +684,54 @@ components:
                 vetName: { type: string, nullable: true }
                 vetPhone: { type: string, nullable: true }
                 notes: { type: string, nullable: true }
+                photos:
+                  type: array
+                  maxItems: 5
+                  items: { $ref: '#/components/schemas/DogPhotoPayload' }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
+    DogPhotoPayload:
+      type: object
+      required: [id, dogId, contentType, sizeBytes, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        dogId: { type: string, format: uuid }
+        contentType: { $ref: '#/components/schemas/PhotoContentType' }
+        sizeBytes: { type: integer, minimum: 0 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    DogPhotoAddedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: object
+              required: [dogPhotoId, dogId, contentType, sizeBytes, createdAt, updatedAt]
+              properties:
+                dogPhotoId: { type: string, format: uuid }
+                dogId: { type: string, format: uuid }
+                contentType: { $ref: '#/components/schemas/PhotoContentType' }
+                sizeBytes: { type: integer, minimum: 0 }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
+    DogPhotoRemovedEnvelope:
+      description: |
+        Removal event — minimal payload by convention (removal
+        channels are exempt from the full-state rule).
+      allOf:
+        - $ref: '#/components/schemas/CloudEventsBase'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: object
+              required: [dogPhotoId, dogId, removedAt]
+              properties:
+                dogPhotoId: { type: string, format: uuid }
+                dogId: { type: string, format: uuid }
+                removedAt: { type: string, format: date-time }
     WalkRequestedEnvelope:
       allOf:
         - $ref: '#/components/schemas/CloudEventsBase'
@@ -887,7 +959,7 @@ components:
           properties:
             data:
               type: object
-              required: [invoiceId, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, tipCents, createdAt, updatedAt, lineItems]
+              required: [invoiceId, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, createdAt, updatedAt, lineItems]
               properties:
                 invoiceId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
@@ -899,7 +971,6 @@ components:
                 status: { type: string, enum: [issued] }
                 paidAt: { type: string, format: date-time, nullable: true }
                 paidVia: { type: string, nullable: true }
-                tipCents: { type: integer, minimum: 0, default: 0 }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
                 lineItems:
@@ -918,7 +989,7 @@ components:
           properties:
             data:
               type: object
-              required: [invoiceId, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, paidAt, paidVia, tipCents, createdAt, updatedAt, lineItems]
+              required: [invoiceId, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, paidAt, paidVia, createdAt, updatedAt, lineItems]
               properties:
                 invoiceId: { type: string, format: uuid }
                 walkerId: { type: string, format: uuid }
@@ -930,7 +1001,6 @@ components:
                 status: { type: string, enum: [paid] }
                 paidAt: { type: string, format: date-time }
                 paidVia: { type: string }
-                tipCents: { type: integer, minimum: 0 }
                 createdAt: { type: string, format: date-time }
                 updatedAt: { type: string, format: date-time }
                 lineItems:
