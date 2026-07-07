@@ -33,10 +33,16 @@ confirm, invite accept, refresh) are rate-limited per NFR-SEC-004 and
 return `429 RATE_LIMITED` beyond the threshold — invite accept and
 refresh included, since single-use opaque tokens are brute-forceable.
 
+`GET /v1/instance` (US-023) is the one public non-auth read: it takes
+no credential and guards no secret, so it is rate-limited per source
+IP at a looser threshold than the credential endpoints (see
+NFR-SEC-004) — sign-in screens fetch it on every load.
+
 ## Auth Matrix
 
 | Operation | Endpoint | Public | walker | owner |
 |-----------|----------|--------|--------|-------|
+| Instance status | `GET /v1/instance` | 🌐 | 🌐 | 🌐 |
 | Walker self-register | `POST /v1/auth/register` | 🌐 | 🌐 | 🌐 |
 | Log in | `POST /v1/auth/login` | 🌐 | 🌐 | 🌐 |
 | Request password reset | `POST /v1/auth/password-reset/request` | 🌐 | 🌐 | 🌐 |
@@ -46,10 +52,14 @@ refresh included, since single-use opaque tokens are brute-forceable.
 | Log out | `POST /v1/auth/logout` | ❌ | ✅ | ✅ |
 | Add client | `POST /v1/clients` | ❌ | ✅ | ❌ |
 | List clients | `GET /v1/clients` | ❌ | ✅ | ❌ |
+| View client | `GET /v1/clients/{clientId}` | ❌ | 🔒 own client | ❌ |
 | Add dog | `POST /v1/dogs` | ❌ | 🔒 own client | 🔒 own |
 | List dogs | `GET /v1/dogs` | ❌ | 🔒 own clients' | 🔒 own |
 | View dog | `GET /v1/dogs/{dogId}` | ❌ | 🔒 own client | 🔒 own |
 | Edit dog | `PATCH /v1/dogs/{dogId}` | ❌ | 🔒 own client | 🔒 own |
+| Add dog photo | `POST /v1/dogs/{dogId}/photos` | ❌ | 🔒 own client | 🔒 own |
+| Get dog photo | `GET /v1/dogs/{dogId}/photos/{photoId}` | ❌ | 🔒 own client | 🔒 own |
+| Delete dog photo | `DELETE /v1/dogs/{dogId}/photos/{photoId}` | ❌ | 🔒 own client | 🔒 own |
 | Schedule walk | `POST /v1/walks` | ❌ | 🔒 own client | 🔒 own dog |
 | List walks | `GET /v1/walks` | ❌ | 🔒 own clients' | 🔒 own |
 | Decide on walk request | `PATCH /v1/walks/{walkId}/decision` | ❌ | 🔒 assigned | ❌ |

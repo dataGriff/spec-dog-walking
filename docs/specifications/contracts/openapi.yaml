@@ -17,6 +17,8 @@ servers:
     description: Local development server
 
 tags:
+  - name: Instance
+    description: Public instance metadata — first-run walker detection
   - name: Auth
     description: Authentication — register, login, password reset, invite acceptance
   - name: Clients
@@ -36,6 +38,28 @@ security:
   - BearerAuth: []
 
 paths:
+  # ── Instance ──────────────────────────────────────────────────
+  /v1/instance:
+    get:
+      tags: [Instance]
+      operationId: getInstanceStatus
+      summary: Instance status
+      description: >
+        Public. Reports whether this single-walker instance already has
+        its walker registered, so sign-in screens only offer first-run
+        walker setup on a genuinely fresh instance (US-023).
+        Deliberately reveals only the walker's display name — it is the
+        instance's storefront. Rate-limited per source IP at a looser
+        threshold than the credential endpoints (NFR-SEC-004).
+      security: []
+      responses:
+        '200':
+          description: Instance status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InstanceStatus' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
   # ── Auth ───────────────────────────────────────────────────────
   /v1/auth/register:
     post:
@@ -269,6 +293,27 @@ paths:
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
+  /v1/clients/{clientId}:
+    parameters:
+      - { name: clientId, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [Clients]
+      operationId: viewClient
+      summary: View client
+      description: >
+        Full client record including the projected contact `email`
+        (US-024). Walker-only; a client outside the walker's instance
+        returns 404, indistinguishable from nonexistent. Owners get
+        403 — the client book belongs to the walker.
+      responses:
+        '200':
+          description: Client detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Client' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
 
   # ── Dogs ──────────────────────────────────────────────────────
   /v1/dogs:
@@ -304,10 +349,13 @@ paths:
       summary: List dogs
       description: >
         Owners see only their own dogs; the walker sees all dogs
-        belonging to their clients.
+        belonging to their clients. `ownerId` narrows the list to one
+        client's dogs (US-024); an unknown or out-of-tenancy `ownerId`
+        returns 404, indistinguishable from nonexistent.
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
+        - { name: ownerId, in: query, schema: { type: string, format: uuid }, description: "Filter to one client's dogs. Unknown or cross-tenant ids return 404." }
       responses:
         '200':
           description: Paginated list of dogs
@@ -316,6 +364,7 @@ paths:
               schema: { $ref: '#/components/schemas/DogList' }
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /v1/dogs/{dogId}:
     parameters:
       - { name: dogId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -355,6 +404,80 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Dog' }
         '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /v1/dogs/{dogId}/photos:
+    parameters:
+      - { name: dogId, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Dogs]
+      operationId: addDogPhoto
+      summary: Add dog photo
+      description: >
+        Adds one photo to the dog's profile gallery (US-025). One photo
+        per request. The gallery holds at most 5 photos — a sixth
+        returns 409 `PHOTO_LIMIT_EXCEEDED`. JPEG/PNG/HEIC, max 10 MB,
+        else 400 `INVALID_PHOTO`. Rejected with 409
+        `STORAGE_QUOTA_EXCEEDED` when the instance's photo-storage cap
+        (NFR-DATA-003) is exhausted. Manageable by the dog's owner and
+        their walker; out-of-tenancy dogs return 404.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photo]
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: The photo bytes (JPEG/PNG/HEIC, max 10 MB)
+      responses:
+        '201':
+          description: Photo added to the gallery
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DogPhoto' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /v1/dogs/{dogId}/photos/{photoId}:
+    parameters:
+      - { name: dogId, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: photoId, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [Dogs]
+      operationId: getDogPhoto
+      summary: Get dog photo
+      description: >
+        Streams the profile photo bytes over the authenticated endpoint
+        (never a public URL). Visible to the dog's owner and their
+        walker only; out-of-tenancy photos return 404.
+      responses:
+        '200':
+          description: Photo bytes
+          content:
+            image/jpeg: { schema: { type: string, format: binary } }
+            image/png: { schema: { type: string, format: binary } }
+            image/heic: { schema: { type: string, format: binary } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Dogs]
+      operationId: deleteDogPhoto
+      summary: Delete dog photo
+      description: >
+        Removes a photo from the dog's profile gallery, freeing a
+        gallery slot and reclaiming its storage quota (US-025).
+        Deletable by the dog's owner and their walker; out-of-tenancy
+        photos return 404.
+      responses:
+        '204':
+          description: Photo deleted
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
@@ -777,6 +900,7 @@ components:
             - IDEMPOTENCY_KEY_CONFLICT
             - CURRENCY_IMMUTABLE
             - STORAGE_QUOTA_EXCEEDED
+            - PHOTO_LIMIT_EXCEEDED
             - RATE_LIMITED
         message:
           type: string
@@ -813,6 +937,19 @@ components:
         page: { type: integer }
         pageSize: { type: integer }
         total: { type: integer }
+
+    # ── Instance ───────────────────────────────────────────────
+    InstanceStatus:
+      type: object
+      required: [walkerRegistered, walkerDisplayName]
+      properties:
+        walkerRegistered:
+          type: boolean
+          description: Whether this instance's walker has registered (US-023)
+        walkerDisplayName:
+          type: string
+          nullable: true
+          description: The walker's display name once registered; null on a fresh instance
 
     # ── Auth ───────────────────────────────────────────────────
     RegisterRequest:
@@ -896,12 +1033,13 @@ components:
 
     Client:
       type: object
-      required: [id, userId, invitedByWalkerId, displayName, createdAt, updatedAt]
+      required: [id, userId, invitedByWalkerId, displayName, email, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         userId: { type: string, format: uuid }
         invitedByWalkerId: { type: string, format: uuid }
         displayName: { type: string }
+        email: { type: string, format: email, description: "Projected from the linked User — the login email the walker invited (US-024). Not stored on the Client record and absent from Client events; event consumers join on userId." }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     ClientCreateRequest:
@@ -1190,7 +1328,7 @@ components:
         - unknown
     Dog:
       type: object
-      required: [id, ownerId, name, createdAt, updatedAt]
+      required: [id, ownerId, name, photos, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         ownerId: { type: string, format: uuid }
@@ -1204,6 +1342,21 @@ components:
         vetName: { type: string, nullable: true }
         vetPhone: { type: string, nullable: true }
         notes: { type: string, nullable: true }
+        photos:
+          type: array
+          maxItems: 5
+          description: Profile gallery metadata, max 5 photos (US-025)
+          items: { $ref: '#/components/schemas/DogPhoto' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    DogPhoto:
+      type: object
+      required: [id, dogId, contentType, sizeBytes, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        dogId: { type: string, format: uuid }
+        contentType: { $ref: '#/components/schemas/PhotoContentType' }
+        sizeBytes: { type: integer, minimum: 0, maximum: 10485760 }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     DogCreateRequest:
@@ -1385,7 +1538,7 @@ components:
 
     Invoice:
       type: object
-      required: [id, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, tipCents, lineItems, createdAt, updatedAt]
+      required: [id, walkerId, clientId, periodStart, periodEnd, currency, totalCents, status, lineItems, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         walkerId: { type: string, format: uuid }
@@ -1394,7 +1547,6 @@ components:
         periodEnd: { type: string, format: date }
         currency: { type: string, minLength: 3, maxLength: 3 }
         totalCents: { type: integer, minimum: 0 }
-        tipCents: { type: integer, minimum: 0, default: 0 }
         status: { $ref: '#/components/schemas/InvoiceStatus' }
         paidAt: { type: string, format: date-time, nullable: true }
         paidVia: { type: string, nullable: true }
@@ -1416,7 +1568,6 @@ components:
       properties:
         paidAt: { type: string, format: date-time }
         paidVia: { type: string }
-        tipCents: { type: integer, minimum: 0, default: 0 }
     InvoiceList:
       type: object
       required: [data, pagination, balanceOwedCents]

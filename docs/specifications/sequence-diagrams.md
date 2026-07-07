@@ -303,7 +303,7 @@ sequenceDiagram
 
 ---
 
-## Flow 10: Invoicing & Tipping — Generate, view, mark paid (with optional tip)
+## Flow 10: Invoicing — Generate, view, mark paid
 
 Covers US-014, US-015, US-016.
 
@@ -322,11 +322,79 @@ sequenceDiagram
     owner->>API: GET /v1/invoices?status=issued&from=2026-06-01&to=2026-06-30
     API-->>owner: 200 { data: [{id, totalCents, status: "issued"}], ... }
 
-    walker->>API: POST /v1/invoices/{invoiceId}/mark-paid<br/>{ paidAt, paidVia: "bank transfer", tipCents: 500 }
-    Note over walker,API: US-019 — tipCents is optional (defaults to 0)
-    API-->>walker: 200 { id, status: "paid", paidAt, paidVia, tipCents }
+    walker->>API: POST /v1/invoices/{invoiceId}/mark-paid<br/>{ paidAt, paidVia: "bank transfer" }
+    API-->>walker: 200 { id, status: "paid", paidAt, paidVia }
     API->>EventBus: publish dogwalking.invoice.paid
 
     owner->>API: GET /v1/invoices?status=paid
     API-->>owner: 200 { data: [{id, status: "paid"}], ... }
+```
+
+---
+
+## Flow 11: Instance status — first-run detection (US-023)
+
+Covers US-023.
+
+```mermaid
+sequenceDiagram
+    participant anon as sign-in screen
+    participant API
+
+    anon->>API: GET /v1/instance (no auth)
+    API-->>anon: 200 { walkerRegistered: false, walkerDisplayName: null }
+    Note over anon: Fresh instance — offer "Set up this instance as the walker"
+
+    Note over anon,API: ...walker registers (Flow 1)...
+
+    anon->>API: GET /v1/instance (no auth)
+    API-->>anon: 200 { walkerRegistered: true, walkerDisplayName: "Alison" }
+    Note over anon: Hide first-run setup; show whose business this is
+```
+
+---
+
+## Flow 12: Clients — Walker views a client and their dogs (US-024)
+
+Covers US-024.
+
+```mermaid
+sequenceDiagram
+    participant walker
+    participant API
+
+    walker->>API: GET /v1/clients/{clientId}
+    API-->>walker: 200 { id, displayName, email, ... }
+    Note over API: email is projected from the linked User —<br/>not stored on Client, absent from Client events
+
+    walker->>API: GET /v1/dogs?ownerId={clientId}
+    API-->>walker: 200 { data: [{id, name, ownerId}, ...], ... }
+    Note over API: Unknown or cross-tenant ownerId → 404 (no existence oracle)
+```
+
+---
+
+## Flow 13: Dogs — Profile photo gallery (US-025)
+
+Covers US-025.
+
+```mermaid
+sequenceDiagram
+    participant owner
+    participant API
+    participant EventBus
+    participant walker
+
+    owner->>API: POST /v1/dogs/{dogId}/photos (multipart, one photo)
+    API-->>owner: 201 { id, dogId, contentType, sizeBytes }
+    API->>EventBus: publish dogwalking.dogphoto.added
+    Note over API: Max 5 per dog — sixth returns 409 PHOTO_LIMIT_EXCEEDED
+
+    walker->>API: GET /v1/dogs/{dogId}/photos/{photoId}
+    API-->>walker: 200 (image bytes, authenticated stream)
+
+    walker->>API: DELETE /v1/dogs/{dogId}/photos/{photoId}
+    API-->>walker: 204
+    API->>EventBus: publish dogwalking.dogphoto.removed
+    Note over API: Slot freed; storage quota reclaimed (NFR-DATA-003)
 ```

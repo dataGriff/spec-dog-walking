@@ -84,6 +84,9 @@ to a User with role=`owner` and 1:1 to the Walker who invited them.
 - A client always traces back to the walker who invited them via
   `invitedByWalkerId`. Cross-walker visibility is forbidden.
 - `userId` and `invitedByWalkerId` are immutable.
+- API responses project the linked User's `email` onto the Client for
+  walker contact (US-024). It is not stored on the Client record and
+  does not appear in Client events — event consumers join on `userId`.
 
 ---
 
@@ -138,6 +141,39 @@ owner or the walker assigned to that owner.
 - `ownerId` is immutable; transfers are out of scope for v1.
 - Either the owner or the walker assigned to that owner may edit any
   field.
+- Dog is an aggregate root owning its profile gallery (`photos`, see
+  Aggregates); dog responses and Dog events carry the gallery's
+  metadata.
+
+---
+
+### DogPhoto
+
+A single image in a Dog's profile gallery (US-025). Stored by the
+domain (direct upload, authenticated retrieval) rather than as a
+public URL — same storage discipline as WalkUpdate photos.
+
+| Attribute | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | UUID | Yes | Unique identifier |
+| `dogId` | UUID | Yes | FK to Dog this photo belongs to (immutable) |
+| `contentType` | enum:PhotoContentType | Yes | MIME type of the stored bytes |
+| `sizeBytes` | integer | Yes | Stored size in bytes |
+| `createdAt` | ISO 8601 | Yes | When the photo was uploaded |
+| `updatedAt` | ISO 8601 | Yes | Last update timestamp |
+
+**Business Rules:**
+- Maximum 5 photos per Dog; adding a sixth returns
+  `PHOTO_LIMIT_EXCEEDED` (a state condition — delete one to free a
+  slot).
+- Maximum size 10 MB per photo; `contentType` must be one of the three
+  permitted MIMEs, `INVALID_PHOTO` otherwise.
+- Bytes are served via the authenticated endpoint only, never a public
+  URL.
+- Stored bytes count toward the instance photo storage cap
+  (NFR-DATA-003); deletion reclaims the quota.
+- Managed by the dog's owner or their walker (same ownership rule as
+  Dog edits).
 
 ---
 
@@ -293,15 +329,13 @@ that walk was scheduled.
 | `status` | enum:InvoiceStatus | Yes | Lifecycle state of the invoice |
 | `paidAt` | ISO 8601 \| null | No | Set when status=`paid` |
 | `paidVia` | string \| null | No | Free-text payment channel (set with status=`paid`) |
-| `tipCents` | integer | Yes | Tip amount in the invoice's currency, minor units. Defaults to `0` at issue; can be set to a non-negative integer at mark-paid (US-019). |
 | `createdAt` | ISO 8601 | Yes | Issue timestamp |
 | `updatedAt` | ISO 8601 | Yes | Last update timestamp |
 
 **Business Rules:**
 - Immutable after issue: no PATCH endpoint on invoices.
 - `mark-paid` is the only state transition; it must include `paidAt`
-  and `paidVia`, and MAY include `tipCents` (defaults to `0`,
-  non-negative, US-019).
+  and `paidVia`.
 - Only the assigned walker can mark an invoice paid (owners cannot).
 - `totalCents` is computed at issue and never recomputed.
 
@@ -394,6 +428,9 @@ Invite              ──── belongs-to ──  Walker
 Client              ──── has-many ────  Dog
 Dog                 ──── belongs-to ──  Client
 
+Dog                 ──── has-many ────  DogPhoto
+DogPhoto            ──── belongs-to ──  Dog
+
 Dog                 ──── has-many ────  Walk
 Walk                ──── belongs-to ──  Dog
 
@@ -439,6 +476,8 @@ Walk                ──── billed-by ───  InvoiceLineItem
 | `ClientRegistered` | POST /v1/invites/{token}/accept → 200 | `dogwalking.client.registered` |
 | `DogAdded` | POST /v1/dogs → 201 | `dogwalking.dog.added` |
 | `DogUpdated` | PATCH /v1/dogs/{dogId} → 200 | `dogwalking.dog.updated` |
+| `DogPhotoAdded` | POST /v1/dogs/{dogId}/photos → 201 | `dogwalking.dogphoto.added` |
+| `DogPhotoRemoved` | DELETE /v1/dogs/{dogId}/photos/{photoId} → 204 | `dogwalking.dogphoto.removed` |
 | `WalkRequested` | POST /v1/walks → 201 by owner | `dogwalking.walk.requested` |
 | `WalkScheduled` | POST /v1/walks by walker OR PATCH /v1/walks/{id}/decision=scheduled | `dogwalking.walk.scheduled` |
 | `WalkDeclined` | PATCH /v1/walks/{id}/decision=declined | `dogwalking.walk.declined` |
@@ -608,3 +647,4 @@ per SUITE-DESIGN §4.5 and enforced by EVENT-PAYLOAD-COVERS-ENTITY-STATE.
 | `RateCard` | `RateCardEntry` | `entries` |
 | `Invoice` | `InvoiceLineItem` | `lineItems` |
 | `WalkUpdate` | `Photo` | `photos` |
+| `Dog` | `DogPhoto` | `photos` |
