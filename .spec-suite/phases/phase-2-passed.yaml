@@ -17,10 +17,10 @@ decisions:
   summary: PasswordResetToken demoted from `## Entities` to a new `## Supporting auth
     records` section, which also documents RefreshToken (previously unmodelled despite
     rules depending on it). Neither is published to the event stream or data contract.
-  rationale: "Critique H10/L5 \u2014 token records are auth mechanics carrying secrets,\
-    \ with no consumer value in the historic record; modelling them as entities forced\
-    \ dead openapi schemas. Their behaviour stays fully specified and observable via\
-    \ the auth endpoints (INVALID_REFRESH_TOKEN on refresh, RESET_TOKEN_* on confirm)."
+  rationale: Critique H10/L5 — token records are auth mechanics carrying secrets,
+    with no consumer value in the historic record; modelling them as entities forced
+    dead openapi schemas. Their behaviour stays fully specified and observable via
+    the auth endpoints (INVALID_REFRESH_TOKEN on refresh, RESET_TOKEN_* on confirm).
   affects:
   - docs/specifications/domain-model.md
   - docs/specifications/contracts/openapi.yaml
@@ -29,34 +29,32 @@ decisions:
   summary: UserRegistered (published on walker registration and invite acceptance)
     and WalkerRegistered events added, with matching channels, so User and Walker
     exist in the historic record and the stream's walkerId/userId FKs resolve.
-  rationale: "Critique H5 \u2014 Walker and User were invisible to the event stream,\
-    \ leaving dangling FKs in four datacontract tables and contradicting the stream's\
-    \ reconstruct-without-the-API claim."
+  rationale: Critique H5 — Walker and User were invisible to the event stream, leaving
+    dangling FKs in four datacontract tables and contradicting the stream's reconstruct-without-the-API
+    claim.
   affects:
   - docs/specifications/domain-model.md
   - docs/specifications/contracts/asyncapi.yaml
   - docs/specifications/contracts/datacontract.yaml
   ts: '2026-07-06T05:36:01Z'
 - id: REQUESTED-CANCEL-IS-OWNER-WITHDRAWAL
-  summary: "requested\u2192cancelled is owner withdrawal only; the walker's route\
-    \ out of `requested` is the decision endpoint (decline). Either party cancels\
-    \ a `scheduled` walk. A walker cancel attempt on a `requested` walk returns 403\
-    \ FORBIDDEN."
-  rationale: "Critique M10 \u2014 model prose said \"either party\", the lifecycle\
-    \ table said owner-only, and the auth matrix said unconditional walker cancel.\
-    \ Owner-only keeps decline (with its recorded reason) the single walker path out\
-    \ of `requested`."
+  summary: requested→cancelled is owner withdrawal only; the walker's route out of
+    `requested` is the decision endpoint (decline). Either party cancels a `scheduled`
+    walk. A walker cancel attempt on a `requested` walk returns 403 FORBIDDEN.
+  rationale: Critique M10 — model prose said "either party", the lifecycle table said
+    owner-only, and the auth matrix said unconditional walker cancel. Owner-only keeps
+    decline (with its recorded reason) the single walker path out of `requested`.
   affects:
   - docs/specifications/domain-model.md
   - docs/specifications/auth-matrix.md
   ts: '2026-07-06T05:36:01Z'
 - id: WALK-PRICE-SNAPSHOT-ATTRIBUTE
-  summary: "Walk gains nullable priceCents, snapshotted at the requested\u2192scheduled\
-    \ transition (or at creation for walker-created walks); InvoiceLineItem.priceCents\
-    \ copies it. There is no reschedule endpoint in v1, so no re-snapshot path exists."
-  rationale: "Critique H7 \u2014 the recorded-price invariant had no recording mechanism;\
-    \ PUT /v1/rate-card wholesale-replaces entries and would have destroyed the pricing\
-    \ history invoices depend on."
+  summary: Walk gains nullable priceCents, snapshotted at the requested→scheduled
+    transition (or at creation for walker-created walks); InvoiceLineItem.priceCents
+    copies it. There is no reschedule endpoint in v1, so no re-snapshot path exists.
+  rationale: Critique H7 — the recorded-price invariant had no recording mechanism;
+    PUT /v1/rate-card wholesale-replaces entries and would have destroyed the pricing
+    history invoices depend on.
   affects:
   - docs/specifications/domain-model.md
   - docs/specifications/glossary.md
@@ -65,17 +63,40 @@ decisions:
 - id: GLOSSARY-LEXICON-ONLY
   summary: Glossary rewritten as a lexicon (entities, roles, events, enumerations,
     auth records, key terms); per-attribute sections removed.
-  rationale: "Gate 1.4: domain-model.md's entity tables are the single attribute authority\
-    \ \u2014 the ~130-entry duplication carried no extra information (every load-bearing\
-    \ detail was already in the model's tables/business rules) and doubled the maintenance\
-    \ surface."
+  rationale: 'Gate 1.4: domain-model.md''s entity tables are the single attribute
+    authority — the ~130-entry duplication carried no extra information (every load-bearing
+    detail was already in the model''s tables/business rules) and doubled the maintenance
+    surface.'
   affects:
   - docs/specifications/glossary.md
   ts: '2026-07-06T11:00:00Z'
+- id: CLIENT-EMAIL-PROJECTION
+  summary: Client API responses project the linked User's email (US-024); email is
+    not a Client attribute and stays out of Client events.
+  rationale: Walker needs the contact email they invited, but duplicating it onto
+    the Client entity would force PII into ClientRegistered events and the datacontract
+    for zero informational gain - UserRegistered already publishes it, joinable via
+    userId.
+  affects:
+  - docs/specifications/domain-model.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-07T11:00:00Z'
+- id: DOGPHOTO-AGGREGATE-WITH-OWN-EVENTS
+  summary: Dog becomes aggregate root owning a photos gallery (max 5); DogPhoto also
+    emits its own added/removed events.
+  rationale: Dog events must carry gallery state (aggregate rule 4.5) so consumers
+    see the whole profile, while the DELETE operation mechanically requires a removed
+    channel - DogPhoto therefore has both aggregate-carried state and its own lifecycle
+    channels. Removal payload is the conventional minimal record.
+  affects:
+  - docs/specifications/domain-model.md
+  - docs/specifications/contracts/asyncapi.yaml
+  - docs/specifications/contracts/datacontract.yaml
+  ts: '2026-07-07T11:00:00Z'
 files_signed:
 - path: docs/specifications/domain-model.md
-  sha256: 8d049ee17e0ca0b86745cd0526b91b72ca2c2b269dd3e5b824e6e456f5299c57
+  sha256: eee7d320b54e220d8e14a391c81735447cd18b23bd0bfa94c2f909d99a529f65
   mtime: '2026-07-06T10:35:33Z'
 - path: docs/specifications/glossary.md
-  sha256: 021766f8184354ea395fdae43c1213cab68d34b18c26e8cf68a456aa4b978eb3
+  sha256: 586a080f47b6012d8bfc00a0c997a3445f5dcc16684ffc3b36adb3c21fd7e65f
   mtime: '2026-07-06T10:35:33Z'

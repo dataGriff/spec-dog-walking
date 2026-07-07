@@ -15,9 +15,9 @@ decisions:
   summary: POST /v1/auth/refresh is public (the refresh token in the body is the credential,
     like invite accept); POST /v1/auth/logout requires a bearer token. Both are rate-limited
     per NFR-SEC-004.
-  rationale: "Critique H8 \u2014 the auth matrix declared refresh out of scope while\
-    \ the contract issued refresh tokens. Refresh must work when the access token\
-    \ has already expired, so it cannot demand a live bearer."
+  rationale: Critique H8 — the auth matrix declared refresh out of scope while the
+    contract issued refresh tokens. Refresh must work when the access token has already
+    expired, so it cannot demand a live bearer.
   affects:
   - docs/specifications/auth-matrix.md
   - docs/specifications/contracts/openapi.yaml
@@ -25,9 +25,9 @@ decisions:
 - id: INVITE-ACCEPT-RATE-LIMITED
   summary: POST /v1/invites/{token}/accept and POST /v1/auth/refresh join the NFR-SEC-004
     rate-limited set, returning 429 RATE_LIMITED with Retry-After beyond the threshold.
-  rationale: "Critique M17/H2 \u2014 invite acceptance was a public, token-authenticated,\
-    \ format-unconstrained brute-force surface excluded from rate limiting, while\
-    \ the NFR-mandated 429 existed nowhere downstream."
+  rationale: Critique M17/H2 — invite acceptance was a public, token-authenticated,
+    format-unconstrained brute-force surface excluded from rate limiting, while the
+    NFR-mandated 429 existed nowhere downstream.
   affects:
   - docs/specifications/auth-matrix.md
   - docs/specifications/error-catalogue.md
@@ -38,8 +38,7 @@ decisions:
   summary: Invalid-signature / tampered bearer tokens map to AUTHENTICATION_REQUIRED
     (401); TOKEN_EXPIRED stays reserved for valid-signature-expired so clients know
     a silent refresh fixes it.
-  rationale: "Critique M14 \u2014 the most common real-world 401 had no catalogue\
-    \ entry."
+  rationale: Critique M14 — the most common real-world 401 had no catalogue entry.
   affects:
   - docs/specifications/error-catalogue.md
   - docs/specifications/auth-matrix.md
@@ -48,17 +47,29 @@ decisions:
   summary: Invite / password-reset tokens that never existed return 404 RESOURCE_NOT_FOUND;
     410 Gone stays reserved for tokens that verifiably existed (expired / already
     used).
-  rationale: "Critique M13 \u2014 the unknown-token case had no defined response;\
-    \ implementers could not choose between 400/404/410."
+  rationale: Critique M13 — the unknown-token case had no defined response; implementers
+    could not choose between 400/404/410.
   affects:
   - docs/specifications/error-catalogue.md
   - docs/specifications/prd.md
   - docs/specifications/contracts/openapi.yaml
   ts: '2026-07-06T05:39:45Z'
+- id: INSTANCE-STATUS-PUBLIC
+  summary: GET /v1/instance is public and deliberately reveals walkerRegistered +
+    walkerDisplayName, rate-limited at 60/min per IP.
+  rationale: Single-walker instances need first-run detection so sign-in screens only
+    offer walker setup on fresh instances. The display name is the storefront and
+    already reaches invitees out of band; 5/min credential-grade limiting would break
+    normal sign-in-screen loads.
+  affects:
+  - docs/specifications/auth-matrix.md
+  - docs/specifications/nfr.md
+  - docs/specifications/contracts/openapi.yaml
+  ts: '2026-07-07T11:00:00Z'
 files_signed:
 - path: docs/specifications/auth-matrix.md
-  sha256: e408504fffa6f65764124006294bb102f52329a7377ac8102abae4abe8de8e61
+  sha256: 0eeb6a178b916a334e45d73ef6e05a3df6756f22b814b2792dc0d6a4f59cc673
   mtime: '2026-07-06T10:35:33Z'
 - path: docs/specifications/error-catalogue.md
-  sha256: 6200c3c3732c4b5808fac29dfd0d7026ac983535d0ba33f0d9c927233cf01dab
+  sha256: c4e841c5e2734002df223397a37c3509340962194a8af6e7c7f5e83e212ac361
   mtime: '2026-07-06T10:35:33Z'

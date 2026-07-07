@@ -18,18 +18,16 @@ decisions:
   summary: NFR-AVAIL-002 rewritten from best-effort publication to a transactional-outbox
     at-least-once guarantee; NFR-PERF-002's budget covers the synchronous outbox write,
     broker relay off the request path.
-  rationale: "Critique M19 \u2014 best-effort delivery contradicted the asyncapi's\
-    \ reconstruct-the-history completeness claim and the datacontract tables consumers\
-    \ were told to trust."
+  rationale: Critique M19 — best-effort delivery contradicted the asyncapi's reconstruct-the-history
+    completeness claim and the datacontract tables consumers were told to trust.
   affects:
   - docs/specifications/nfr.md
   ts: '2026-07-06T05:49:06Z'
 - id: STORAGE-QUOTA-CODE
   summary: NFR-DATA-003 quota exhaustion now returns 409 STORAGE_QUOTA_EXCEEDED (new
     catalogue entry) instead of repurposing VALIDATION_ERROR.
-  rationale: "Critique L14 \u2014 quota exhaustion is a state condition of the instance,\
-    \ not a defect in the request; a byte-identical upload succeeds after space is\
-    \ freed."
+  rationale: Critique L14 — quota exhaustion is a state condition of the instance,
+    not a defect in the request; a byte-identical upload succeeds after space is freed.
   affects:
   - docs/specifications/nfr.md
   - docs/specifications/error-catalogue.md
@@ -40,17 +38,17 @@ decisions:
     - 24-month post-closure retention ceiling (invoices anonymised at the ceiling,
     kept to the 84-month accounting floor), 30-day manual DSR process, explicit PII
     inventory. All numbers provisional pending real policy input.
-  rationale: "Critique M18 \u2014 substantial UK PII with retention floors but no\
-    \ ceilings and deletion deferred wholesale."
+  rationale: Critique M18 — substantial UK PII with retention floors but no ceilings
+    and deletion deferred wholesale.
   affects:
   - docs/specifications/nfr.md
   ts: '2026-07-06T05:49:06Z'
 - id: WALK-UPDATES-UNPAGINATED
   summary: GET /v1/walks/{walkId}/updates stays unpaginated by design; GET /v1/clients
     added to the NFR-PERF-006 pagination list.
-  rationale: "Critique L14 \u2014 updates are bounded per walk and the timeline is\
-    \ only meaningful whole; clients list was an accidental omission from the pagination\
-    \ ceiling."
+  rationale: Critique L14 — updates are bounded per walk and the timeline is only
+    meaningful whole; clients list was an accidental omission from the pagination
+    ceiling.
   affects:
   - docs/specifications/nfr.md
   ts: '2026-07-06T05:49:06Z'
@@ -60,10 +58,10 @@ decisions:
     convention with replay/conflict/missing-key scenarios, and coverage for every
     operation including refresh, logout, register, listClients, listDogs, pagination,
     rate limiting, auth failures, and the rate-change invoicing invariant.
-  rationale: "Critique M7/M8/M9/M12/L12 \u2014 scenario literals violated the contracts\
-    \ they test, response paths asserted wrapped keys the contracts never return,\
-    \ no POST scenario supplied the required Idempotency-Key, and whole operations/error\
-    \ paths had no scenario."
+  rationale: Critique M7/M8/M9/M12/L12 — scenario literals violated the contracts
+    they test, response paths asserted wrapped keys the contracts never return, no
+    POST scenario supplied the required Idempotency-Key, and whole operations/error
+    paths had no scenario.
   affects:
   - docs/specifications/acceptance-scenarios.md
   ts: '2026-07-06T05:49:06Z'
@@ -78,8 +76,8 @@ decisions:
   ts: '2026-07-06T11:00:00Z'
 files_signed:
 - path: docs/specifications/nfr.md
-  sha256: cc4f7bc0d1cbe64223ba26bdffa8cf60d84f5eb0641d85e870387522173f889e
+  sha256: f5709fa910dbe1b86121f54f130eedddde2cd679e6ef4d6b405b9141afcd35e6
   mtime: '2026-07-06T10:35:33Z'
 - path: docs/specifications/acceptance-scenarios.md
-  sha256: 58a4a0cdec682ef04b09ec56f4679216e7348a7e7953af798db806f0f3c112ca
+  sha256: fe0c77c6014fd82f8b9f0de60479bdc9b603921b3bec87a4dfa8a87529c07718
   mtime: '2026-07-06T10:35:33Z'
